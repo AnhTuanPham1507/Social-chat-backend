@@ -1,0 +1,94 @@
+# rs.initiate({_id:'rs0',members:[{_id:0,host:'mongo1:27017',priority:1},{_id:1,host:'mongo2:27018',priority:0.5}]})
+version: '3'
+services:
+    cache:
+        image: redis:7.2.5
+        restart: always
+        ports:
+            - 6379:6379
+        command: /bin/sh -c "redis-server --requirepass $$REDIS_PASSWORD"
+        environment:
+            - REDIS_PASSWORD=ewqovxnzsa2438JFGSJFGbsad7dsa76asjj
+        volumes:
+            - cache:/data
+        mem_limit: 512m
+        logging:
+            driver: 'json-file'
+            options:
+                max-size: '5m'
+                max-file: '3'
+        networks:
+            - my-network
+
+    mongo1:
+        image: mongo:7.0
+        command:
+            [
+                '--replSet',
+                'rs0',
+                '--bind_ip_all',
+                '--port',
+                '27017',
+                '--keyFile',
+                '/etc/mongodb/pki/keyfile',
+            ]
+        restart: always
+        ports:
+            - 27017:27017
+        volumes:
+            - ${PWD}/rs_keyfile:/etc/mongodb/pki/keyfile
+            - 'mongo1_data:/data/db'
+            - 'mongo1_config:/data/configdb'
+        mem_limit: 512m
+        logging:
+            driver: 'json-file'
+            options:
+                max-size: '5m'
+                max-file: '3'
+        networks:
+            - my-network
+        environment:
+            MONGO_INITDB_ROOT_USERNAME: root
+            MONGO_INITDB_ROOT_PASSWORD: dsalkdldsadDSFS898243FSFSsads9989
+
+    mongo2:
+        image: mongo:7.0
+        command:
+            [
+                '--replSet',
+                'rs0',
+                '--bind_ip_all',
+                '--port',
+                '27018',
+                '--keyFile',
+                '/etc/mongodb/pki/keyfile',
+            ]
+        restart: always
+        ports:
+            - 27018:27018
+        volumes:
+            - ${PWD}/rs_keyfile:/etc/mongodb/pki/keyfile
+            - 'mongo2_data:/data/db'
+            - 'mongo2_config:/data/configdb'
+        mem_limit: 512m
+        logging:
+            driver: 'json-file'
+            options:
+                max-size: '5m'
+                max-file: '3'
+        networks:
+            - my-network
+        environment:
+            MONGO_INITDB_ROOT_USERNAME: root
+            MONGO_INITDB_ROOT_PASSWORD: dsalkdldsadDSFS898243FSFSsads9989
+
+volumes:
+    cache:
+    mongo1_data:
+    mongo2_data:
+    mongo1_config:
+    mongo2_config:
+
+networks:
+    my-network:
+        driver: bridge
