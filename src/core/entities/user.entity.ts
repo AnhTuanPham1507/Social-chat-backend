@@ -1,15 +1,22 @@
-import { UserSex } from "src/common/enums/user.enum";
+import { UserSex } from 'src/core/enums/user.enum';
+import { Entity } from '../interfaces/base-entity.interface';
+export class UserEntity extends Entity {
+    fullName: string;
+    email: string;
+    phone: string;
+    password: string;
+    sex: UserSex;
 
-export class UserEntity {
-    private id: string;
-    private fullName: string;
-    private email: string;
-    private phone: string;
-    private password: string;
-    private sex: UserSex;
+    constructor(
+        fullName: string,
+        email: string,
+        phone,
+        password: string,
+        sex: UserSex,
+        id?: string,
+    ) {
+        super(id);
 
-    constructor(id: string, fullName: string, email: string, phone, password: string, sex: UserSex) {
-        this.id = id;
         this.fullName = fullName;
         this.email = email;
         this.phone = phone;

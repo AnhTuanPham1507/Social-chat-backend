@@ -1,5 +1,5 @@
 # rs.initiate({_id:'rs0',members:[{_id:0,host:'mongo1:27017',priority:1},{_id:1,host:'mongo2:27018',priority:0.5}]})
-version: '3'
+version: '3.9'
 services:
     cache:
         image: redis:7.2.5
@@ -20,74 +20,94 @@ services:
         networks:
             - my-network
 
-    mongo1:
-        image: mongo:7.0
-        command:
-            [
-                '--replSet',
-                'rs0',
-                '--bind_ip_all',
-                '--port',
-                '27017',
-                '--keyFile',
-                '/etc/mongodb/pki/keyfile',
-            ]
-        restart: always
-        ports:
-            - 27017:27017
-        volumes:
-            - ${PWD}/rs_keyfile:/etc/mongodb/pki/keyfile
-            - 'mongo1_data:/data/db'
-            - 'mongo1_config:/data/configdb'
-        mem_limit: 512m
-        logging:
-            driver: 'json-file'
-            options:
-                max-size: '5m'
-                max-file: '3'
-        networks:
-            - my-network
-        environment:
-            MONGO_INITDB_ROOT_USERNAME: root
-            MONGO_INITDB_ROOT_PASSWORD: dsalkdldsadDSFS898243FSFSsads9989
+    # mongo1:
+    #     image: mongo:7.0
+    #     command:
+    #         [
+    #             '--replSet',
+    #             'rs0',
+    #             '--bind_ip_all',
+    #             '--port',
+    #             '27017',
+    #             '--keyFile',
+    #             '/etc/mongodb/pki/keyfile',
+    #         ]
+    #     restart: always
+    #     ports:
+    #         - 27017:27017
+    #     volumes:
+    #         - ${PWD}/rs_keyfile:/etc/mongodb/pki/keyfile
+    #         - 'mongo1_data:/data/db'
+    #         - 'mongo1_config:/data/configdb'
+    #     mem_limit: 512m
+    #     logging:
+    #         driver: 'json-file'
+    #         options:
+    #             max-size: '5m'
+    #             max-file: '3'
+    #     networks:
+    #         - my-network
+    #     environment:
+    #         MONGO_INITDB_ROOT_USERNAME: root
+    #         MONGO_INITDB_ROOT_PASSWORD: dsalkdldsadDSFS898243FSFSsads9989
 
-    mongo2:
-        image: mongo:7.0
-        command:
-            [
-                '--replSet',
-                'rs0',
-                '--bind_ip_all',
-                '--port',
-                '27018',
-                '--keyFile',
-                '/etc/mongodb/pki/keyfile',
-            ]
+    # mongo2:
+    # image: mongo:7.0
+    # command:
+    #     [
+    #         '--replSet',
+    #         'rs0',
+    #         '--bind_ip_all',
+    #         '--port',
+    #         '27018',
+    #         '--keyFile',
+    #         '/etc/mongodb/pki/keyfile',
+    #     ]
+    # restart: always
+    # ports:
+    #     - 27018:27018
+    # volumes:
+    #     - ${PWD}/rs_keyfile:/etc/mongodb/pki/keyfile
+    #     - 'mongo2_data:/data/db'
+    #     - 'mongo2_config:/data/configdb'
+    # mem_limit: 512m
+    # logging:
+    #     driver: 'json-file'
+    #     options:
+    #         max-size: '5m'
+    #         max-file: '3'
+    # networks:
+    #     - my-network
+    # environment:
+    #     MONGO_INITDB_ROOT_USERNAME: root
+    #     MONGO_INITDB_ROOT_PASSWORD: dsalkdldsadDSFS898243FSFSsads9989
+
+    postgres:
+        image: postgres
+        restart: always
+        environment:
+            POSTGRES_PASSWORD: postgres
+            POSTGRES_DB: social-chat-db
+            TZ: 'Asia/Ho_Chi_Minh'
+            PGTZ: 'Asia/Ho_Chi_Minh'
+        volumes:
+            - pg_data:/var/lib/postgresql/data
+        ports:
+            - 5432:5432
+
+    adminer:
+        image: adminer
         restart: always
         ports:
-            - 27018:27018
-        volumes:
-            - ${PWD}/rs_keyfile:/etc/mongodb/pki/keyfile
-            - 'mongo2_data:/data/db'
-            - 'mongo2_config:/data/configdb'
-        mem_limit: 512m
-        logging:
-            driver: 'json-file'
-            options:
-                max-size: '5m'
-                max-file: '3'
-        networks:
-            - my-network
-        environment:
-            MONGO_INITDB_ROOT_USERNAME: root
-            MONGO_INITDB_ROOT_PASSWORD: dsalkdldsadDSFS898243FSFSsads9989
+            - 8080:8080
 
 volumes:
     cache:
-    mongo1_data:
-    mongo2_data:
-    mongo1_config:
-    mongo2_config:
+    pg_data:
+    # mongo1_data:
+    # mongo2_data:
+    # mongo1_config:
+    # mongo2_config:
 
 networks:
     my-network:
