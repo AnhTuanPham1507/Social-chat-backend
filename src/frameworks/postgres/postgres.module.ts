@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Global, Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import InitConfiguration from './configuration';
 import { UserModel } from './models/user.model';
@@ -20,4 +20,5 @@ import { UserRepo } from './repositories/user.repository';
     ],
     exports: [DIToken.USER_REPOSITORY], // Export the provider if needed
 })
+@Global()
 export class PostgresModule {}

@@ -1,4 +1,4 @@
-import bcrypt from 'bcrypt';
+import * as bcrypt from 'bcrypt';
 
 export function generateHash(rawData: string): string {
     const SALT_ROUNDS = 10;

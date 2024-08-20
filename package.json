@@ -7,7 +7,9 @@
     },
     "scripts": {
         "test": "echo \"Error: no test specified\" && exit 1",
-        "dev": "nest start --watch"
+        "dev": "nest start --watch",
+        "migration:generate": "ts-node node_modules/typeorm/cli.js migration:generate -d ormconfig -o postgres/migrations/migration",
+        "migration": "ts-node node_modules/typeorm/cli.js migration:run -d ormconfig"
     },
     "author": "",
     "license": "ISC",
@@ -28,7 +30,9 @@
         "class-validator": "^0.14.1",
         "dotenv": "^16.4.5",
         "pg": "^8.12.0",
+        "source-map-support": "^0.5.21",
         "swagger-ui-express": "^5.0.1",
+        "ts-node": "^10.9.2",
         "typeorm": "^0.3.20"
     },
     "engines": {
@@ -36,7 +40,11 @@
         "node": "20.16.0"
     },
     "devDependencies": {
+        "@nestjs/testing": "^10.4.1",
         "@types/bcrypt": "^5.0.2",
-        "@types/node": "^22.3.0"
+        "@types/jest": "^29.5.12",
+        "@types/node": "^22.3.0",
+        "jest": "^29.7.0",
+        "ts-jest": "^29.2.4"
     }
 }

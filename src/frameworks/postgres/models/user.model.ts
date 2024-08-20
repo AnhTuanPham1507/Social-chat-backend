@@ -1,9 +1,9 @@
 import { UserSex } from 'src/core/enums/user.enum';
 import { Column, Entity, PrimaryColumn } from 'typeorm';
 
-@Entity('user')
+@Entity({ name: 'user' })
 export class UserModel {
-    @PrimaryColumn('id')
+    @PrimaryColumn()
     id: string;
 
     @Column({ length: 255, unique: true })
