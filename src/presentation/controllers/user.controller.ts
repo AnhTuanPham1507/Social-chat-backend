@@ -12,10 +12,10 @@ import {
     ApiOkResponse,
     ApiTags,
 } from '@nestjs/swagger';
-import CreateUserDTO from 'src/core/dtos/create-user.dto';
-import UserDTO from 'src/core/dtos/user.dto';
-import { DIToken } from 'src/core/enums/di-tokens.enum';
-import { ICreateUserUseCase } from 'src/core/use-cases/user/create-user.use-case';
+import CreateUserDTO from '../../core/dtos/create-user.dto';
+import UserDTO from '../../core/dtos/user.dto';
+import { DIToken } from '../../core/enums/di-tokens.enum';
+import { ICreateUserUseCase } from '../../core/use-cases/user/create-user.use-case';
 
 @Controller('api/v1/user')
 @ApiTags('User')

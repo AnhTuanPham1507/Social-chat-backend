@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { DIToken } from 'src/core/enums/di-tokens.enum';
+import { DIToken } from '../../../core/enums/di-tokens.enum';
 import { CreateUserUseCase } from './create-user.use-case';
 @Module({
     imports: [],

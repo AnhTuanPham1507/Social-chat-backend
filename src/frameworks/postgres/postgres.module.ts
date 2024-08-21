@@ -2,7 +2,7 @@ import { Global, Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import InitConfiguration from './configuration';
 import { UserModel } from './models/user.model';
-import { DIToken } from 'src/core/enums/di-tokens.enum';
+import { DIToken } from '../../core/enums/di-tokens.enum';
 import { UserRepo } from './repositories/user.repository';
 
 @Module({

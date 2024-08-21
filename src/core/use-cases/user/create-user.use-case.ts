@@ -1,14 +1,14 @@
-import CreateUserDTO from 'src/core/dtos/create-user.dto';
-import UserDTO from 'src/core/dtos/user.dto';
+import CreateUserDTO from '../../../core/dtos/create-user.dto';
+import UserDTO from '../../../core/dtos/user.dto';
 import { BadRequestException, Inject, Injectable } from '@nestjs/common';
-import { UserEntity } from 'src/core/entities/user.entity';
-import { generateHash } from 'src/core/helpers/hash.helper';
-import { DIToken } from 'src/core/enums/di-tokens.enum';
-import { IUseCase } from 'src/core/interfaces/base-use-case.interface';
-import { IUserRepo } from 'src/core/interfaces/user-repo.interface';
-import { IQueueService } from 'src/core/interfaces/queue-service.interface';
-import { EventActions } from 'src/core/enums/event-actioon.enum';
-import { QueueName } from 'src/core/enums/queue-name';
+import { UserEntity } from '../../../core/entities/user.entity';
+import { generateHash } from '../../../core/helpers/hash.helper';
+import { DIToken } from '../../../core/enums/di-tokens.enum';
+import { IUseCase } from '../../../core/interfaces/base-use-case.interface';
+import { IUserRepo } from '../../../core/interfaces/user-repo.interface';
+import { IQueueService } from '../../../core/interfaces/queue-service.interface';
+import { EventActions } from '../../../core/enums/event-actioon.enum';
+import { QueueName } from '../../../core/enums/queue-name';
 
 export interface ICreateUserUseCase extends IUseCase<CreateUserDTO, UserDTO> {}
 

@@ -2,14 +2,17 @@ import { ApiProperty } from '@nestjs/swagger';
 import {
     IsEmail,
     IsEnum,
+    IsNotEmpty,
     IsPhoneNumber,
     IsString,
     IsStrongPassword,
     MinLength,
 } from 'class-validator';
-import { UserSex } from 'src/core/enums/user.enum';
+import { UserSex } from '../../core/enums/user.enum';
+import { Transform } from 'class-transformer';
 
 export default class CreateUserDTO {
+    @IsNotEmpty({ message: 'Họ và tên là thông tin bắt buộc' })
     @IsString({
         message: 'Họ và tên người dùng không hợp lệ',
     })
@@ -21,6 +24,7 @@ export default class CreateUserDTO {
     })
     fullName: string;
 
+    @IsNotEmpty({ message: 'Email là thông tin bắt buộc' })
     @IsEmail(
         {},
         {
@@ -32,6 +36,7 @@ export default class CreateUserDTO {
     })
     email: string;
 
+    @IsNotEmpty({ message: 'Số điện thoại là thông tin bắt buộc' })
     @IsPhoneNumber('VN', {
         message: 'Số điện thoại không hợp lệ',
     })
@@ -40,6 +45,7 @@ export default class CreateUserDTO {
     })
     phone: string;
 
+    @IsNotEmpty({ message: 'Mật khẩu là thông tin bắt buộc' })
     @IsStrongPassword(
         {
             minLength: 8,
@@ -57,6 +63,7 @@ export default class CreateUserDTO {
     })
     password: string;
 
+    @IsNotEmpty({ message: 'Giới tính là thông tin bắt buộc' })
     @IsEnum(UserSex, {
         message: 'Giới tính không hợp lệ',
     })

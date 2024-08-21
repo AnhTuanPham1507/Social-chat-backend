@@ -1,5 +1,5 @@
 import { InternalServerErrorException } from '@nestjs/common';
-import { IRepo } from 'src/core/interfaces/base-repo.interface';
+import { IRepo } from '../../../core/interfaces/base-repo.interface';
 import { Repository } from 'typeorm';
 
 export class BaseRepo<T> implements IRepo<T> {

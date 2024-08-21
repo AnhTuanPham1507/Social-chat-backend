@@ -1,4 +1,4 @@
-import { UserSex } from 'src/core/enums/user.enum';
+import { UserSex } from '../../core/enums/user.enum';
 import { Entity } from '../interfaces/base-entity.interface';
 export class UserEntity extends Entity {
     fullName: string;

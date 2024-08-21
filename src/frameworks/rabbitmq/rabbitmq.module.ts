@@ -1,5 +1,5 @@
 import { Global, Module } from '@nestjs/common';
-import { DIToken } from 'src/core/enums/di-tokens.enum';
+import { DIToken } from '../../core/enums/di-tokens.enum';
 import { RabbitMQService } from './rabbitmq.service';
 
 @Module({

@@ -1,5 +1,5 @@
-import { UserSex } from 'src/core/enums/user.enum';
-import { UserEntity } from 'src/core/entities/user.entity';
+import { UserSex } from '../../core/enums/user.enum';
+import { UserEntity } from '../../core/entities/user.entity';
 import { ApiProperty } from '@nestjs/swagger';
 
 export default class UserDTO {

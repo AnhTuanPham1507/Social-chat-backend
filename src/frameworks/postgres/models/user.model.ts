@@ -1,4 +1,4 @@
-import { UserSex } from 'src/core/enums/user.enum';
+import { UserSex } from '../../../core/enums/user.enum';
 import { Column, Entity, PrimaryColumn } from 'typeorm';
 
 @Entity({ name: 'user' })
