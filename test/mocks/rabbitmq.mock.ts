@@ -1,6 +1,6 @@
 import { Global, Injectable, Module } from '@nestjs/common';
 import { DIToken } from '../../src/core/enums/di-tokens.enum';
-import { EventActions } from '../../src/core/enums/event-actioon.enum';
+import { EventActions } from '../../src/core/enums/event-action.enum';
 import { QueueName } from '../../src/core/enums/queue-name';
 
 @Injectable()

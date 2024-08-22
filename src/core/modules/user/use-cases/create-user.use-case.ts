@@ -1,15 +1,15 @@
-import CreateUserDTO from '../../../core/dtos/create-user.dto';
-import UserDTO from '../../../core/dtos/user.dto';
+import CreateUserDTO from '../../../../core/dtos/create-user.dto';
+import UserDTO from '../../../../core/dtos/user.dto';
 import { BadRequestException, Inject, Injectable } from '@nestjs/common';
-import { UserEntity } from '../../../core/entities/user.entity';
-import { generateHash } from '../../../core/helpers/hash.helper';
-import { DIToken } from '../../../core/enums/di-tokens.enum';
-import { IUseCase } from '../../../core/interfaces/base-use-case.interface';
-import { IUserRepo } from '../../../core/interfaces/user-repo.interface';
-import { IQueueService } from '../../../core/interfaces/queue-service.interface';
-import { EventActions } from '../../../core/enums/event-actioon.enum';
-import { QueueName } from '../../../core/enums/queue-name';
+import { UserEntity } from '../../../../core/entities/user.entity';
+import { DIToken } from '../../../../core/enums/di-tokens.enum';
+import { IUseCase } from '../../../../core/interfaces/base-use-case.interface';
+import { IUserRepo } from '../../../../core/interfaces/user-repo.interface';
+import { IQueueService } from '../../../../core/interfaces/queue-service.interface';
+import { EventActions } from '../../../enums/event-action.enum';
+import { QueueName } from '../../../../core/enums/queue-name';
 import { Role } from 'src/core/enums/role.enum';
+import { IHashDataService } from 'src/core/interfaces/hash-data-service.interface';
 
 export interface ICreateUserUseCase extends IUseCase<CreateUserDTO, UserDTO> {}
 
@@ -21,6 +21,9 @@ export class CreateUserUseCase implements ICreateUserUseCase {
 
         @Inject(DIToken.QUEUE_SERVICE)
         public readonly queueService: IQueueService,
+
+        @Inject(DIToken.HASH_SERVICE)
+        public readonly hashService: IHashDataService,
     ) {}
 
     async execute(payload: CreateUserDTO): Promise<UserDTO> {
@@ -43,7 +46,9 @@ export class CreateUserUseCase implements ICreateUserUseCase {
             );
         }
 
-        userEntity.password = generateHash(userEntity.password);
+        userEntity.password = this.hashService.generateHash(
+            userEntity.password,
+        );
 
         await this.userRepo.save(userEntity);
 

@@ -6,7 +6,7 @@ import {
 } from '@nestjs/microservices';
 import { QueueName } from '../../core/enums/queue-name';
 import { IQueueService } from '../../core/interfaces/queue-service.interface';
-import { EventActions } from '../../core/enums/event-actioon.enum';
+import { EventActions } from '../../core/enums/event-action.enum';
 
 @Injectable()
 export class RabbitMQService implements IQueueService {

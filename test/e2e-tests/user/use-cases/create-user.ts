@@ -1,12 +1,12 @@
 import * as request from 'supertest';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
-import { UserModule } from '../../../../src/core/use-cases/user/user.module';
-import { PostgresModule } from '../../../../src/frameworks/postgres/postgres.module';
-import { UserController } from '../../../../src/presentation/controllers/user.controller';
+import { UserController } from '../../../../src/core/modules/user/user.controller';
 import { ConfigModule } from '@nestjs/config';
 import { faker } from '@faker-js/faker';
 import { MockedRabbitMQModule } from '../../../mocks/rabbitmq.mock';
+import { UserModule } from '../../../../src/core/modules/user/user.module';
+import { PostgresModule } from '../../../../src/infras/database/postgres.module';
 
 export default function () {
     describe('Create', () => {
@@ -232,19 +232,18 @@ export default function () {
                 .send(dummyObject);
 
             const responseDuplicatedEmail = await request(app.getHttpServer())
-            .post('/api/v1/user')
-            .send({
-                ...dummyObject,
-                phone: faker.helpers.fromRegExp('077[1-9]{7}')
-            });
+                .post('/api/v1/user')
+                .send({
+                    ...dummyObject,
+                    phone: faker.helpers.fromRegExp('077[1-9]{7}'),
+                });
 
             const responseDuplicatedPhone = await request(app.getHttpServer())
-            .post('/api/v1/user')
-            .send({
-                ...dummyObject,
-                email: faker.internet.email()
-            });
-
+                .post('/api/v1/user')
+                .send({
+                    ...dummyObject,
+                    email: faker.internet.email(),
+                });
 
             expect(responseDuplicatedEmail.status).toBe(400);
             expect(responseDuplicatedPhone.status).toBe(400);

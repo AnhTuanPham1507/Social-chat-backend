@@ -1,11 +1,8 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 import 'tsconfig-paths/register';
-
 import * as dotenv from 'dotenv';
-
-import { SnakeNamingStrategy } from './src/frameworks/postgres/snake-naming.strategy';
-
 import { DataSource } from 'typeorm';
+import { SnakeNamingStrategy } from 'src/infras/database/snake-naming.strategy';
 
 if (!(<any>module).hot /* for webpack HMR */) {
     process.env.NODE_ENV = process.env.NODE_ENV || 'development';
@@ -31,5 +28,5 @@ module.exports = new DataSource({
     password: process.env.DB_PASSWORD,
     database: process.env.DB_DATABASE,
     namingStrategy: new SnakeNamingStrategy(),
-    entities: ['src/frameworks/data-services/**/models/*.model{.ts,.js}'],
+    entities: ['src/frameworks/**/models/*.model{.ts,.js}'],
 });

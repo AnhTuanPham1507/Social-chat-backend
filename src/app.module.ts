@@ -1,22 +1,24 @@
 import { Module } from '@nestjs/common';
-import { PostgresModule } from './frameworks/postgres/postgres.module';
-import { UserController } from './presentation/controllers/user.controller';
-import { UserModule } from './core/use-cases/user/user.module';
 import { ConfigModule } from '@nestjs/config';
-import { RabbitMQModule } from './frameworks/rabbitmq/rabbitmq.module';
-import { AuthModule } from './frameworks/auth/auth.module';
+import { UserModule } from './core/modules/user/user.module';
+import { AuthModule } from './core/modules/auth/auth.module';
+import { RabbitMQModule } from './infras/message-broker/rabbitmq.module';
+import { PostgresModule } from './infras/database/postgres.module';
+import { HashDataModule } from './infras/hash-data/hash-data.module';
+import { TokenModule } from './infras/token/token.module';
 
 @Module({
     imports: [
         PostgresModule,
         RabbitMQModule,
-        AuthModule,
+        HashDataModule,
+        TokenModule,
         ConfigModule.forRoot({
             envFilePath: `.development.env`,
         }),
         UserModule,
+        AuthModule,
     ],
-    controllers: [UserController],
     providers: [],
 })
 export class AppModule {}
