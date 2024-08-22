@@ -1,6 +1,7 @@
 import { UserSex } from '../../core/enums/user.enum';
 import { UserEntity } from '../../core/entities/user.entity';
 import { ApiProperty } from '@nestjs/swagger';
+import { Role } from '../enums/role.enum';
 
 export default class UserDTO {
     @ApiProperty({
@@ -29,11 +30,18 @@ export default class UserDTO {
     })
     sex: UserSex;
 
+    @ApiProperty({
+        enum: Role,
+        example: Role.USER,
+    })
+    role: Role;
+
     constructor(userEntity: UserEntity) {
         this.id = userEntity.id;
         this.fullName = userEntity.fullName;
         this.email = userEntity.email;
         this.phone = userEntity.phone;
         this.sex = userEntity.sex;
+        this.role = userEntity.role;
     }
 }

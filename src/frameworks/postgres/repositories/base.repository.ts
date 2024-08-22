@@ -8,6 +8,11 @@ export class BaseRepo<T> implements IRepo<T> {
     constructor(repo: Repository<T>) {
         this.repo = repo;
     }
+    async findOne(query: object): Promise<T | null> {
+        return await this.repo.findOne({
+            where: query,
+        }) || null;
+    }
 
     async exists(t: T, fieldNames: string[]): Promise<boolean> {
         const query = [];

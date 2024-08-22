@@ -15,8 +15,8 @@ export default function () {
             fullName: 'Phạm Anh Tuấn',
             password: '0943722631aA@',
             sex: 'MALE',
-            email: null,
-            phone: null,
+            email: 'phamanhtuan9a531@gmail.com',
+            phone: '0778821404',
         };
 
         beforeAll(async () => {
@@ -160,6 +160,62 @@ export default function () {
             }
         });
 
+        it(`Validate field email`, async () => {
+            const parameters = [
+                {
+                    ...dummyObject,
+                    email: 'phamanhtuan',
+                },
+                {
+                    ...dummyObject,
+                    email: 778821404,
+                },
+                {
+                    ...dummyObject,
+                    email: null,
+                },
+                {
+                    ...dummyObject,
+                    email: undefined,
+                },
+            ];
+
+            for (const parameter of parameters) {
+                const result = await request(app.getHttpServer())
+                    .post('/api/v1/user')
+                    .send(parameter);
+                expect(result.status).toBe(400);
+            }
+        });
+
+        it(`Validate field sex`, async () => {
+            const parameters = [
+                {
+                    ...dummyObject,
+                    sex: 'phamanhtuan',
+                },
+                {
+                    ...dummyObject,
+                    sex: 778821404,
+                },
+                {
+                    ...dummyObject,
+                    sex: null,
+                },
+                {
+                    ...dummyObject,
+                    sex: undefined,
+                },
+            ];
+
+            for (const parameter of parameters) {
+                const result = await request(app.getHttpServer())
+                    .post('/api/v1/user')
+                    .send(parameter);
+                expect(result.status).toBe(400);
+            }
+        });
+
         it(`Create user successfully`, async () => {
             const result = await request(app.getHttpServer())
                 .post('/api/v1/user')
@@ -168,6 +224,30 @@ export default function () {
             expect(result.status).toBe(201);
             expect(result._body.email).toBe(dummyObject.email);
             expect(result._body?.password).toBe(undefined);
+        });
+
+        it(`Duplicated email, phone`, async () => {
+            await request(app.getHttpServer())
+                .post('/api/v1/user')
+                .send(dummyObject);
+
+            const responseDuplicatedEmail = await request(app.getHttpServer())
+            .post('/api/v1/user')
+            .send({
+                ...dummyObject,
+                phone: faker.helpers.fromRegExp('077[1-9]{7}')
+            });
+
+            const responseDuplicatedPhone = await request(app.getHttpServer())
+            .post('/api/v1/user')
+            .send({
+                ...dummyObject,
+                email: faker.internet.email()
+            });
+
+
+            expect(responseDuplicatedEmail.status).toBe(400);
+            expect(responseDuplicatedPhone.status).toBe(400);
         });
     });
 }

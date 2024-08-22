@@ -1,4 +1,5 @@
 import { UserSex } from '../../core/enums/user.enum';
+import { Role } from '../enums/role.enum';
 import { Entity } from '../interfaces/base-entity.interface';
 export class UserEntity extends Entity {
     fullName: string;
@@ -6,8 +7,10 @@ export class UserEntity extends Entity {
     phone: string;
     password: string;
     sex: UserSex;
+    role: Role;
 
     constructor(
+        role: Role,
         fullName: string,
         email: string,
         phone,
@@ -22,5 +25,6 @@ export class UserEntity extends Entity {
         this.phone = phone;
         this.password = password;
         this.sex = sex;
+        this.role = role;
     }
 }

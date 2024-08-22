@@ -9,6 +9,7 @@ import { IUserRepo } from '../../../core/interfaces/user-repo.interface';
 import { IQueueService } from '../../../core/interfaces/queue-service.interface';
 import { EventActions } from '../../../core/enums/event-actioon.enum';
 import { QueueName } from '../../../core/enums/queue-name';
+import { Role } from 'src/core/enums/role.enum';
 
 export interface ICreateUserUseCase extends IUseCase<CreateUserDTO, UserDTO> {}
 
@@ -24,6 +25,7 @@ export class CreateUserUseCase implements ICreateUserUseCase {
 
     async execute(payload: CreateUserDTO): Promise<UserDTO> {
         const userEntity = new UserEntity(
+            Role.USER,
             payload.fullName,
             payload.email,
             payload.phone,
