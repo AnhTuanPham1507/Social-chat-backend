@@ -1,16 +1,18 @@
 import { BadRequestException, Inject, Injectable } from '@nestjs/common';
+import { GoogleLoginPayloadDTO } from 'src/core/dtos/gogole-login-payload.dto';
 import { LoginPayloadDTO } from 'src/core/dtos/login-payload.dto';
 import UserDTO from 'src/core/dtos/user.dto';
 import { UserEntity } from 'src/core/entities/user.entity';
 import { DIToken } from 'src/core/enums/di-tokens.enum';
+import { UserProvider } from 'src/core/enums/user-provider.enum';
 import { IUseCase } from 'src/core/interfaces/base-use-case.interface';
 import { IHashDataService } from 'src/core/interfaces/hash-data-service.interface';
 import { IUserRepo } from 'src/core/interfaces/user-repo.interface';
 
-export interface ILoginUseCase extends IUseCase<LoginPayloadDTO, UserDTO> {}
+export interface IGoogleLoginUseCase extends IUseCase<GoogleLoginPayloadDTO, UserDTO> {}
 
 @Injectable()
-export class LoginUseCase implements ILoginUseCase {
+export class GoogleLoginUseCase implements IGoogleLoginUseCase {
     constructor(
         @Inject(DIToken.USER_REPOSITORY)
         public readonly userRepo: IUserRepo,
@@ -19,16 +21,16 @@ export class LoginUseCase implements ILoginUseCase {
         public readonly hashService: IHashDataService,
     ) {}
 
-    async execute(payload?: LoginPayloadDTO, actor?: string): Promise<UserDTO> {
+    async execute(payload?: GoogleLoginPayloadDTO, actor?: string): Promise<UserDTO> {
         const user = new UserEntity(null, {
             email: payload.email, 
-            password: payload.password
+            fullName: payload.name
         });
 
         const foundUser = await this.userRepo.findOne(user);
 
-        if (!foundUser) {
-            throw new BadRequestException('Email không tồn tại trong hệ thống');
+        if (foundUser && foundUser.provider === UserProvider.GOOGLE) {
+            return new UserDTO(foundUser)
         }
 
         const isSamePassword = await this.hashService.validateHashString(

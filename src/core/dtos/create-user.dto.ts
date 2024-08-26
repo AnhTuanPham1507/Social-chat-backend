@@ -8,7 +8,7 @@ import {
     IsStrongPassword,
     MinLength,
 } from 'class-validator';
-import { UserSex } from '../../core/enums/user.enum';
+import { UserSex } from '../enums/user-sex.enum';
 import { Transform } from 'class-transformer';
 
 export default class CreateUserDTO {

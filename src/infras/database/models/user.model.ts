@@ -1,5 +1,6 @@
-import { UserSex } from '../../../core/enums/user.enum';
+import { UserSex } from '../../../core/enums/user-sex.enum';
 import { Column, Entity, PrimaryColumn } from 'typeorm';
+import { UserProvider } from 'src/core/enums/user-provider.enum';
 
 @Entity({ name: 'user' })
 export class UserModel {
@@ -20,4 +21,9 @@ export class UserModel {
 
     @Column({ type: 'enum', enum: UserSex })
     sex: UserSex;
+
+    @Column({
+        type: 'enum', enum: UserProvider, default: UserProvider.LOCAL
+    })
+    provider: UserProvider;
 }

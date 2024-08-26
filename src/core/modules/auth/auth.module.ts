@@ -1,9 +1,10 @@
 import { Module } from '@nestjs/common';
 import { DIToken } from '../../enums/di-tokens.enum';
-import { LogInUseCase } from './use-cases/login.use-case';
+import { LoginUseCase } from './use-cases/login.use-case';
 import { PassportModule } from '@nestjs/passport';
 import { LocalStrategy } from './strategies/local.strategy';
 import { AuthController } from './auth.controller';
+import { GoogleStrategy } from './strategies/google.strategy';
 
 @Module({
     imports: [PassportModule],
@@ -11,9 +12,10 @@ import { AuthController } from './auth.controller';
     providers: [
         {
             provide: DIToken.LOGIN_USE_CASE,
-            useClass: LogInUseCase,
+            useClass: LoginUseCase,
         },
         LocalStrategy,
+        GoogleStrategy
     ],
 })
 export class AuthModule {}

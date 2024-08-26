@@ -27,14 +27,14 @@ export class CreateUserUseCase implements ICreateUserUseCase {
     ) {}
 
     async execute(payload: CreateUserDTO): Promise<UserDTO> {
-        const userEntity = new UserEntity(
-            Role.USER,
-            payload.fullName,
-            payload.email,
-            payload.phone,
-            payload.password,
-            payload.sex,
-        );
+        const userEntity = new UserEntity(null, {
+            role: Role.USER,
+            fullName: payload.fullName,
+            email: payload.email,
+            phone: payload.phone,
+            password: payload.password,
+            sex: payload.sex,
+        });
 
         const isExisted = await this.userRepo.exists(userEntity, [
             'email',

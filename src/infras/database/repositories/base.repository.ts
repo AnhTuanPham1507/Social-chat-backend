@@ -1,6 +1,6 @@
 import { InternalServerErrorException } from '@nestjs/common';
 import { IRepo } from '../../../core/interfaces/base-repo.interface';
-import { Repository } from 'typeorm';
+import { FindOptionsWhere, Repository } from 'typeorm';
 
 export class BaseRepo<T> implements IRepo<T> {
     protected repo: Repository<T>;
@@ -8,9 +8,11 @@ export class BaseRepo<T> implements IRepo<T> {
     constructor(repo: Repository<T>) {
         this.repo = repo;
     }
-    async findOne(query: object): Promise<T | null> {
+    async findOne(query: T): Promise<T | null> {
         return await this.repo.findOne({
-            where: query,
+            where: {
+                ...query
+            } as FindOptionsWhere<T>,
         }) || null;
     }
 
