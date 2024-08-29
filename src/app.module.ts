@@ -9,13 +9,14 @@ import { TokenModule } from './infras/token/token.module';
 
 @Module({
     imports: [
+        ConfigModule.forRoot({
+            isGlobal: true,
+            envFilePath: `.development.env`,
+        }),
         PostgresModule,
         RabbitMQModule,
         HashDataModule,
         TokenModule,
-        ConfigModule.forRoot({
-            envFilePath: `.development.env`,
-        }),
         UserModule,
         AuthModule,
     ],

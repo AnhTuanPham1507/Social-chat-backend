@@ -2,3 +2,5 @@ node_modules
 dist
 
 test/coverage/*
+
+postgres

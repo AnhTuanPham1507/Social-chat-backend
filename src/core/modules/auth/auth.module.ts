@@ -5,6 +5,7 @@ import { PassportModule } from '@nestjs/passport';
 import { LocalStrategy } from './strategies/local.strategy';
 import { AuthController } from './auth.controller';
 import { GoogleStrategy } from './strategies/google.strategy';
+import { GoogleLoginUseCase } from './use-cases/google-login.use-case';
 
 @Module({
     imports: [PassportModule],
@@ -14,8 +15,12 @@ import { GoogleStrategy } from './strategies/google.strategy';
             provide: DIToken.LOGIN_USE_CASE,
             useClass: LoginUseCase,
         },
+        {
+            provide: DIToken.GOOGLE_LOGIN_USE_CASE,
+            useClass: GoogleLoginUseCase,
+        },
         LocalStrategy,
-        GoogleStrategy
+        GoogleStrategy,
     ],
 })
 export class AuthModule {}

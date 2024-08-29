@@ -28,5 +28,5 @@ module.exports = new DataSource({
     password: process.env.DB_PASSWORD,
     database: process.env.DB_DATABASE,
     namingStrategy: new SnakeNamingStrategy(),
-    entities: ['src/frameworks/**/models/*.model{.ts,.js}'],
+    entities: ['src/infras/**/models/*.model{.ts,.js}'],
 });

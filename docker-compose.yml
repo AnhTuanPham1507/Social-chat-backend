@@ -60,10 +60,31 @@ services:
         networks:
             - my-network
 
+    minio:
+        image: minio/minio:latest
+        container_name: minio
+        environment:
+            - MINIO_ROOT_USER=minioadmin        # Set your MinIO access key
+            - MINIO_ROOT_PASSWORD=minioadmin    # Set your MinIO secret key
+        ports:
+            - "9000:9000"   # MinIO API port
+            - "9001:9001"   # MinIO console port
+        volumes:
+            - minio-data:/var/lib/minio/data   # Persist data locally
+        command: server /data --console-address ":9001"
+        healthcheck:
+            test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+            interval: 30s
+            timeout: 20s
+            retries: 3
+        networks:
+            - my-network
+
 volumes:
     cache:
     pg_data:
     rbmq_data:
+    minio-data:
 
 networks:
     my-network:

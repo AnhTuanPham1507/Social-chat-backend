@@ -8,8 +8,7 @@ import { IUserRepo } from '../../../../core/interfaces/user-repo.interface';
 import { IQueueService } from '../../../../core/interfaces/queue-service.interface';
 import { EventActions } from '../../../enums/event-action.enum';
 import { QueueName } from '../../../../core/enums/queue-name';
-import { Role } from 'src/core/enums/role.enum';
-import { IHashDataService } from 'src/core/interfaces/hash-data-service.interface';
+import { IHashDataService } from '../../../../core/interfaces/hash-data-service.interface';
 
 export interface ICreateUserUseCase extends IUseCase<CreateUserDTO, UserDTO> {}
 
@@ -27,8 +26,7 @@ export class CreateUserUseCase implements ICreateUserUseCase {
     ) {}
 
     async execute(payload: CreateUserDTO): Promise<UserDTO> {
-        const userEntity = new UserEntity(null, {
-            role: Role.USER,
+        const userEntity = UserEntity.createLocalUser(null, {
             fullName: payload.fullName,
             email: payload.email,
             phone: payload.phone,

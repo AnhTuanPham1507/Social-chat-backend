@@ -8,7 +8,7 @@ import {
 
 @Injectable()
 export class JWTService implements ITokenService {
-    constructor(private jwtService: JwtService) {}
+    constructor(private readonly jwtService: JwtService) {}
 
     generatePairToken(payload: ITokenPayload): ITokenResponse {
         const accessToken = this.jwtService.sign(payload, {

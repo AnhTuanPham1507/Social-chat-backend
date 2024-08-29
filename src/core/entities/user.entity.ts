@@ -1,13 +1,19 @@
 import { UserSex } from '../enums/user-sex.enum';
 import { Role } from '../enums/role.enum';
 import { Entity } from '../interfaces/base-entity.interface';
+import { UserProvider } from '../enums/user-provider.enum';
+import { AssetEntity } from './asset.entity';
 export interface IUserProps {
-    role?: Role,
-    fullName?: string,
-    email?: string,
-    phone?: string,
-    password?: string,
-    sex?: UserSex,
+    fullName?: string;
+    email?: string;
+    phone?: string;
+    password?: string;
+    sex?: UserSex;
+    provider?: UserProvider;
+    avatar?: AssetEntity;
+    createdAt?: Date;
+    updatedAt?: Date;
+    deletedAt?: Date;
 }
 export class UserEntity extends Entity {
     fullName?: string;
@@ -16,11 +22,10 @@ export class UserEntity extends Entity {
     password?: string;
     sex?: UserSex;
     role?: Role;
+    provider?: UserProvider;
+    avatar?: AssetEntity;
 
-    constructor(
-        id?: string,
-        props?: IUserProps,
-    ) {
+    private constructor(id?: string, props?: IUserProps) {
         super(id);
 
         if (props) {
@@ -29,7 +34,20 @@ export class UserEntity extends Entity {
             this.phone = props.phone;
             this.password = props.password;
             this.sex = props.sex;
-            this.role = props.role;
+            this.provider = props.provider;
+            this.avatar = props.avatar;
+            this.createdAt = props.createdAt;
+            this.updatedAt = props.updatedAt;
+            this.deletedAt = props.deletedAt;
+            this.role = Role.USER;
         }
+    }
+
+    static createLocalUser(id?: string, props?: IUserProps) {
+        return new UserEntity(id, { ...props, provider: UserProvider.LOCAL });
+    }
+
+    static createGoogleUser(id?: string, props?: IUserProps) {
+        return new UserEntity(id, {...props, provider: UserProvider.GOOGLE });
     }
 }

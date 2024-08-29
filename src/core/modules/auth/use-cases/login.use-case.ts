@@ -3,6 +3,7 @@ import { LoginPayloadDTO } from 'src/core/dtos/login-payload.dto';
 import UserDTO from 'src/core/dtos/user.dto';
 import { UserEntity } from 'src/core/entities/user.entity';
 import { DIToken } from 'src/core/enums/di-tokens.enum';
+import { UserProvider } from 'src/core/enums/user-provider.enum';
 import { IUseCase } from 'src/core/interfaces/base-use-case.interface';
 import { IHashDataService } from 'src/core/interfaces/hash-data-service.interface';
 import { IUserRepo } from 'src/core/interfaces/user-repo.interface';
@@ -20,12 +21,12 @@ export class LoginUseCase implements ILoginUseCase {
     ) {}
 
     async execute(payload?: LoginPayloadDTO, actor?: string): Promise<UserDTO> {
-        const user = new UserEntity(null, {
+        const user = UserEntity.createLocalUser(null, {
             email: payload.email, 
             password: payload.password
         });
 
-        const foundUser = await this.userRepo.findOne(user);
+        const foundUser = await this.userRepo.findOne({email: user.email, provider: user.provider});
 
         if (!foundUser) {
             throw new BadRequestException('Email không tồn tại trong hệ thống');
@@ -35,7 +36,6 @@ export class LoginUseCase implements ILoginUseCase {
             payload.password,
             foundUser.password,
         );
-
         if (!isSamePassword) {
             throw new BadRequestException('Mật khẩu không chính xác');
         }

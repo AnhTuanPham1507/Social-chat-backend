@@ -2,7 +2,7 @@ import { UserSex } from '../enums/user-sex.enum';
 import { UserEntity } from '../../core/entities/user.entity';
 import { ApiProperty } from '@nestjs/swagger';
 import { Role } from '../enums/role.enum';
-
+import { UserProvider } from '../enums/user-provider.enum';
 export default class UserDTO {
     @ApiProperty({
         example: 'id',
@@ -36,6 +36,12 @@ export default class UserDTO {
     })
     role: Role;
 
+    @ApiProperty({
+        enum: UserProvider,
+        example: UserProvider.LOCAL,
+    })
+    provider: UserProvider;
+
     constructor(userEntity: UserEntity) {
         this.id = userEntity.id;
         this.fullName = userEntity.fullName;
@@ -43,5 +49,6 @@ export default class UserDTO {
         this.phone = userEntity.phone;
         this.sex = userEntity.sex;
         this.role = userEntity.role;
+        this.provider = userEntity.provider;
     }
 }

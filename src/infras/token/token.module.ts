@@ -5,9 +5,10 @@ import { DIToken } from 'src/core/enums/di-tokens.enum';
 
 @Module({
     imports: [
-        JwtModule.register({
-            secret: process.env.JWT_SECRET, // Replace with your secret key
-            signOptions: { expiresIn: process.env.JWT_TOKEN_EXPIRE }, // Token expiration time
+        JwtModule.registerAsync({
+            useFactory: () => ({
+                secret: process.env.JWT_SECRET,
+            }),
         }),
     ],
     providers: [
