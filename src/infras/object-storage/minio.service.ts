@@ -1,7 +1,9 @@
 import { Injectable } from "@nestjs/common";
 import * as Minio from 'minio';
+import { MimeType } from "src/core/enums/mime-type.enum";
+import { IObjectStorageService } from "src/core/interfaces/object-storage-service.interface";
 @Injectable()
-export class MinioService {
+export class MinioService implements IObjectStorageService{
     private readonly minioClient: Minio.Client;
 
     constructor() {
@@ -13,21 +15,24 @@ export class MinioService {
             secretKey: process.env.MINIO_SECRET_KEY,
         });
     }
-
-    async uploadFile(file: Express.Multer.File, bucketName: string, region?: string): Promise<void> {
+    
+    private async findOrCreateBucket(bucketName: string, region?: string): Promise<void> {
         const existedBucket = await this.minioClient.bucketExists(bucketName);
-        if (!existedBucket)
-            await this.minioClient.makeBucket(bucketName, region);
+        if (!existedBucket) this.minioClient.makeBucket(bucketName, region);
+    }
+
+    async uploadFile(fileBuffer: Buffer, fileName: string, fileSize: number, mimetype: MimeType): Promise<void> {
+        await this.findOrCreateBucket('bucketName', 'us-east-1');
 
         const metaData = {
-            'Content-Type': file.mimetype,
+            'Content-Type': mimetype,
         };
 
         await this.minioClient.putObject(
-            bucketName,
-            file.originalname,
-            file.buffer,
-            file.size,
+            'bucketName',
+            fileName,
+            fileBuffer,
+            fileSize,
             metaData,
         );
     }
