@@ -70,7 +70,7 @@ services:
             - "9000:9000"   # MinIO API port
             - "9001:9001"   # MinIO console port
         volumes:
-            - minio-data:/var/lib/minio/data   # Persist data locally
+            - minio_data:/var/lib/minio/data   # Persist data locally
         command: server /data --console-address ":9001"
         healthcheck:
             test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
@@ -84,7 +84,7 @@ volumes:
     cache:
     pg_data:
     rbmq_data:
-    minio-data:
+    minio_data:
 
 networks:
     my-network:

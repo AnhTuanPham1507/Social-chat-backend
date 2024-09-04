@@ -1,12 +1,12 @@
 import { Role } from "../enums/role.enum";
 
-export interface ITokenPayload {
+export type ITokenPayload = {
     id: string;
     email: string;
     role: Role
 }
 
-export interface ITokenResponse {
+export type ITokenResponse = {
     accessToken: string;
     refreshToken: string;
     expiresAt: Date;

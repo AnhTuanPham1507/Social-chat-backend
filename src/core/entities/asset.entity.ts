@@ -4,10 +4,10 @@ import { Entity } from '../interfaces/base-entity.interface';
 
 export interface IAssetProps {
     name?: string;
-    url?: string;
+    path?: string;
     size?: number;
     ownerId?: string;
-    mimeType?: MimeType;
+    mimetype?: MimeType;
     assetType?: AssetType;
     metadata?: any;
     createdAt?: Date;
@@ -17,22 +17,22 @@ export interface IAssetProps {
 
 export class AssetEntity extends Entity {
     name?: string;
-    url?: string;
+    path?: string;
     size?: number;
     ownerId?: string;
-    mimeType?: MimeType;
+    mimetype?: MimeType;
     assetType?: AssetType;
     metadata?: any;
 
-    private constructor(id?: string, props?: IAssetProps) {
+    constructor(id?: string, props?: IAssetProps) {
         super(id);
 
         if (props) {
             this.name = props.name;
-            this.url = props.url;
+            this.path = props.path;
             this.size = props.size;
             this.ownerId = props.ownerId;
-            this.mimeType = props.mimeType;
+            this.mimetype = props.mimetype;
             this.assetType = props.assetType;
             this.metadata = props.metadata;
             this.createdAt = props.createdAt;

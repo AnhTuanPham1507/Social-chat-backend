@@ -32,6 +32,7 @@ export class CreateUserUseCase implements ICreateUserUseCase {
             phone: payload.phone,
             password: payload.password,
             sex: payload.sex,
+            avatar: payload.uploadedAvatar,
         });
 
         const isExisted = await this.userRepo.exists(userEntity, [

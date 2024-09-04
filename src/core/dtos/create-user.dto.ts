@@ -9,7 +9,7 @@ import {
     MinLength,
 } from 'class-validator';
 import { UserSex } from '../enums/user-sex.enum';
-import { Transform } from 'class-transformer';
+import { UploadedAssetDTO } from './uploadedAsset.dto';
 
 export default class CreateUserDTO {
     @IsNotEmpty({ message: 'Họ và tên là thông tin bắt buộc' })
@@ -59,7 +59,7 @@ export default class CreateUserDTO {
         },
     )
     @ApiProperty({
-        example: 'anHTunDepTra1',
+        example: '0943722631aA@',
     })
     password: string;
 
@@ -72,4 +72,12 @@ export default class CreateUserDTO {
         example: UserSex.MALE,
     })
     sex: UserSex;
+
+    @ApiProperty({
+        type: 'string',
+        format: 'binary',
+    })
+    avatar: any;
+
+    uploadedAvatar: UploadedAssetDTO;
 }

@@ -3,4 +3,5 @@ export enum AssetType {
     VIDEO = 'video',
     AUDIO = 'audio',
     DOCUMENT = 'document',
+    OTHER = 'other'
 }

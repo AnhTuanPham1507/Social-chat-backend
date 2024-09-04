@@ -21,7 +21,7 @@ export class AssetModel extends BaseModel {
         type: 'enum',
         enum: MimeType,
     })
-    mimeType: MimeType;
+    mimetype: MimeType;
 
     @Column({
         type: 'enum',
