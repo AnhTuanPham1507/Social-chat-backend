@@ -1,6 +1,5 @@
-import { InternalServerErrorException } from '@nestjs/common';
-import { IRepo } from '../../../core/interfaces/base-repo.interface';
-import { FindOptionsWhere, Repository } from 'typeorm';
+import { IQueryOptions, IRepo } from '../../../core/interfaces/base-repo.interface';
+import { FindOptionsSelect, Repository } from 'typeorm';
 
 export abstract class BaseRepo<T> implements IRepo<T> {
     protected repo: Repository<T>;
@@ -8,38 +7,18 @@ export abstract class BaseRepo<T> implements IRepo<T> {
     constructor(repo: Repository<T>) {
         this.repo = repo;
     }
-    async findOne(query: FindOptionsWhere<T>): Promise<T | null> {
+    async findOne(query: IQueryOptions): Promise<T | null> {
+        const {selections, queryParams} = query
         return (
             (await this.repo.findOne({
-                where: query
+                where: queryParams,
+                select: selections as unknown as FindOptionsSelect<T>
             })) || null
         );
     }
 
-    async exists(t: T, fieldNames: string[]): Promise<boolean> {
-        const query = [];
-
-        fieldNames.forEach((fieldName) => {
-            if (!t[fieldName]) {
-                throw new InternalServerErrorException(
-                    `Field ${fieldName} not found`,
-                );
-            }
-
-            query.push({
-                [fieldName]: t[fieldName],
-            });
-        });
-
-        const entity = await this.repo.findOne({
-            where: query,
-        });
-        const isExisted = !!entity;
-
-        return isExisted;
-    }
-
-    save(t: T): Promise<T> {
-        return this.repo.save(t);
+    async create(t: T): Promise<T> {
+        const entity = await this.repo.create(t);
+        return this.repo.save(entity);
     }
 }

@@ -35,11 +35,14 @@ export class CreateUserUseCase implements ICreateUserUseCase {
             avatar: payload.uploadedAvatar,
         });
 
-        const isExisted = await this.userRepo.exists(userEntity, [
-            'email',
-            'phone',
-        ]);
-        if (isExisted) {
+        const entity = await this.userRepo.findOne({
+            selections: ['id'],
+            queryParams: [
+                {email: userEntity.email},
+                {phone: userEntity.phone}
+            ]
+        });
+        if (!!entity) {
             throw new BadRequestException(
                 'Email hoặc số điện thoại đã tồn tại',
             );
@@ -49,7 +52,7 @@ export class CreateUserUseCase implements ICreateUserUseCase {
             userEntity.password,
         );
 
-        await this.userRepo.save(userEntity);
+        await this.userRepo.create(userEntity);
 
         this.queueService.sendMessage(
             QueueName.USER,

@@ -18,7 +18,11 @@ export class GetOneUserUseCase implements IGetOneUserUseCase {
     async execute(payload: GetOneUserDTO): Promise<UserDTO> {
         const user = UserEntity.createLocalUser(payload.id);
         
-        const foundUser = await this.userRepo.findOne(user);
+        const foundUser = await this.userRepo.findOne({
+            queryParams: [
+                { id: user.id }
+            ],
+        });
 
         if (!foundUser) {
             throw new BadRequestException(

@@ -26,14 +26,17 @@ export class GoogleLoginUseCase implements IGoogleLoginUseCase {
         });
 
         const foundUser = await this.userRepo.findOne({
-            email: user.email,
-            provider: user.provider,
+            queryParams: [
+                {
+                    email: user.email,
+                },
+            ],
         });
         if (foundUser){
             return new UserDTO(foundUser);
         }
 
-        const createdUser = await this.userRepo.save(user);
+        const createdUser = await this.userRepo.create(user);
         return new UserDTO(createdUser);
     }
 }

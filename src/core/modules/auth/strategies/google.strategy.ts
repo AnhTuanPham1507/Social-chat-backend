@@ -29,7 +29,8 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
         refreshToken: string,
         profile: any,
     ): Promise<ResponseLoginDTO> {
-        const user = await this.loginUseCase.execute(profile._json as GoogleLoginPayloadDTO);
+        const loginPayload: GoogleLoginPayloadDTO = profile._json;
+        const user = await this.loginUseCase.execute(loginPayload);
 
         const tokenPayload: ITokenPayload = {
             id: user.id,

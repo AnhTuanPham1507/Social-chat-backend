@@ -32,7 +32,7 @@ export class UserModel extends BaseModel {
     })
     provider: UserProvider;
 
-    @OneToOne(() => AssetModel, { nullable: true })
+    @OneToOne(() => AssetModel, { nullable: true, cascade: true })
     @JoinColumn()
     avatar: AssetModel | null;
 }

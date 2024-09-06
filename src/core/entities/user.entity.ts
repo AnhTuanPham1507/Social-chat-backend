@@ -3,6 +3,7 @@ import { Role } from '../enums/role.enum';
 import { Entity } from '../interfaces/base-entity.interface';
 import { UserProvider } from '../enums/user-provider.enum';
 import { AssetEntity, IAssetProps } from './asset.entity';
+import { BadRequestException } from '@nestjs/common';
 export interface IUserProps {
     fullName?: string;
     email?: string;
@@ -39,23 +40,37 @@ export class UserEntity extends Entity {
             this.updatedAt = props.updatedAt;
             this.deletedAt = props.deletedAt;
             this.role = Role.USER;
-            if(props.avatar instanceof AssetEntity){
-                props.avatar.ownerId = this.id;
-                this.avatar = props.avatar;
-            } else {
-                this.avatar = new AssetEntity(null, {
-                    ownerId: this.id,
-                    ...props.avatar,
-                });
+            if(props.avatar){
+                if (props.avatar instanceof AssetEntity) {
+                    props.avatar.ownerId = this.id;
+                    this.avatar = props.avatar;
+                } else {
+                    this.avatar = new AssetEntity(null, {
+                        ownerId: this.id,
+                        ...props.avatar,
+                    });
+                }
             }
+            
         }
     }
 
     static createLocalUser(id?: string, props?: IUserProps) {
-        return new UserEntity(id, { ...props, provider: UserProvider.LOCAL });
+        if(typeof props.password === 'string' && props.password.length >= 8){
+            return new UserEntity(id, { ...props, provider: UserProvider.LOCAL });
+        }
+
+        throw new BadRequestException(
+            'Mật khẩu không hợp lệ',
+        );
     }
 
     static createGoogleUser(id?: string, props?: IUserProps) {
-        return new UserEntity(id, { ...props, provider: UserProvider.GOOGLE });
+        if (props.password === undefined || props.password === null) {
+            return new UserEntity(id, { ...props, provider: UserProvider.GOOGLE });
+        }
+        throw new BadRequestException(
+            'Tài khoản chỉ có thể đăng nhập thông qua Google',
+        );
     }
 }

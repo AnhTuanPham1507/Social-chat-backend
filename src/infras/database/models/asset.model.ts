@@ -12,7 +12,7 @@ export class AssetModel extends BaseModel {
     name: string;
 
     @Column()
-    url: string;
+    path: string;
 
     @Column({ nullable: true })
     size: number | null;

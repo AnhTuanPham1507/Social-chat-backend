@@ -17,7 +17,6 @@ import {
     ApiTags,
     ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
-import { ResponseLoginDTO } from 'src/core/dtos/response-login.dto';
 import {
     ITokenService,
 } from 'src/core/interfaces/token-service.interface';
