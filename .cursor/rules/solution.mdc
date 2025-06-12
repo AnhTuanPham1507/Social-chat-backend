@@ -1,0 +1,66 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+RULES FOR PROVIDING SOLUTIONS:
+  SOLUTION PROPOSAL FORMAT: MANDATORY but not limited to
+  1. Problem/Current State Analysis
+    - Current Implementation
+    - Issues/States Identified
+    - Expected Result: [describe desired outcome]
+
+  2. Proposed Solution(s)
+    - If the user does not specify, figure it out yourself.
+    - If the user is specific, determine whether better results can be achieved, and prioritize those.
+    - Steps to 
+    - FORMAT:
+      1. Solution A:
+          - Approach: [high-level description]
+          - Pros: [list advantages]
+          - Cons: [list disadvantages]
+          - High-level design Mermaid diagram (MANDATORY)
+          - Low-level design Mermaid sequence diagram (MANDATORY)
+          - Implementation Steps:
+            ```pseudo
+            [pseudo code or outline steps]
+            // MUST include:
+            // - Full file paths where changes will be made
+            // - Class/component names and their relationships
+            // - Method signatures with parameter types
+            // - Clear indication of existing vs. new code
+            // - Context comments explaining implementation details
+            
+            // Example:
+            // File: src/services/UserService.ts
+            // Modify class UserService:
+            
+            export class UserService {
+              // Existing methods...
+              
+              // New method to handle user verification
+              async verifyUser(userId: string, token: string): Promise<VerificationResult> {
+                // Implementation details...
+              }
+            }
+            ```
+      2. Solution B: (if any)
+          - [same structure as above]
+
+  3. Recommendation
+    - Recommended Solution: [A or B]
+    - Rationale: [explain why]
+
+  4. Risk Assessment (MANDATORY)
+    - Technical Risks:
+      - Performance impact
+      - Data consistency
+      - System dependencies
+
+  5. Confirmation Request (MANDATORY)
+    - Explicit request for user confirmation.
+    - Clear decision points.
+
+___________________________________________________________________
+
+

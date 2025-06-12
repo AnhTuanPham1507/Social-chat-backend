@@ -10,14 +10,21 @@
         "sourceMap": true,
         "outDir": "./dist",
         "baseUrl": "./",
+        "rootDir": ".",
         "incremental": true,
         "skipLibCheck": true,
         "strictNullChecks": false,
         "noImplicitAny": false,
         "strictBindCallApply": false,
         "forceConsistentCasingInFileNames": false,
-        "noFallthroughCasesInSwitch": false
+        "noFallthroughCasesInSwitch": false,
+        "paths": {
+            "@commons/*": ["./src/commons/*"],
+            "@configs/*": ["./src/configs/*"],
+            "@infras/*": ["./src/infras/*"],
+            "@modules/*": ["./src/modules/*"],        
+        }
     },
-    "include": ["src/**/*", "test/**/*", "ormconfig.ts"],
-    "exclude": ["node_modules", "**/*.spec.ts"]
+    "include": ["src/**/*", "test/**/*"],
+    "exclude": ["node_modules", "**/*.spec.ts", "dist"],
 }

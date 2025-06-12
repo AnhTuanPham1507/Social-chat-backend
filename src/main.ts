@@ -4,8 +4,11 @@ import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
 import { RmqOptions, Transport } from '@nestjs/microservices';
 import * as cookieParser from 'cookie-parser';
+import { initializeTransactionalContext } from 'typeorm-transactional';
 
 async function bootstrap() {
+    initializeTransactionalContext()
+
     const app = await NestFactory.create(AppModule);
 
     app.use(cookieParser());

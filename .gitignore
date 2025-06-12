@@ -4,3 +4,7 @@ dist
 test/coverage/*
 
 postgres
+
+coverage/*
+test/coverage/*
+

@@ -1,11 +1,11 @@
 import * as request from 'supertest';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
-import { UserController } from '../../../../src/core/modules/user/user.controller';
+import { UserController } from '../../../../src/commons/modules/user/user.controller';
 import { ConfigModule } from '@nestjs/config';
 import { faker } from '@faker-js/faker';
 import { MockedRabbitMQModule } from '../../../mocks/rabbitmq.mock';
-import { UserModule } from '../../../../src/core/modules/user/user.module';
+import { UserModule } from '../../../../src/commons/modules/user/user.module';
 import { PostgresModule } from '../../../../src/infras/database/postgres.module';
 
 export default function () {

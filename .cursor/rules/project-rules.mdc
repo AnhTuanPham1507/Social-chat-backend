@@ -1,0 +1,367 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# Social Chat Backend Project Guidelines
+
+## Technology Stack
+
+### Language and Framework
+- **Language**: TypeScript
+- **Framework**: NestJS (Node.js)
+- **Database**: PostgreSQL with TypeORM
+- **Object Storage**: MinIO
+- **Message Broker**: RabbitMQ
+- **Cache**: Redis
+
+### Architecture
+- **Clean Architecture / Hexagonal Architecture**
+  - Domain-Driven Design (DDD) principles
+  - Separation of concerns with layers:
+    - Domain layer (entities, value objects)
+    - Application layer (use cases, application services)
+    - Infrastructure layer (repositories, external services)
+    - Driving adapters (controllers, message handlers)
+    - Driven adapters (repositories implementations, external services implementations)
+
+### Coding Style
+- Follows strict TypeScript guidelines
+- Uses ESLint for linting with comprehensive rules
+- Naming conventions:
+  - camelCase for variables, methods, and properties
+  - PascalCase for classes, interfaces, and types
+  - snake_case for database fields (using SnakeNamingStrategy)
+  - Private class members prefixed with underscore (_)
+  - Boolean variables prefixed with is/should/has/can/did/will
+
+### Linting Rules
+- Maximum line length: 150 characters
+- Maximum classes per file: 5
+- Strict null checks: disabled
+- No implicit any: disabled
+- Single quotes for strings
+- Semicolons required
+- No console.log (except for specific allowed methods)
+- Comprehensive import sorting and organization
+
+## Project Structure
+
+```
+social-chat-backend/
+├── dist/                       # Compiled output
+├── node_modules/               # Dependencies
+├── src/                        # Source code
+│   ├── app.module.ts           # Main application module
+│   ├── main.ts                 # Application entry point
+│   ├── commons/                # Shared utilities and components
+│   │   ├── constants/          # Global constants
+│   │   ├── core/               # Core domain abstractions
+│   │   │   ├── base-exception.interface.ts
+│   │   │   ├── base-repo.interface.ts
+│   │   │   ├── base-use-case.interface.ts
+│   │   │   └── value-objects/  # Domain value objects
+│   │   │       ├── email.value-object.ts
+│   │   │       ├── phone.value-object.ts
+│   │   │       └── url.value-object.ts
+│   │   ├── guards/             # Authentication guards
+│   │   ├── infra/              # Common infrastructure components
+│   │   └── utils/              # Utility functions
+│   ├── configs/                # Application configuration
+│   ├── infras/                 # Infrastructure implementations
+│   │   ├── minio/              # MinIO object storage integration
+│   │   │   ├── minio.module.ts
+│   │   │   ├── minio.service.ts
+│   │   │   └── minio-client.ts
+│   │   └── postgres/           # PostgreSQL database integration
+│   │       ├── configuration.ts
+│   │       ├── models/         # Database models
+│   │       ├── postgres.module.ts
+│   │       ├── repositories/   # Repository implementations
+│   │       └── snake-naming.strategy.ts
+│   └── modules/                # Feature modules
+│       ├── asset/              # Asset management module
+│       └── auth/               # Authentication module
+│           ├── auth.helper.ts
+│           ├── auth.module.ts
+│           ├── constants/      # Module-specific constants
+│           ├── domain/         # Domain layer
+│           │   └── entities/   # Domain entities
+│           ├── application/    # Application layer
+│           │   ├── application-services/  # Application services
+│           │   ├── contracts/  # Repository interfaces
+│           │   └── exceptions/ # Application exceptions
+│           ├── driving-adapters/  # Driving adapters (controllers)
+│           │   ├── controllers/   # HTTP controllers
+│           │   ├── dtos/          # Data transfer objects
+│           │   └── strategies/    # Authentication strategies
+│           └── driven-adapters/   # Driven adapters (repositories)
+├── test/                       # Test files
+├── .development.env            # Development environment variables
+├── .editorconfig               # Editor configuration
+├── .eslintrc.js                # ESLint configuration
+├── .gitignore                  # Git ignore file
+├── .nvmrc                      # Node version manager configuration
+├── .prettierrc                 # Prettier configuration
+├── docker-compose.yml          # Docker Compose configuration
+├── nest-cli.json               # NestJS CLI configuration
+├── package.json                # Project dependencies and scripts
+├── package-lock.json           # Locked dependencies
+├── tsconfig.build.json         # TypeScript build configuration
+└── tsconfig.json               # TypeScript configuration
+```
+
+## Entry Points
+
+The application has several types of entry points:
+
+### 1. HTTP REST APIs
+
+The primary entry point is through HTTP REST controllers. These are defined in the `driving-adapters/controllers` directory of each module.
+
+**Example**: `auth.controller.ts` in the Auth module
+
+#### Steps to implement a new REST API endpoint:
+
+1. **Create or update DTOs**:
+   - Define data transfer objects in the `driving-adapters/dtos` directory
+   - Use class-validator decorators for validation
+   - Use Swagger decorators for API documentation
+
+   ```typescript
+   // Example DTO
+   import { ApiProperty } from '@nestjs/swagger';
+   import { IsEmail, IsNotEmpty, MinLength } from 'class-validator';
+
+   export class LoginPayloadDTO {
+     @ApiProperty()
+     @IsEmail()
+     @IsNotEmpty()
+     email: string;
+
+     @ApiProperty()
+     @IsNotEmpty()
+     @MinLength(8)
+     password: string;
+   }
+   ```
+
+2. **Create or update domain entities**:
+   - Define domain entities in the `domain/entities` directory
+   - Implement value objects for complex properties
+   - Use factory methods for entity creation
+
+   ```typescript
+   // Example Entity
+   export class UserEntity {
+     id: string;
+     fullName: string;
+     email: EmailValueObject;
+     phone?: PhoneValueObject;
+     
+     static create(props: UserProps): UserEntity {
+       const user = new UserEntity();
+       user.id = props.id || randomUUID();
+       user.fullName = props.fullName;
+       user.email = new EmailValueObject(props.email);
+       if (props.phone) {
+         user.phone = new PhoneValueObject(props.phone);
+       }
+       return user;
+     }
+   }
+   ```
+
+3. **Define application service interface**:
+   - Create an interface in the `application/application-services` directory
+   - Define methods that represent use cases
+
+   ```typescript
+   export const USER_APPLICATION_SERVICE_TOKEN = 'USER_APPLICATION_SERVICE_TOKEN';
+
+   export interface IUserApplicationService {
+     getProfile(userId: string): Promise<UserDTO>;
+     updateProfile(userId: string, data: UpdateProfileDTO): Promise<UserDTO>;
+   }
+   ```
+
+4. **Implement application service**:
+   - Create a class that implements the interface
+   - Inject required repositories and services
+   - Implement business logic
+
+   ```typescript
+   @Injectable()
+   export class UserApplicationService implements IUserApplicationService {
+     constructor(
+       @Inject(USER_REPO_TOKEN)
+       private readonly _userRepo: IUserRepository,
+     ) {}
+
+     async getProfile(userId: string): Promise<UserDTO> {
+       const user = await this._userRepo.findById(userId);
+       if (!user) {
+         throw new UserNotFoundException();
+       }
+       return new UserDTO(user);
+     }
+
+     async updateProfile(userId: string, data: UpdateProfileDTO): Promise<UserDTO> {
+       // Implementation
+     }
+   }
+   ```
+
+5. **Create controller**:
+   - Define a controller in the `driving-adapters/controllers` directory
+   - Inject application service
+   - Define routes using NestJS decorators
+   - Use Swagger decorators for API documentation
+
+   ```typescript
+   @Controller('users')
+   @ApiTags('Users')
+   export class UserController {
+     constructor(
+       @Inject(USER_APPLICATION_SERVICE_TOKEN)
+       private readonly _userApplicationService: IUserApplicationService,
+     ) {}
+
+     @Get('profile')
+     @UseGuards(JwtAuthGuard)
+     @ApiOkResponse({ type: UserDTO })
+     async getProfile(@Request() req): Promise<UserDTO> {
+       return this._userApplicationService.getProfile(req.user.id);
+     }
+
+     @Put('profile')
+     @UseGuards(JwtAuthGuard)
+     @ApiOkResponse({ type: UserDTO })
+     async updateProfile(
+       @Request() req,
+       @Body() data: UpdateProfileDTO,
+     ): Promise<UserDTO> {
+       return this._userApplicationService.updateProfile(req.user.id, data);
+     }
+   }
+   ```
+
+6. **Update module**:
+   - Register controllers, providers, and repositories in the module
+
+   ```typescript
+   @Module({
+     imports: [/* Any required modules */],
+     controllers: [UserController],
+     providers: [
+       {
+         provide: USER_APPLICATION_SERVICE_TOKEN,
+         useClass: UserApplicationService,
+       },
+       /* Other providers */
+     ],
+     exports: [/* Exported providers */],
+   })
+   export class UserModule {}
+   ```
+
+7. **Register module in app.module.ts**:
+   - Import and add the module to the imports array in the main app module
+
+### 2. OAuth Callbacks
+
+The application supports OAuth authentication (Google) with callback endpoints.
+
+**Example**: `auth.web-hook.ts` in the Auth module
+
+#### Steps to implement a new OAuth provider:
+
+1. **Create authentication strategy**:
+   - Create a strategy in the `driving-adapters/strategies` directory
+   - Implement the passport strategy for the provider
+
+2. **Create guard**:
+   - Create a guard in the `commons/guards` directory
+   - Use the strategy in the guard
+
+3. **Create controller endpoints**:
+   - Create a controller with the OAuth entry point and callback
+   - Use the guard on the endpoints
+
+4. **Update application service**:
+   - Implement the login method for the provider
+
+### 3. RabbitMQ Message Consumers
+
+The application is configured to use RabbitMQ for message-based communication, but no consumers are currently implemented.
+
+#### Steps to implement a new message consumer:
+
+1. **Define message pattern**:
+   - Create a constant for the message pattern in a constants file
+
+2. **Create DTO**:
+   - Define a DTO for the message payload
+
+3. **Create controller with message handler**:
+   - Use `@MessagePattern()` decorator to define the handler
+   - Inject appropriate application service
+
+   ```typescript
+   @Controller()
+   export class NotificationConsumer {
+     constructor(
+       @Inject(NOTIFICATION_SERVICE_TOKEN)
+       private readonly _notificationService: INotificationService,
+     ) {}
+
+     @MessagePattern('notification.send')
+     async handleSendNotification(data: SendNotificationDTO): Promise<void> {
+       await this._notificationService.sendNotification(data);
+     }
+   }
+   ```
+
+4. **Update module**:
+   - Register the controller in the module
+
+5. **Ensure RabbitMQ connection**:
+   - The main.ts already configures RabbitMQ connection
+   - Make sure to start microservices with `await app.startAllMicroservices()`
+
+## Development Guidelines
+
+### Environment Setup
+
+1. **Clone the repository**
+2. **Install dependencies**: `npm install`
+3. **Start development environment**: `docker-compose up -d`
+4. **Run the application**: `npm run dev`
+
+### Database Management
+
+- Database migrations are handled automatically with TypeORM's synchronize option
+- Entity changes will automatically update the database schema in development
+
+### Authentication
+
+- JWT-based authentication
+- OAuth support for Google
+- Access tokens and refresh tokens stored in HTTP-only cookies
+
+### File Storage
+
+- MinIO is used for object storage
+- Files are uploaded through the Asset module
+
+### Testing
+
+- Jest is used for testing
+- Tests are located in the `test` directory
+- Run tests with `npm test`
+
+### API Documentation
+
+- Swagger is used for API documentation
+- Access the documentation at `/api/documentation`
+- Endpoints are documented using Swagger decorators 
