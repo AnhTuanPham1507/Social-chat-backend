@@ -9,8 +9,8 @@ import { ConfigModule } from '@nestjs/config';
 import { ClsModule } from 'nestjs-cls';
 
 import { configs } from './configs';
-import { PostgresModule } from './infras/postgres/postgres.module';
 import { AuthModule } from './modules/auth/auth.module';
+import { PostgresModule } from '@infras/postgres/postgres.module';
 
 @Module({
     imports: [

@@ -25,8 +25,7 @@ import { createMockAssetService } from '../mocks/services/asset.service.mock';
 import * as hashUtil from '../../../../commons/utils/hash.util';
 import { ACCOUNT_PROVIDER } from '../../domain/entities/account/account-provider.value-object';
 import { AssetEntity } from '../../../../modules/asset/domain/entities/asset/asset.entity';
-import { setupTransactionalMock, setTransactionsToFail, TransactionMockState } from '../setup/transactional-mock.setup';
-
+    
 // Mock hash utility functions
 jest.mock('../../../../commons/utils/hash.util', () => ({
     generateHash: jest.fn(),
