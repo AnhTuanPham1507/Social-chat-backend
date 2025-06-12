@@ -9,7 +9,7 @@ const ENDPOINT = {
     WEB_HOOK: {
         BASE: '/public/web-hook',
         GOOGLE_REDIRECT: 'login/google/redirect',
-    }
-}
+    },
+};
 
 export default ENDPOINT;

@@ -15,17 +15,6 @@ on:
       - '.eslintrc.js'
       - 'Dockerfile'
       - 'docker-compose*.yml'
-  push:
-    branches: [ "main" ]
-    paths:
-      - 'src/**'
-      - 'test/**'
-      - 'package.json'
-      - 'yarn.lock'
-      - 'tsconfig*.json'
-      - '.eslintrc.js'
-      - 'Dockerfile'
-      - 'docker-compose*.yml'
 
 concurrency:
   group: ci-${{ github.ref }}
@@ -59,16 +48,8 @@ jobs:
         run: yarn install --frozen-lockfile --prefer-offline
 
       - name: 🔍 Run ESLint
-        run: |
-          yarn lint --format=@microsoft/eslint-formatter-sarif --output-file=eslint-results.sarif
+        run: yarn lint
         continue-on-error: true
-
-      - name: 📊 Upload ESLint results
-        uses: github/codeql-action/upload-sarif@v2
-        if: always()
-        with:
-          sarif_file: eslint-results.sarif
-          wait-for-processing: true
 
       - name: 🎨 Check code formatting
         run: yarn prettier --check .

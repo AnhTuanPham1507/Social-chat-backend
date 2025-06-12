@@ -1,6 +1,6 @@
 /**
  * Auth Module Test Suite
- * 
+ *
  * This file serves as the entry point for all auth module tests.
  * It imports all test files to ensure they are executed together.
  */
@@ -11,7 +11,7 @@ import './controllers/auth.controller.spec';
 import './controllers/auth.web-hook.spec';
 
 describe('Auth Module Test Suite', () => {
-  it('should load all auth module tests', () => {
-    expect(true).toBe(true);
-  });
-}); 
+    it('should load all auth module tests', () => {
+        expect(true).toBe(true);
+    });
+});

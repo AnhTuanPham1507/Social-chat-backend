@@ -1,11 +1,11 @@
-import { BaseException } from "@commons/core/base-exception.interface";
+import { BaseException } from '@commons/core/base-exception.interface';
 
 export class AccountNotFoundException extends BaseException {
     private static ERROR_CODE = 'application.auth.account_not_found';
 
     constructor() {
         super(AccountNotFoundException.ERROR_CODE);
-    }   
+    }
 }
 
 export class InvalidCredentialsException extends BaseException {
@@ -13,5 +13,5 @@ export class InvalidCredentialsException extends BaseException {
 
     constructor() {
         super(InvalidCredentialsException.ERROR_CODE);
-    }   
+    }
 }

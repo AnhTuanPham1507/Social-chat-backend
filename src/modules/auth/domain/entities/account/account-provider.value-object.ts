@@ -1,4 +1,8 @@
-import { DomainPrimitiveProperties, ValueObject, ValueObjectProperties } from "@beincom/domain";
+import {
+    DomainPrimitiveProperties,
+    ValueObject,
+    ValueObjectProperties,
+} from '@beincom/domain';
 
 export enum ACCOUNT_PROVIDER {
     LOCAL = 'LOCAL',

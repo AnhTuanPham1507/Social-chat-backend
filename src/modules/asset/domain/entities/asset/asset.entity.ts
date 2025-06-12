@@ -1,8 +1,19 @@
-import { CreatedAt, DeletedAt, Entity, EntityProps, UpdatedAt, UUID } from "@beincom/domain";
-import { MIME_TYPE, MimeType } from "@modules/asset/domain/entities/asset/mime-type.value-object";
-import { ASSET_TYPE, AssetType } from "./asset-type.value-object";
-import { AssetSize } from "./asset-size.value-object";
-import { URL } from "@commons/core/value-objects/url.value-object";
+import {
+    CreatedAt,
+    DeletedAt,
+    Entity,
+    EntityProps,
+    UpdatedAt,
+    UUID,
+} from '@beincom/domain';
+import { URL } from '@commons/core/value-objects/url.value-object';
+import {
+    MIME_TYPE,
+    MimeType,
+} from '@modules/asset/domain/entities/asset/mime-type.value-object';
+
+import { AssetSize } from './asset-size.value-object';
+import { ASSET_TYPE, AssetType } from './asset-type.value-object';
 
 export interface IAssetProps {
     name?: string;
@@ -51,10 +62,20 @@ export class AssetEntity extends Entity<UUID, IAssetProps> {
                 size: AssetSize.fromNumber(props.size),
                 url: new URL(props.url),
             },
-            createdAt: CreatedAt.fromDateString(props.createdAt ? props.createdAt.toISOString() : new Date().toISOString()),
-            updatedAt: UpdatedAt.fromDateString(props.updatedAt ? props.updatedAt.toISOString() : new Date().toISOString()),
-            deletedAt: props.deletedAt ? DeletedAt.fromDateString(props.deletedAt.toISOString()) : null
-        })
+            createdAt: CreatedAt.fromDateString(
+                props.createdAt
+                    ? props.createdAt.toISOString()
+                    : new Date().toISOString(),
+            ),
+            updatedAt: UpdatedAt.fromDateString(
+                props.updatedAt
+                    ? props.updatedAt.toISOString()
+                    : new Date().toISOString(),
+            ),
+            deletedAt: props.deletedAt
+                ? DeletedAt.fromDateString(props.deletedAt.toISOString())
+                : null,
+        });
     }
 
     static fromRaw(raw: any) {
@@ -69,7 +90,9 @@ export class AssetEntity extends Entity<UUID, IAssetProps> {
             },
             createdAt: CreatedAt.fromDateString(raw.createdAt),
             updatedAt: UpdatedAt.fromDateString(raw.updatedAt),
-            deletedAt: raw.deletedAt ? DeletedAt.fromDateString(raw.deletedAt) : null
+            deletedAt: raw.deletedAt
+                ? DeletedAt.fromDateString(raw.deletedAt)
+                : null,
         });
     }
 }

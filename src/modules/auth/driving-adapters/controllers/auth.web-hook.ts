@@ -1,26 +1,24 @@
-import {
-    Controller,
-    Get,
-    Request,
-    Res,
-    UseGuards,
-} from '@nestjs/common';
-import {
-    ApiTags,
-} from '@nestjs/swagger';
-
-import { Response } from 'express';
 import { GoogleOAuthGuard } from '@commons/guards/google.guard';
 import ENDPOINT from '@modules/auth/constants/endpoint.constant';
+import { Controller, Get, Logger, Request, Res, UseGuards } from '@nestjs/common';
+import { ApiTags } from '@nestjs/swagger';
+import { Response } from 'express';
 
 @Controller(ENDPOINT.WEB_HOOK.BASE)
 @ApiTags('Auth')
 export class AuthWebHook {
+    private readonly logger = new Logger(AuthWebHook.name);
     constructor() {}
 
     @Get(ENDPOINT.WEB_HOOK.GOOGLE_REDIRECT)
     @UseGuards(GoogleOAuthGuard)
     googleAuthRedirect(@Request() req, @Res() res: Response): void {
+        if (!req.user) {
+            this.logger.error('User not found');
+            res.status(401).json({ message: 'Unauthorized' });
+            return;
+        }
+
         res.cookie('accessToken', req.user.accessToken, {
             httpOnly: true, // Ensures the cookie is not accessible via JavaScript
             secure: process.env.NODE_ENV === 'production', // Ensures the cookie is sent only over HTTPS in production

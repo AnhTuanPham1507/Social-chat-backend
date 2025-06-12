@@ -1,6 +1,7 @@
 import { InternalServerErrorException } from '@nestjs/common';
-import { IRepo } from '../core/base-repo.interface';
 import { FindOptionsWhere, Repository } from 'typeorm';
+
+import { IRepo } from '../core/base-repo.interface';
 
 export abstract class BaseRepo<T> implements IRepo<T> {
     protected repo: Repository<T>;
@@ -8,16 +9,19 @@ export abstract class BaseRepo<T> implements IRepo<T> {
     constructor(repo: Repository<T>) {
         this.repo = repo;
     }
-    
+
     async findOne(query: FindOptionsWhere<T>): Promise<T | null> {
         return (
             (await this.repo.findOne({
-                where: query
+                where: query,
             })) || null
         );
     }
 
-    async exists(t: Record<string, any>, fieldNames: string[]): Promise<boolean> {
+    async exists(
+        t: Record<string, any>,
+        fieldNames: string[],
+    ): Promise<boolean> {
         const query = [];
 
         fieldNames.forEach((fieldName) => {
@@ -43,6 +47,6 @@ export abstract class BaseRepo<T> implements IRepo<T> {
     async insert(t: Partial<T>): Promise<Record<string, any> | null> {
         const createdRow = await this.repo.insert(t as any);
 
-        return createdRow.generatedMaps[0]
+        return createdRow.generatedMaps[0];
     }
 }
