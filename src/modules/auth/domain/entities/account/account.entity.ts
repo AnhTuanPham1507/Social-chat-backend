@@ -1,10 +1,4 @@
-import {
-    CreatedAt,
-    DeletedAt,
-    Entity,
-    UpdatedAt,
-    UUID,
-} from '@beincom/domain';
+import { CreatedAt, DeletedAt, Entity, UpdatedAt, UUID } from '@beincom/domain';
 import { Email } from '@commons/core/value-objects/email.value-object';
 
 import { UserEntity } from '../user/user.entity';
@@ -117,7 +111,9 @@ export class AccountEntity extends Entity<UUID, IAccountProps> {
             props: {
                 ...raw,
                 email: Email.fromString(raw.email),
-                password: raw.password ? Password.fromString(raw.password) : undefined,
+                password: raw.password
+                    ? Password.fromString(raw.password)
+                    : undefined,
                 provider: AccountProvider.fromString(raw.provider),
                 role: Role.fromString(raw.role),
                 avatar: raw.avatar ? AvatarEntity.fromRaw(raw.avatar) : null,

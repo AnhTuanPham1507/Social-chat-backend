@@ -1,7 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import {
-    AuthApplicationService,
-} from '../../application/application-services/auth.application-service';
+import { AuthApplicationService } from '../../application/application-services/auth.application-service';
 import {
     ACCOUNT_REPO_TOKEN,
     IAccountRepository,
@@ -25,7 +23,7 @@ import { createMockAssetService } from '../mocks/services/asset.service.mock';
 import * as hashUtil from '../../../../commons/utils/hash.util';
 import { ACCOUNT_PROVIDER } from '../../domain/entities/account/account-provider.value-object';
 import { AssetEntity } from '../../../../modules/asset/domain/entities/asset/asset.entity';
-    
+
 // Mock hash utility functions
 jest.mock('../../../../commons/utils/hash.util', () => ({
     generateHash: jest.fn(),
@@ -38,7 +36,7 @@ describe('AuthApplicationService', () => {
     let userRepo: jest.Mocked<IUserRepository>;
     let assetService: jest.Mocked<IAssetService>;
 
-    beforeEach(async () => {        
+    beforeEach(async () => {
         const module: TestingModule = await Test.createTestingModule({
             providers: [
                 AuthApplicationService,
@@ -173,7 +171,9 @@ describe('AuthApplicationService', () => {
             const registerPayload = AuthTestFactory.createRegisterPayload();
             const mockAsset = AuthTestFactory.createMockAssetEntity();
 
-            assetService.createAsset.mockResolvedValue(mockAsset as unknown as AssetEntity);
+            assetService.createAsset.mockResolvedValue(
+                mockAsset as unknown as AssetEntity,
+            );
             (hashUtil.generateHash as jest.Mock).mockReturnValue(
                 'hashed-password',
             );
@@ -194,15 +194,19 @@ describe('AuthApplicationService', () => {
             expect(userRepo.insert).toHaveBeenCalled();
             expect(accountRepo.insert).toHaveBeenCalled();
         });
-        
+
         it('should execute register method with mocked @Transactional decorator', async () => {
             // Arrange
             const registerPayload = AuthTestFactory.createRegisterPayload();
             const mockAsset = AuthTestFactory.createMockAssetEntity();
             const registerSpy = jest.spyOn(service, 'register');
 
-            assetService.createAsset.mockResolvedValue(mockAsset as unknown as AssetEntity);
-            (hashUtil.generateHash as jest.Mock).mockReturnValue('hashed-password');
+            assetService.createAsset.mockResolvedValue(
+                mockAsset as unknown as AssetEntity,
+            );
+            (hashUtil.generateHash as jest.Mock).mockReturnValue(
+                'hashed-password',
+            );
             userRepo.insert.mockResolvedValue();
             accountRepo.insert.mockResolvedValue();
 
@@ -215,7 +219,6 @@ describe('AuthApplicationService', () => {
             expect(userRepo.insert).toHaveBeenCalled();
             expect(accountRepo.insert).toHaveBeenCalled();
         });
-    
 
         it('should handle asset creation failure', async () => {
             // Arrange
@@ -239,7 +242,9 @@ describe('AuthApplicationService', () => {
             const mockAsset = AuthTestFactory.createMockAssetEntity();
             const userInsertError = new Error('User insertion failed');
 
-            assetService.createAsset.mockResolvedValue(mockAsset as unknown as AssetEntity);
+            assetService.createAsset.mockResolvedValue(
+                mockAsset as unknown as AssetEntity,
+            );
             (hashUtil.generateHash as jest.Mock).mockReturnValue(
                 'hashed-password',
             );
@@ -259,7 +264,9 @@ describe('AuthApplicationService', () => {
             const mockAsset = AuthTestFactory.createMockAssetEntity();
             const accountInsertError = new Error('Account insertion failed');
 
-            assetService.createAsset.mockResolvedValue(mockAsset as unknown as AssetEntity);
+            assetService.createAsset.mockResolvedValue(
+                mockAsset as unknown as AssetEntity,
+            );
             (hashUtil.generateHash as jest.Mock).mockReturnValue(
                 'hashed-password',
             );

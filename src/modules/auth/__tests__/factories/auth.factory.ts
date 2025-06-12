@@ -11,7 +11,7 @@ import AccountDTO from '@modules/auth/driving-adapters/dtos/account.dto';
 import { GoogleLoginPayloadDTO } from '@modules/auth/driving-adapters/dtos/google-login-payload.dto';
 import { LoginPayloadDTO } from '@modules/auth/driving-adapters/dtos/login-payload.dto';
 import RegisterPayloadDTO from '@modules/auth/driving-adapters/dtos/register-payload.dto';
-import {UUID} from '@beincom/domain'
+import { UUID } from '@beincom/domain';
 
 export class AuthTestFactory {
     static createLoginPayload(

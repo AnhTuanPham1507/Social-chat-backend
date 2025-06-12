@@ -38,24 +38,31 @@ src/modules/[module-name]/
 ## Available Commands
 
 ### Run All Tests
+
 ```bash
 npm test
 ```
+
 Runs both unit tests and E2E tests with unified coverage reporting.
 
 ### Run Unit Tests Only
+
 ```bash
 npm run test:unit
 ```
+
 Runs all unit tests from `src/modules/**/__tests__/` directories.
 
 ### Run E2E Tests Only
+
 ```bash
 npm run test:e2e
 ```
+
 Runs all E2E tests from `test/e2e-tests/` directory.
 
 ### Watch Mode
+
 ```bash
 npm run test:watch       # Watch all tests
 npm run test:unit:watch  # Watch unit tests only
@@ -63,9 +70,11 @@ npm run test:e2e:watch   # Watch E2E tests only
 ```
 
 ### Coverage
+
 ```bash
 npm run test:coverage
 ```
+
 Runs all tests with coverage reporting. Coverage reports are generated in the `coverage/` directory.
 
 ## Writing Tests
@@ -80,25 +89,25 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { TestHelpers } from '../../../../test/utils/test-helpers';
 
 describe('AuthService', () => {
-  let service: AuthService;
-  let module: TestingModule;
+    let service: AuthService;
+    let module: TestingModule;
 
-  beforeEach(async () => {
-    module = await TestHelpers.createTestingModule([
-      AuthService,
-      // Add other providers
-    ]);
-    
-    service = module.get<AuthService>(AuthService);
-  });
+    beforeEach(async () => {
+        module = await TestHelpers.createTestingModule([
+            AuthService,
+            // Add other providers
+        ]);
 
-  afterEach(async () => {
-    await module.close();
-  });
+        service = module.get<AuthService>(AuthService);
+    });
 
-  it('should be defined', () => {
-    expect(service).toBeDefined();
-  });
+    afterEach(async () => {
+        await module.close();
+    });
+
+    it('should be defined', () => {
+        expect(service).toBeDefined();
+    });
 });
 ```
 
@@ -114,22 +123,22 @@ import * as request from 'supertest';
 import { TestHelpers } from '../utils/test-helpers';
 
 describe('Auth E2E', () => {
-  let app: INestApplication;
+    let app: INestApplication;
 
-  beforeEach(async () => {
-    app = await TestHelpers.createTestApp(AppModule);
-  });
+    beforeEach(async () => {
+        app = await TestHelpers.createTestApp(AppModule);
+    });
 
-  afterEach(async () => {
-    await app.close();
-  });
+    afterEach(async () => {
+        await app.close();
+    });
 
-  it('/auth/login (POST)', () => {
-    return request(app.getHttpServer())
-      .post('/auth/login')
-      .send({ email: 'test@example.com', password: 'password' })
-      .expect(200);
-  });
+    it('/auth/login (POST)', () => {
+        return request(app.getHttpServer())
+            .post('/auth/login')
+            .send({ email: 'test@example.com', password: 'password' })
+            .expect(200);
+    });
 });
 ```
 
@@ -148,7 +157,10 @@ The `TestHelpers` class provides common utilities:
 ### Example Usage
 
 ```typescript
-import { TestHelpers, TEST_CONSTANTS } from '../../../../test/utils/test-helpers';
+import {
+    TestHelpers,
+    TEST_CONSTANTS,
+} from '../../../../test/utils/test-helpers';
 
 // Create a mock repository
 const mockUserRepo = TestHelpers.createMockRepository();
@@ -174,6 +186,7 @@ Tests can use the following path mappings:
 ### Coverage Thresholds
 
 Unit tests have coverage thresholds set to 70% for:
+
 - Branches
 - Functions
 - Lines
@@ -210,4 +223,4 @@ To debug tests, you can use:
 node --inspect-brk node_modules/.bin/jest --config ./test/jest.config.js --runInBand
 ```
 
-Then connect your debugger to the Node.js process. 
+Then connect your debugger to the Node.js process.

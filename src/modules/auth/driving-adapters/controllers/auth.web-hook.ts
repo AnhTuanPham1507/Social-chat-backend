@@ -1,6 +1,13 @@
 import { GoogleOAuthGuard } from '@commons/guards/google.guard';
 import ENDPOINT from '@modules/auth/constants/endpoint.constant';
-import { Controller, Get, Logger, Request, Res, UseGuards } from '@nestjs/common';
+import {
+    Controller,
+    Get,
+    Logger,
+    Request,
+    Res,
+    UseGuards,
+} from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { Response } from 'express';
 

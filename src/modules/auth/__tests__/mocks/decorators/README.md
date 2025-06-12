@@ -1,6 +1,6 @@
 # Transactional Decorator Mock
 
-This directory contains mock implementations for decorators used in the codebase. 
+This directory contains mock implementations for decorators used in the codebase.
 
 ## Transactional Decorator Mock
 
@@ -30,37 +30,44 @@ import '../path/to/transactional-mock.setup';
 import { TransactionMockState } from '../path/to/transactional-mock.setup';
 
 it('should complete a transaction successfully', async () => {
-  // Arrange
-  TransactionMockState.reset(); // Reset state before test
-  
-  // Act
-  await service.methodWithTransaction();
-  
-  // Assert
-  expect(TransactionMockState.completedTransactions.length).toBeGreaterThan(0);
-  expect(TransactionMockState.failedTransactions.length).toBe(0);
+    // Arrange
+    TransactionMockState.reset(); // Reset state before test
+
+    // Act
+    await service.methodWithTransaction();
+
+    // Assert
+    expect(TransactionMockState.completedTransactions.length).toBeGreaterThan(
+        0,
+    );
+    expect(TransactionMockState.failedTransactions.length).toBe(0);
 });
 ```
 
 #### Testing Transaction Failures
 
 ```typescript
-import { setTransactionsToFail, TransactionMockState } from '../path/to/transactional-mock.setup';
+import {
+    setTransactionsToFail,
+    TransactionMockState,
+} from '../path/to/transactional-mock.setup';
 
 it('should handle transaction rollbacks', async () => {
-  // Arrange
-  TransactionMockState.reset(); // Reset state before test
-  setTransactionsToFail(true); // Force transactions to fail
-  
-  // Act & Assert
-  await expect(service.methodWithTransaction()).rejects.toThrow(/rolled back/);
-  
-  // Verify that the transaction was recorded as failed
-  expect(TransactionMockState.failedTransactions.length).toBeGreaterThan(0);
-  expect(TransactionMockState.completedTransactions.length).toBe(0);
-  
-  // Reset for other tests
-  setTransactionsToFail(false);
+    // Arrange
+    TransactionMockState.reset(); // Reset state before test
+    setTransactionsToFail(true); // Force transactions to fail
+
+    // Act & Assert
+    await expect(service.methodWithTransaction()).rejects.toThrow(
+        /rolled back/,
+    );
+
+    // Verify that the transaction was recorded as failed
+    expect(TransactionMockState.failedTransactions.length).toBeGreaterThan(0);
+    expect(TransactionMockState.completedTransactions.length).toBe(0);
+
+    // Reset for other tests
+    setTransactionsToFail(false);
 });
 ```
 
@@ -68,17 +75,19 @@ it('should handle transaction rollbacks', async () => {
 
 ```typescript
 it('should handle partial transaction failures', async () => {
-  // Arrange
-  TransactionMockState.reset();
-  
-  // Mock a repository method to fail
-  someRepo.save.mockRejectedValue(new Error('Database error'));
-  
-  // Act & Assert
-  await expect(service.methodWithTransaction()).rejects.toThrow('Database error');
-  
-  // Verify the transaction state
-  expect(TransactionMockState.failedTransactions.length).toBeGreaterThan(0);
+    // Arrange
+    TransactionMockState.reset();
+
+    // Mock a repository method to fail
+    someRepo.save.mockRejectedValue(new Error('Database error'));
+
+    // Act & Assert
+    await expect(service.methodWithTransaction()).rejects.toThrow(
+        'Database error',
+    );
+
+    // Verify the transaction state
+    expect(TransactionMockState.failedTransactions.length).toBeGreaterThan(0);
 });
 ```
 
@@ -108,4 +117,4 @@ The mock works by wrapping the original method with a function that:
 2. Executes the original method
 3. Checks if the transaction should fail (globally or per-decorator)
 4. Records success/failure in the appropriate state arrays
-5. Throws appropriate errors for rollbacks 
+5. Throws appropriate errors for rollbacks

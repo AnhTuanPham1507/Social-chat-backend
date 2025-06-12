@@ -11,7 +11,7 @@ export class Password extends ValueObject<string> {
     public validate(properties: ValueObjectProperties<string>): void {
         // Skip validation if value is null or undefined (for non-LOCAL providers)
         if (!properties.value) return;
-        
+
         const isValidPassword = properties.value.length >= Password.MIN_LENGTH;
         if (!isValidPassword) {
             throw new IllegalArgumentException('Invalid password');

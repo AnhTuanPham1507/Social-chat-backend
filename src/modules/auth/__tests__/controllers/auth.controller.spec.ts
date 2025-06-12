@@ -79,7 +79,9 @@ describe('AuthController', () => {
 
         it('should handle missing user data in request', () => {
             // Arrange
-            const mockRequest = { user: { accessToken: 'token', refreshToken: 'token' } };
+            const mockRequest = {
+                user: { accessToken: 'token', refreshToken: 'token' },
+            };
             const mockResponse = AuthTestFactory.createMockResponse();
 
             // Act & Assert
@@ -116,7 +118,10 @@ describe('AuthController', () => {
             authService.register.mockResolvedValue(undefined);
 
             // Act
-            const result = await controller.register(mockRequest as any, mockFile);
+            const result = await controller.register(
+                mockRequest as any,
+                mockFile,
+            );
 
             // Assert
             expect(authService.register).toHaveBeenCalledWith({
