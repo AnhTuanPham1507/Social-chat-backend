@@ -97,7 +97,7 @@ social-chat-backend/
 │           │   └── strategies/    # Authentication strategies
 │           └── driven-adapters/   # Driven adapters (repositories)
 ├── test/                       # Test files
-├── .development.env            # Development environment variables
+├── .env            # Development environment variables
 ├── .editorconfig               # Editor configuration
 ├── .eslintrc.js                # ESLint configuration
 ├── .gitignore                  # Git ignore file

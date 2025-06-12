@@ -8,3 +8,4 @@ postgres
 coverage/*
 test/coverage/*
 
+.env

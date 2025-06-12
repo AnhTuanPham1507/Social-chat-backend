@@ -16,7 +16,7 @@ import { LogModule } from '@infras/log/log.module';
         ConfigModule.forRoot({
             isGlobal: true,
             cache: true,
-            envFilePath: `.development.env`,
+            envFilePath: `.env`,
             load: [configs]
         }),
         ClsModule.forRoot({

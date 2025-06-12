@@ -26,7 +26,7 @@ export default function () {
                     UserModule,
                     PostgresModule,
                     ConfigModule.forRoot({
-                        envFilePath: `.development.env`,
+                        envFilePath: `.env`,
                     }),
                 ],
                 controllers: [UserController],

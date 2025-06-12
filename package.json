@@ -10,7 +10,18 @@
         "test:unit:watch": "jest --config ./test/jest.unit.config.js --watch",
         "test:e2e:watch": "jest --config ./test/jest.e2e.config.js --watch",
         "dev": "nest start --watch",
-        "build": "nest build"
+        "build": "nest build",
+        "lint": "eslint \"{src,apps,libs,test}/**/*.ts\"",
+        "lint:fix": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
+        "prettier": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
+        "prettier:check": "prettier --check \"src/**/*.ts\" \"test/**/*.ts\"",
+        "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\" && npm run lint:fix",
+        "typecheck": "tsc --noEmit",
+        "docker:build": "docker build -t social-chat-backend .",
+        "docker:run": "docker run -p 3000:3000 social-chat-backend",
+        "docker:dev": "docker-compose up -d",
+        "docker:staging": "docker-compose -f docker-compose.staging.yml up -d",
+        "docker:prod": "docker-compose -f docker-compose.production.yml up -d"
     },
     "author": "",
     "license": "ISC",
@@ -63,6 +74,13 @@
         "jest": "^29.7.0",
         "jest-when": "^3.6.0",
         "supertest": "^7.0.0",
-        "ts-jest": "^29.2.4"
+        "ts-jest": "^29.2.4",
+        "@typescript-eslint/eslint-plugin": "^6.0.0",
+        "@typescript-eslint/parser": "^6.0.0",
+        "eslint": "^8.42.0",
+        "eslint-config-prettier": "^9.0.0",
+        "eslint-plugin-prettier": "^5.0.0",
+        "prettier": "^3.0.0",
+        "typescript": "^5.1.3"
     }
 }
