@@ -31,7 +31,7 @@ export class AuthTestFactory {
             fullName: 'Test User',
             email: 'test@example.com',
             password: 'TestPassword123!',
-            phone: '0778821404',
+            phone: '0778824109',
             sex: USER_SEX.MALE,
             avatar: this.createAssetPayload(),
             ...overrides,
@@ -97,7 +97,7 @@ export class AuthTestFactory {
             id: UUID.generate(),
             fullName: 'Test User',
             email: 'test@example.com',
-            phone: '0778821404',
+            phone: '0778859867',
             sex: USER_SEX.MALE,
             ...overrides,
         });
