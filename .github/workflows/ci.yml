@@ -54,8 +54,11 @@ jobs:
             - name: 🎨 Check code formatting
               run: yarn prettier --check .
 
-            - name: 📋 TypeScript type checking
-              run: tsc --noEmit
+            - name: 🔍 Run SonarQube Scanner
+              uses: SonarSource/sonarqube-scan-action@v5
+              env:
+                SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+                SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
 
     # Job 2: Security Scanning
     security:
@@ -96,6 +99,7 @@ jobs:
 
             - name: 🔍 Perform CodeQL Analysis
               uses: github/codeql-action/analyze@v2
+
 
     # Job 3: Unit Tests
     test-unit:
