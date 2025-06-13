@@ -71,6 +71,7 @@ class MockAuthApplicationService {
     }
 
     async register(payload: any): Promise<void> {
+        const asset = await this.assetService.createAsset(payload.avatar);
         const hashedPassword = mockHashUtil.generateHash(payload.password);
 
         const user = {
