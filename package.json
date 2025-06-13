@@ -16,7 +16,7 @@
         "prettier": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
         "prettier:check": "prettier --check \"src/**/*.ts\" \"test/**/*.ts\"",
         "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\" && npm run lint:fix",
-        "typecheck": "tsc --project tsconfig.json --noEmit && tsc-alias -p tsconfig.json",
+        "typecheck": "tsc --noEmit",
         "docker:build": "docker build -t social-chat-backend .",
         "docker:run": "docker run -p 3000:3000 social-chat-backend",
         "docker:dev": "docker-compose up -d",

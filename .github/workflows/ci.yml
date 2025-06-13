@@ -55,7 +55,7 @@ jobs:
               run: yarn prettier --check .
 
             - name: 📋 TypeScript type checking
-              run: yarn typecheck
+              run: tsc --noEmit
 
     # Job 2: Security Scanning
     security:
