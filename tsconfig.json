@@ -19,10 +19,10 @@
         "forceConsistentCasingInFileNames": false,
         "noFallthroughCasesInSwitch": false,
         "paths": {
-            "@commons/*": ["./src/commons/*"],
-            "@configs/*": ["./src/configs/*"],
-            "@infras/*": ["./src/infras/*"],
-            "@modules/*": ["./src/modules/*"]
+            "@commons/*": ["./src/commons/*", "./dist/src/commons/*"],
+            "@configs/*": ["./src/configs/*", "./dist/src/configs/*"],
+            "@infras/*": ["./src/infras/*", "./dist/src/infras/*"],
+            "@modules/*": ["./src/modules/*", "./dist/src/modules/*"],   
         }
     },
     "include": ["src/**/*", "test/**/*"],
