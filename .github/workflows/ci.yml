@@ -15,6 +15,10 @@ on:
             - '.eslintrc.js'
             - 'Dockerfile'
             - 'docker-compose*.yml'
+            
+permissions:
+  contents: read
+  security-events: write
 
 concurrency:
     group: ci-${{ github.ref }}
