@@ -53,7 +53,7 @@ jobs:
               uses: actions/checkout@v4
               with:
                   fetch-depth: 0
-                  token: ${{ secrets.GITHUB_TOKEN }}
+                  token: ${{ secrets.GH_PAT }}
 
             - name: 🔍 Check for release necessity
               id: check
@@ -103,7 +103,7 @@ jobs:
               uses: actions/checkout@v4
               with:
                   fetch-depth: 0
-                  token: ${{ secrets.GITHUB_TOKEN }}
+                  token: ${{ secrets.GH_PAT }}
 
             - name: 🟢 Setup Node.js
               uses: actions/setup-node@v4
@@ -233,6 +233,9 @@ jobs:
         steps:
             - name: 📥 Checkout code
               uses: actions/checkout@v4
+              with:
+                  fetch-depth: 0
+                  token: ${{ secrets.GH_PAT }}
 
             - name: 🟢 Setup Node.js
               uses: actions/setup-node@v4
@@ -290,7 +293,7 @@ jobs:
               uses: actions/checkout@v4
               with:
                   fetch-depth: 0
-                  token: ${{ secrets.GITHUB_TOKEN }}
+                  token: ${{ secrets.GH_PAT }}
 
             - name: 📄 Download changelog
               uses: actions/download-artifact@v3
@@ -337,6 +340,9 @@ jobs:
         steps:
             - name: 📥 Checkout code
               uses: actions/checkout@v4
+              with:
+                  fetch-depth: 0
+                  token: ${{ secrets.GH_PAT }}
 
             - name: 🚀 Trigger production deployment
               uses: ./.github/workflows/cd.yml

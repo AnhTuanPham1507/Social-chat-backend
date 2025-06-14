@@ -104,6 +104,8 @@ jobs:
         steps:
             - name: 📥 Checkout code
               uses: actions/checkout@v4
+              with:
+                token: ${{ secrets.GH_PAT }}
 
             - name: 🔐 Configure deployment credentials
               run: |
@@ -221,6 +223,8 @@ jobs:
         steps:
             - name: 📥 Checkout code
               uses: actions/checkout@v4
+              with:
+                token: ${{ secrets.GH_PAT }}
 
             - name: 🔐 Configure production credentials
               run: |
