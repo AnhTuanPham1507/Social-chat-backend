@@ -108,7 +108,7 @@ jobs:
             - name: 🔍 Perform CodeQL Analysis
               uses: github/codeql-action/analyze@v3
               with:
-                token: ${{ secrets.GH_PAT }}
+                github-token: ${{ secrets.GH_PAT }}
     
 
 
