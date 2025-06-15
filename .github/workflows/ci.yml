@@ -96,13 +96,13 @@ jobs:
                   fi
 
             - name: 🔍 Initialize CodeQL
-              uses: github/codeql-action/init@v3
+              uses: github/codeql-action/init@v2
               with:
                   languages: javascript
                   queries: security-and-quality
 
             - name: 🔍 Perform CodeQL Analysis
-              uses: github/codeql-action/analyze@v3
+              uses: github/codeql-action/analyze@v2
     
     # Job 3: Unit Tests
     test-unit:
