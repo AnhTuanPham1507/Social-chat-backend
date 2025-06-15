@@ -15,10 +15,6 @@ on:
             - '.eslintrc.js'
             - 'Dockerfile'
             - 'docker-compose*.yml'
-            
-permissions:
-  contents: read
-  security-events: write
 
 concurrency:
     group: ci-${{ github.ref }}
@@ -71,8 +67,8 @@ jobs:
         runs-on: ubuntu-latest
         timeout-minutes: 15
         permissions:
-            security-events: write
-
+          contents: write
+          security-events: write
         steps:
             - name: 📥 Checkout code
               uses: actions/checkout@v4
