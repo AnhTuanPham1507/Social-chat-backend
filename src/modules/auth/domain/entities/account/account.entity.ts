@@ -36,7 +36,7 @@ export interface ICreateAccountProps {
 export class AccountEntity extends Entity<UUID, IAccountProps> {
     protected _id: UUID;
 
-    validate(): void | never {
+    public validate(): void | never {
         // throw new Error('Method not implemented.');
     }
 
@@ -68,7 +68,7 @@ export class AccountEntity extends Entity<UUID, IAccountProps> {
         return this._props['owner'];
     }
 
-    static create(props: ICreateAccountProps) {
+    public static create(props: ICreateAccountProps) {
         const provider = AccountProvider.fromString(props.provider);
         // Only set password for LOCAL accounts or if explicitly provided for other providers
         let password;
@@ -105,7 +105,7 @@ export class AccountEntity extends Entity<UUID, IAccountProps> {
         });
     }
 
-    static fromRaw(raw: any) {
+    public static fromRaw(raw: any) {
         return new AccountEntity({
             id: new UUID(raw.id),
             props: {

@@ -1,14 +1,15 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { AuthController } from '../../driving-adapters/controllers/auth.controller';
+
+import { GoogleOAuthGuard } from '../../../../commons/guards/google.guard';
+import { LocalGuard } from '../../../../commons/guards/local.guard';
 import {
     AUTH_APPLICATION_SERVICE_TOKEN,
     IAuthApplicationService,
 } from '../../application/application-services/auth.application-service';
+import { AuthController } from '../../driving-adapters/controllers/auth.controller';
 import { AuthTestFactory } from '../factories/auth.factory';
-import { LocalGuard } from '../../../../commons/guards/local.guard';
-import { GoogleOAuthGuard } from '../../../../commons/guards/google.guard';
-import { createMockLocalGuard } from '../mocks/guards/local.guard.mock';
 import { createMockGoogleOAuthGuard } from '../mocks/guards/google-oauth.guard.mock';
+import { createMockLocalGuard } from '../mocks/guards/local.guard.mock';
 
 describe('AuthController', () => {
     let controller: AuthController;

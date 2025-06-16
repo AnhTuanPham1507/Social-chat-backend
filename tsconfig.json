@@ -22,9 +22,9 @@
             "@commons/*": ["./src/commons/*", "./dist/src/commons/*"],
             "@configs/*": ["./src/configs/*", "./dist/src/configs/*"],
             "@infras/*": ["./src/infras/*", "./dist/src/infras/*"],
-            "@modules/*": ["./src/modules/*", "./dist/src/modules/*"],   
+            "@modules/*": ["./src/modules/*", "./dist/src/modules/*"]   
         }
     },
     "include": ["src/**/*", "test/**/*"],
-    "exclude": ["node_modules", "**/*.spec.ts", "dist"]
+    "exclude": ["node_modules", "dist"]
 }

@@ -8,15 +8,14 @@ import { UserEntity } from '@modules/auth/domain/entities/user/user.entity';
 import AccountDTO from '@modules/auth/driving-adapters/dtos/account.dto';
 import { GoogleLoginPayloadDTO } from '@modules/auth/driving-adapters/dtos/google-login-payload.dto';
 import { LoginPayloadDTO } from '@modules/auth/driving-adapters/dtos/login-payload.dto';
+import RegisterPayloadDTO from '@modules/auth/driving-adapters/dtos/register-payload.dto';
 import { Inject, Injectable } from '@nestjs/common';
-
 import { Transactional } from 'typeorm-transactional';
 
 import {
     ACCOUNT_REPO_TOKEN,
     IAccountRepository,
 } from '../contracts/account-repository.contract';
-
 import {
     ASSET_SERVICE_TOKEN,
     IAssetService,
@@ -29,7 +28,6 @@ import {
     AccountNotFoundException,
     InvalidCredentialsException,
 } from '../exceptions/auth.exception';
-import RegisterPayloadDTO from '@modules/auth/driving-adapters/dtos/register-payload.dto';
 
 export const AUTH_APPLICATION_SERVICE_TOKEN = 'AUTH_APPLICATION_SERVICE_TOKEN';
 
@@ -53,7 +51,9 @@ export class AuthApplicationService implements IAuthApplicationService {
         private readonly _assetService: IAssetService,
     ) {}
 
-    async googleLogin(payload?: GoogleLoginPayloadDTO): Promise<AccountDTO> {
+    public async googleLogin(
+        payload?: GoogleLoginPayloadDTO,
+    ): Promise<AccountDTO> {
         const account = AccountEntity.create({
             email: payload.email,
             provider: ACCOUNT_PROVIDER.GOOGLE,
@@ -71,7 +71,7 @@ export class AuthApplicationService implements IAuthApplicationService {
         return new AccountDTO(account);
     }
 
-    async localLogin(payload?: LoginPayloadDTO): Promise<AccountDTO> {
+    public async localLogin(payload?: LoginPayloadDTO): Promise<AccountDTO> {
         const account = AccountEntity.create({
             email: payload.email,
             password: payload.password,

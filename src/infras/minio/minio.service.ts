@@ -35,7 +35,7 @@ export class MinioService {
         return `${this._baseUrl}/${bucketName}/${objectName}`;
     }
 
-    async uploadFile(
+    public async uploadFile(
         fileBuffer: Buffer,
         fileName: string,
         fileSize: number,

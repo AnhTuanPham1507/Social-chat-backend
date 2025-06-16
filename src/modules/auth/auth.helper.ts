@@ -5,7 +5,7 @@ import { JwtService } from '@nestjs/jwt';
 export class AuthHelper {
     constructor(private readonly _jwtService: JwtService) {}
 
-    generatePairToken(payload: Record<string, any>): {
+    public generatePairToken(payload: Record<string, any>): {
         accessToken: string;
         refreshToken: string;
     } {

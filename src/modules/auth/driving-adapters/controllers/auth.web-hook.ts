@@ -19,7 +19,7 @@ export class AuthWebHook {
 
     @Get(ENDPOINT.WEB_HOOK.GOOGLE_REDIRECT)
     @UseGuards(GoogleOAuthGuard)
-    googleAuthRedirect(@Request() req, @Res() res: Response): void {
+    public googleAuthRedirect(@Request() req, @Res() res: Response): void {
         if (!req.user) {
             this.logger.error('User not found');
             res.status(401).json({ message: 'Unauthorized' });

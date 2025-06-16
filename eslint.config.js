@@ -18,9 +18,8 @@ export default [
             parser: tsParser,
             parserOptions: {
                 project: './tsconfig.json',
-                sourceType: 'module',
             },
-            ecmaVersion: 2022,
+            ecmaVersion: 2017,
             globals: {
                 node: true,
                 jest: true,

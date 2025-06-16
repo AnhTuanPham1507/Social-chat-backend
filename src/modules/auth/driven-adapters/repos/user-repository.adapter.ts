@@ -7,7 +7,7 @@ import { Injectable, InternalServerErrorException } from '@nestjs/common';
 export class UserRepo implements IUserRepository {
     constructor(private _userRepo: PostgresUserRepository) {}
 
-    async insert(user: UserEntity): Promise<void> {
+    public async insert(user: UserEntity): Promise<void> {
         const createdUser = await this._userRepo.insert({
             ...user.toObject(),
         });

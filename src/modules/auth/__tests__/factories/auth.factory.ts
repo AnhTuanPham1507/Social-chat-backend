@@ -1,3 +1,4 @@
+import { UUID } from '@beincom/domain';
 import { ASSET_TYPE } from '@modules/asset/domain/entities/asset/asset-type.value-object';
 import { AssetEntity } from '@modules/asset/domain/entities/asset/asset.entity';
 import { MIME_TYPE } from '@modules/asset/domain/entities/asset/mime-type.value-object';
@@ -11,10 +12,9 @@ import AccountDTO from '@modules/auth/driving-adapters/dtos/account.dto';
 import { GoogleLoginPayloadDTO } from '@modules/auth/driving-adapters/dtos/google-login-payload.dto';
 import { LoginPayloadDTO } from '@modules/auth/driving-adapters/dtos/login-payload.dto';
 import RegisterPayloadDTO from '@modules/auth/driving-adapters/dtos/register-payload.dto';
-import { UUID } from '@beincom/domain';
 
 export class AuthTestFactory {
-    static createLoginPayload(
+    public static createLoginPayload(
         overrides?: Partial<LoginPayloadDTO>,
     ): LoginPayloadDTO {
         return {
@@ -24,7 +24,7 @@ export class AuthTestFactory {
         };
     }
 
-    static createRegisterPayload(
+    public static createRegisterPayload(
         overrides?: Partial<RegisterPayloadDTO>,
     ): RegisterPayloadDTO {
         return {
@@ -38,7 +38,7 @@ export class AuthTestFactory {
         };
     }
 
-    static createGoogleLoginPayload(
+    public static createGoogleLoginPayload(
         overrides?: Partial<GoogleLoginPayloadDTO>,
     ): GoogleLoginPayloadDTO {
         return {
@@ -50,7 +50,7 @@ export class AuthTestFactory {
         };
     }
 
-    static createAssetPayload(
+    public static createAssetPayload(
         overrides?: Partial<CreateAssetPayloadDTO>,
     ): CreateAssetPayloadDTO {
         return {
@@ -63,7 +63,7 @@ export class AuthTestFactory {
         };
     }
 
-    static createMockFile(
+    public static createMockFile(
         overrides?: Partial<Express.Multer.File>,
     ): Express.Multer.File {
         return {
@@ -81,7 +81,7 @@ export class AuthTestFactory {
         } as Express.Multer.File;
     }
 
-    static createMockAccountEntity(overrides?: any): AccountEntity {
+    public static createMockAccountEntity(overrides?: any): AccountEntity {
         return AccountEntity.create({
             id: UUID.generate(),
             email: 'test@example.com',
@@ -92,7 +92,7 @@ export class AuthTestFactory {
         });
     }
 
-    static createMockUserEntity(overrides?: any): UserEntity {
+    public static createMockUserEntity(overrides?: any): UserEntity {
         return UserEntity.create({
             id: UUID.generate(),
             fullName: 'Test User',
@@ -103,7 +103,7 @@ export class AuthTestFactory {
         });
     }
 
-    static createMockAssetEntity(overrides?: any): AssetEntity {
+    public static createMockAssetEntity(overrides?: any): AssetEntity {
         return AssetEntity.create({
             id: UUID.generate(),
             url: 'https://example.com/avatar.jpg',
@@ -115,12 +115,12 @@ export class AuthTestFactory {
         });
     }
 
-    static createAccountDTO(overrides?: Partial<AccountDTO>): AccountDTO {
+    public static createAccountDTO(): AccountDTO {
         const mockAccount = this.createMockAccountEntity();
         return new AccountDTO(mockAccount);
     }
 
-    static createMockRequest(): any {
+    public static createMockRequest(): any {
         return {
             user: {
                 id: UUID.generate(),
@@ -132,7 +132,7 @@ export class AuthTestFactory {
         };
     }
 
-    static createMockResponse(): any {
+    public static createMockResponse(): any {
         const res = {
             cookie: jest.fn().mockReturnThis(),
             json: jest.fn().mockReturnThis(),

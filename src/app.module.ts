@@ -3,6 +3,7 @@ import { randomUUID } from 'crypto';
 import { REQ_ID_HEADER } from '@commons/constants/app.const';
 import { LogModule } from '@infras/log/log.module';
 import { MinioModule } from '@infras/minio/minio.module';
+import { PostgresModule } from '@infras/postgres/postgres.module';
 import { AssetModule } from '@modules/asset/asset.module';
 import { Module } from '@nestjs/common/decorators';
 import { ConfigModule } from '@nestjs/config';
@@ -10,7 +11,6 @@ import { ClsModule } from 'nestjs-cls';
 
 import { configs } from './configs';
 import { AuthModule } from './modules/auth/auth.module';
-import { PostgresModule } from '@infras/postgres/postgres.module';
 
 @Module({
     imports: [

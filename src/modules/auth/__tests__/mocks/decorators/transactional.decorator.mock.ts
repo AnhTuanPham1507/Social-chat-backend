@@ -35,10 +35,7 @@ export function MockTransactional(options?: { shouldFail?: boolean }) {
             const transactionId = `${target.constructor.name}.${propertyKey}:${Date.now()}`;
             TransactionMockState.activeTransactions.push(transactionId);
 
-            console.log(
-                `[MOCK TRANSACTION] Starting transaction: ${transactionId}`,
-            );
-
+            // Transaction started - tracking in state
             try {
                 // Check if this specific transaction should fail or if global failure is set
                 const shouldFailTransaction =
@@ -50,18 +47,13 @@ export function MockTransactional(options?: { shouldFail?: boolean }) {
                 if (shouldFailTransaction) {
                     // Simulate transaction failure
                     TransactionMockState.failedTransactions.push(transactionId);
-                    console.log(
-                        `[MOCK TRANSACTION] Rolling back transaction: ${transactionId}`,
-                    );
+                    // Transaction rolled back
                     throw new Error(
                         `Transaction ${transactionId} rolled back (simulated)`,
                     );
                 }
 
                 // Transaction succeeded
-                console.log(
-                    `[MOCK TRANSACTION] Committing transaction: ${transactionId}`,
-                );
                 TransactionMockState.completedTransactions.push(transactionId);
                 return result;
             } catch (error) {
@@ -71,9 +63,6 @@ export function MockTransactional(options?: { shouldFail?: boolean }) {
                 }
 
                 // Otherwise, handle original method errors
-                console.log(
-                    `[MOCK TRANSACTION] Error in transaction ${transactionId}: ${error.message}`,
-                );
                 TransactionMockState.failedTransactions.push(transactionId);
                 throw error;
             } finally {
@@ -116,7 +105,7 @@ export function setupTransactionalMock() {
         addTransactionalDataSource: jest.fn(),
 
         // Mock the Transactional decorator using our enhanced implementation
-        Transactional: (options?: any) => {
+        Transactional: () => {
             return function (
                 target: any,
                 propertyKey: string,

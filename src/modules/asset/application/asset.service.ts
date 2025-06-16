@@ -25,7 +25,9 @@ export class AssetService implements IAssetService {
         private readonly assetRepository: IAssetRepository,
     ) {}
 
-    async createAsset(payload: CreateAssetPayloadDTO): Promise<AssetEntity> {
+    public async createAsset(
+        payload: CreateAssetPayloadDTO,
+    ): Promise<AssetEntity> {
         const url = await this.uploadFileService.uploadFile({
             fileBuffer: payload.fileBuffer,
             fileName: payload.fileName,

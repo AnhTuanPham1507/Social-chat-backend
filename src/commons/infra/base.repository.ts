@@ -10,7 +10,7 @@ export abstract class BaseRepo<T> implements IRepo<T> {
         this.repo = repo;
     }
 
-    async findOne(query: FindOptionsWhere<T>): Promise<T | null> {
+    public async findOne(query: FindOptionsWhere<T>): Promise<T | null> {
         return (
             (await this.repo.findOne({
                 where: query,
@@ -18,7 +18,7 @@ export abstract class BaseRepo<T> implements IRepo<T> {
         );
     }
 
-    async exists(
+    public async exists(
         t: Record<string, any>,
         fieldNames: string[],
     ): Promise<boolean> {
@@ -44,7 +44,7 @@ export abstract class BaseRepo<T> implements IRepo<T> {
         return isExisted;
     }
 
-    async insert(t: Partial<T>): Promise<Record<string, any> | null> {
+    public async insert(t: Partial<T>): Promise<Record<string, any> | null> {
         const createdRow = await this.repo.insert(t as any);
 
         return createdRow.generatedMaps[0];

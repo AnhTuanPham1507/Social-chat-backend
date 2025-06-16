@@ -11,7 +11,7 @@ export const MINIO_CLIENT_TOKEN = 'MINIO_INJECT_TOKEN';
 export const MinioClientProvider: Provider = {
     inject: [ConfigService],
     provide: MINIO_CLIENT_TOKEN,
-    useFactory: async (configService: ConfigService): Promise<Minio.Client> => {
+    useFactory: (configService: ConfigService): Minio.Client => {
         const minioConfig = configService.get<IMinioConfig>(MINIO_CONFIG);
 
         const client = new Minio.Client({

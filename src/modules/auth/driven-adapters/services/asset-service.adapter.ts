@@ -10,7 +10,9 @@ import { Injectable } from '@nestjs/common';
 export class AssetServiceAdapter implements IAssetService {
     constructor(private readonly _assetService: AssetService) {}
 
-    async createAsset(payload: CreateAssetPayloadDTO): Promise<AssetEntity> {
+    public async createAsset(
+        payload: CreateAssetPayloadDTO,
+    ): Promise<AssetEntity> {
         return this._assetService.createAsset(payload);
     }
 }

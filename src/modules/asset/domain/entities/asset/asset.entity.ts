@@ -40,7 +40,7 @@ export interface ICreateAssetProps {
 export class AssetEntity extends Entity<UUID, IAssetProps> {
     protected _id: UUID;
 
-    validate(): void | never {
+    public validate(): void | never {
         // throw new Error('Method not implemented.');
     }
 
@@ -78,7 +78,7 @@ export class AssetEntity extends Entity<UUID, IAssetProps> {
         });
     }
 
-    static fromRaw(raw: any) {
+    public static fromRaw(raw: any) {
         return new AssetEntity({
             id: new UUID(raw.id),
             props: {

@@ -3,7 +3,7 @@ describe('AuthController (Simplified)', () => {
     class MockAuthController {
         constructor(private authService: any) {}
 
-        login(req: any, res: any): void {
+        public login(req: any, res: any): void {
             const { user } = req;
 
             if (user?.accessToken) {
@@ -27,11 +27,11 @@ describe('AuthController (Simplified)', () => {
             res.json({ message: 'Đăng nhập thành công' });
         }
 
-        googleAuth(): void {
+        public googleAuth(): void {
             // OAuth initiation - no return value
         }
 
-        async register(req: any, avatar: any): Promise<any> {
+        public register(req: any, avatar: any): Promise<any> {
             if (!avatar) {
                 throw new Error('Avatar is required');
             }

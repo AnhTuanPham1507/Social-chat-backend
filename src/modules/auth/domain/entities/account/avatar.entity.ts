@@ -23,7 +23,7 @@ export interface ICreateAvatarProps {
 export class AvatarEntity extends Entity<UUID, IAvatarProps> {
     protected _id: UUID;
 
-    validate(): void | never {
+    public validate(): void | never {
         // throw new Error('Method not implemented.');
     }
 
@@ -35,7 +35,7 @@ export class AvatarEntity extends Entity<UUID, IAvatarProps> {
         return this._props['url'];
     }
 
-    static create(props: ICreateAvatarProps) {
+    public static create(props: ICreateAvatarProps) {
         return new AvatarEntity({
             id: props.id ? new UUID(props.id) : UUID.generate(),
             props: {
@@ -58,7 +58,7 @@ export class AvatarEntity extends Entity<UUID, IAvatarProps> {
         });
     }
 
-    static fromRaw(raw: any) {
+    public static fromRaw(raw: any) {
         return new AvatarEntity({
             id: new UUID(raw.id),
             props: {

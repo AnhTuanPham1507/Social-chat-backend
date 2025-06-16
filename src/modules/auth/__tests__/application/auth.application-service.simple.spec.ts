@@ -1,5 +1,3 @@
-import { Test, TestingModule } from '@nestjs/testing';
-
 // Mock dependencies
 const mockAccountRepository = {
     findOne: jest.fn(),
@@ -28,7 +26,7 @@ class MockAuthApplicationService {
         private assetService = mockAssetService,
     ) {}
 
-    async localLogin(payload: any): Promise<any> {
+    public async localLogin(payload: any): Promise<any> {
         const foundAccount = await this.accountRepo.findOne({
             email: payload.email,
             provider: 'LOCAL',
@@ -50,7 +48,7 @@ class MockAuthApplicationService {
         return { id: 'test-id', email: payload.email };
     }
 
-    async googleLogin(payload: any): Promise<any> {
+    public async googleLogin(payload: any): Promise<any> {
         const foundAccount = await this.accountRepo.findOne({
             email: payload.email,
             provider: 'GOOGLE',
@@ -70,8 +68,8 @@ class MockAuthApplicationService {
         return newAccount;
     }
 
-    async register(payload: any): Promise<void> {
-        const asset = await this.assetService.createAsset(payload.avatar);
+    public async register(payload: any): Promise<void> {
+        await this.assetService.createAsset(payload.avatar);
         const hashedPassword = mockHashUtil.generateHash(payload.password);
 
         const user = {

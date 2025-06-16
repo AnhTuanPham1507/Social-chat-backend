@@ -7,7 +7,7 @@ import { Injectable, InternalServerErrorException } from '@nestjs/common';
 export class AssetRepo implements IAssetRepository {
     constructor(private _assetRepo: PostgresAssetRepository) {}
 
-    async insert(asset: AssetEntity): Promise<void> {
+    public async insert(asset: AssetEntity): Promise<void> {
         const createdAsset = await this._assetRepo.insert({
             ...asset.toObject(),
         });

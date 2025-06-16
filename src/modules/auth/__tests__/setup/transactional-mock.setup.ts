@@ -35,7 +35,7 @@ jest.mock('typeorm-transactional', () => {
         addTransactionalDataSource: jest.fn(),
 
         // Mock the Transactional decorator with rollback support
-        Transactional: (options?: any) => {
+        Transactional: () => {
             return function (
                 target: any,
                 propertyKey: string,

@@ -33,7 +33,7 @@ export interface ICreateUserProps {
 export class UserEntity extends Entity<UUID, IUserProps> {
     protected _id: UUID;
 
-    validate(): void | never {
+    public validate(): void | never {
         // throw new Error('Method not implemented.');
     }
 
@@ -41,7 +41,7 @@ export class UserEntity extends Entity<UUID, IUserProps> {
         super(props);
     }
 
-    static create(props: ICreateUserProps) {
+    public static create(props: ICreateUserProps) {
         return new UserEntity({
             id: props.id ? new UUID(props.id) : UUID.generate(),
             props: {
@@ -66,7 +66,7 @@ export class UserEntity extends Entity<UUID, IUserProps> {
         });
     }
 
-    static fromRaw(raw: any) {
+    public static fromRaw(raw: any) {
         return new UserEntity({
             id: new UUID(raw.id),
             props: {

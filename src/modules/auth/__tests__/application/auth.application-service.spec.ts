@@ -1,28 +1,29 @@
 import { Test, TestingModule } from '@nestjs/testing';
+
+import * as hashUtil from '../../../../commons/utils/hash.util';
+import { AssetEntity } from '../../../../modules/asset/domain/entities/asset/asset.entity';
 import { AuthApplicationService } from '../../application/application-services/auth.application-service';
 import {
     ACCOUNT_REPO_TOKEN,
     IAccountRepository,
 } from '../../application/contracts/account-repository.contract';
 import {
-    USER_REPO_TOKEN,
-    IUserRepository,
-} from '../../application/contracts/user-repository.contract';
-import {
     ASSET_SERVICE_TOKEN,
     IAssetService,
 } from '../../application/contracts/asset-service.contract';
 import {
+    USER_REPO_TOKEN,
+    IUserRepository,
+} from '../../application/contracts/user-repository.contract';
+import {
     AccountNotFoundException,
     InvalidCredentialsException,
 } from '../../application/exceptions/auth.exception';
+import { ACCOUNT_PROVIDER } from '../../domain/entities/account/account-provider.value-object';
 import { AuthTestFactory } from '../factories/auth.factory';
 import { createMockAccountRepository } from '../mocks/repositories/account.repository.mock';
 import { createMockUserRepository } from '../mocks/repositories/user.repository.mock';
 import { createMockAssetService } from '../mocks/services/asset.service.mock';
-import * as hashUtil from '../../../../commons/utils/hash.util';
-import { ACCOUNT_PROVIDER } from '../../domain/entities/account/account-provider.value-object';
-import { AssetEntity } from '../../../../modules/asset/domain/entities/asset/asset.entity';
 
 // Mock hash utility functions
 jest.mock('../../../../commons/utils/hash.util', () => ({

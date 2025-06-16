@@ -61,7 +61,7 @@ export class AuthController {
     @ApiInternalServerErrorResponse({
         description: 'Xảy ra lỗi không xác thực',
     })
-    login(@Request() req, @Res() res: Response): void {
+    public login(@Request() req, @Res() res: Response): void {
         res.cookie('accessToken', req.user.accessToken, {
             httpOnly: true, // Ensures the cookie is not accessible via JavaScript
             secure: process.env.NODE_ENV === 'production', // Ensures the cookie is sent only over HTTPS in production
@@ -81,7 +81,7 @@ export class AuthController {
 
     @Get(ENDPOINT.AUTH.GOOGLE_LOGIN)
     @UseGuards(GoogleOAuthGuard)
-    googleAuth() {}
+    public googleAuth() {}
 
     @Post(ENDPOINT.AUTH.REGISTER)
     @ApiConsumes('multipart/form-data')
@@ -89,7 +89,7 @@ export class AuthController {
         type: RegisterPayloadDTO,
     })
     @UseInterceptors(FileInterceptor('avatar'))
-    async register(
+    public async register(
         @Request() req,
         @UploadedFile() avatar: Express.Multer.File,
     ) {

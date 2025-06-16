@@ -1,6 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { AuthWebHook } from '../../driving-adapters/controllers/auth.web-hook';
+
 import { GoogleOAuthGuard } from '../../../../commons/guards/google.guard';
+import { AuthWebHook } from '../../driving-adapters/controllers/auth.web-hook';
 import { AuthTestFactory } from '../factories/auth.factory';
 import { createMockGoogleOAuthGuard } from '../mocks/guards/google-oauth.guard.mock';
 

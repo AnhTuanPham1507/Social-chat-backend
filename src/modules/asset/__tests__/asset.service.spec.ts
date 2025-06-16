@@ -1,5 +1,4 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { TestHelpers } from '../../../../test/utils/test-helpers';
 
 describe('Asset Module Tests', () => {
     let module: TestingModule;

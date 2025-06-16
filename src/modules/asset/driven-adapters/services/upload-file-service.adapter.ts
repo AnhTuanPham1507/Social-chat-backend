@@ -8,7 +8,7 @@ import { IUploadFileService } from '../../application/contracts/upload-file-serv
 export class UploadFileService implements IUploadFileService {
     constructor(private readonly minioService: MinioService) {}
 
-    uploadFile(payload: {
+    public uploadFile(payload: {
         fileBuffer: Buffer;
         fileName: string;
         fileSize: number;
