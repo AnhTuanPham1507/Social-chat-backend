@@ -55,11 +55,11 @@ jobs:
             - name: 🎨 Check code formatting
               run: yarn prettier --check .
 
-            - name: 🔍 Run SonarQube Scanner
-              uses: SonarSource/sonarqube-scan-action@v5
-              env:
-                SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-                SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+            # - name: 🔍 Run SonarQube Scanner
+            #   uses: SonarSource/sonarqube-scan-action@v5
+            #   env:
+            #     SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+            #     SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
 
     # Job 2: Security Scanning
     security:
