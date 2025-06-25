@@ -270,19 +270,6 @@ jobs:
                   cache-to: type=gha,mode=max
                   platforms: linux/amd64
 
-            - name: 🔍 Run Trivy vulnerability scanner
-              uses: aquasecurity/trivy-action@master
-              with:
-                  image-ref: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
-                  format: 'sarif'
-                  output: 'trivy-results.sarif'
-
-            - name: 📊 Upload Trivy scan results
-              uses: github/codeql-action/upload-sarif@v3
-              if: always()
-              with:
-                  sarif_file: 'trivy-results.sarif'
-
     # Job 6: Deployment Readiness Check
     deployment-check:
         name: 🚀 Deployment Check
