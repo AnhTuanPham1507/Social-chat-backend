@@ -1,0 +1,51 @@
+# =================================================================
+# CONFIGMAP CONFIGURATION
+# =================================================================
+# ConfigMaps store non-sensitive configuration data in key-value pairs
+# This replaces environment variables from docker-compose.yml
+# =================================================================
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: app-config
+  namespace: social-chat
+  labels:
+    app: social-chat-backend
+    component: configuration
+  annotations:
+    description: "Non-sensitive configuration for Social Chat Backend"
+    tutorial: "ConfigMaps are used for configuration that doesn't contain secrets"
+data:
+  # Application Configuration
+  APP_PORT: "3000"
+  APP_ENV: "development"
+  
+  # JWT Configuration (non-sensitive parts)
+  JWT_TOKEN_EXPIRE: "15m"
+  JWT_REFRESH_TOKEN_EXPIRE: "3d"
+  
+  # Database Configuration (non-sensitive)
+  # NOTE: In Kubernetes, services communicate via DNS names
+  # Format: <service-name>.<namespace>.svc.cluster.local
+  # Short form: <service-name> (when in same namespace)
+  DB_HOST: "postgres-service"  # This will resolve to the PostgreSQL service
+  DB_PORT: "5432"
+  DB_USERNAME: "postgres"
+  DB_DATABASE: "social-chat-db"
+  
+  # Google OAuth Configuration (non-sensitive)
+  GOOGLE_CLIENT_ID: "1094278495089-bhbpvmseeiadev94mjt4h1207n3n1leu.apps.googleusercontent.com"
+  GOOGLE_CALLBACK_URL: "http://localhost:3000/api/v1/auth/login/google/redirect"
+  
+  # MinIO Configuration (non-sensitive)
+  MINIO_URL: "minio-service"  # Service name for internal communication
+  MINIO_PORT: "9000"
+  
+  # Redis Configuration
+  REDIS_HOST: "redis-service"
+  REDIS_PORT: "6379"
+  
+  # Kafka Configuration
+  KAFKA_BROKERS: "kafka-service:9092"
+  KAFKA_CLIENT_ID: "social-chat-backend" 

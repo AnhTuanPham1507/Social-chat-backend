@@ -24,7 +24,7 @@ test/
 Each module should have its own `__tests__` directory:
 
 ```
-src/modules/[module-name]/
+@modules/[module-name]/
 ├── __tests__/
 │   ├── controllers/         # Controller tests
 │   ├── application/         # Application service tests
@@ -51,7 +51,7 @@ Runs both unit tests and E2E tests with unified coverage reporting.
 npm run test:unit
 ```
 
-Runs all unit tests from `src/modules/**/__tests__/` directories.
+Runs all unit tests from `@modules/**/__tests__/` directories.
 
 ### Run E2E Tests Only
 
@@ -84,7 +84,7 @@ Runs all tests with coverage reporting. Coverage reports are generated in the `c
 Create test files in the module's `__tests__` directory:
 
 ```typescript
-// src/modules/auth/__tests__/auth.service.spec.ts
+// @modules/auth/__tests__/auth.service.spec.ts
 import { Test, TestingModule } from '@nestjs/testing';
 import { TestHelpers } from '../../../../test/utils/test-helpers';
 
@@ -176,8 +176,8 @@ const testString = TestHelpers.generateRandomString(10);
 
 Tests can use the following path mappings:
 
-- `@modules/*` - Maps to `src/modules/*`
-- `@commons/*` - Maps to `src/commons/*`
+- `@modules/*` - Maps to `@modules/*`
+- `@common/*` - Maps to `src/commons/*`
 - `@configs/*` - Maps to `src/configs/*`
 - `@infras/*` - Maps to `src/infras/*`
 - `@test/*` - Maps to `test/*`

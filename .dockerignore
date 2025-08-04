@@ -57,10 +57,7 @@ jspm_packages/
 .yarn-integrity
 
 # dotenv environment variables file
-.env
-.env.test
-.env.local
-.env.production
+env/
 
 # parcel-bundler cache
 .cache
@@ -71,7 +68,6 @@ jspm_packages/
 
 # Nuxt.js build / generate output
 .nuxt
-dist
 
 # Gatsby files
 .cache/
@@ -128,11 +124,7 @@ test/
 *.test.js
 *.spec.js
 
-# Development files
-src/
-tsconfig.json
-tsconfig.build.json
+# Development files (but keep necessary build files)
 .eslintrc.js
 .prettierrc
-.editorconfig
-nest-cli.json 
+.editorconfig 

@@ -1,0 +1,193 @@
+# =================================================================
+# KAFKA MESSAGE BROKER CONFIGURATION
+# =================================================================
+# Kafka provides reliable message streaming for the application
+# =================================================================
+
+# Kafka Deployment
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kafka
+  namespace: social-chat
+  labels:
+    app: kafka
+    component: message-broker
+  annotations:
+    description: "Kafka message broker for Social Chat Backend"
+    tutorial: "Kafka handles event streaming and messaging"
+spec:
+  replicas: 1  # Single node Kafka for development
+  selector:
+    matchLabels:
+      app: kafka
+  template:
+    metadata:
+      labels:
+        app: kafka
+        component: message-broker
+    spec:
+      containers:
+      - name: kafka
+        image: apache/kafka:3.8.0
+        ports:
+        - containerPort: 9092
+          name: kafka-port
+        - containerPort: 9093
+          name: controller-port
+        
+        env:
+        # Kafka Node Configuration
+        - name: KAFKA_NODE_ID
+          value: "1"
+        - name: KAFKA_PROCESS_ROLES
+          value: "broker,controller"
+        - name: KAFKA_CONTROLLER_QUORUM_VOTERS
+          value: "1@kafka-service:9093"
+        
+        # Kafka Listeners
+        - name: KAFKA_LISTENERS
+          value: "PLAINTEXT://0.0.0.0:9092,CONTROLLER://kafka-service:9093"
+        - name: KAFKA_ADVERTISED_LISTENERS
+          value: "PLAINTEXT://kafka-service:9092"
+        - name: KAFKA_LISTENER_SECURITY_PROTOCOL_MAP
+          value: "CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT"
+        - name: KAFKA_CONTROLLER_LISTENER_NAMES
+          value: "CONTROLLER"
+        - name: KAFKA_INTER_BROKER_LISTENER_NAME
+          value: "PLAINTEXT"
+        
+        # Cluster and Replication Settings
+        - name: CLUSTER_ID
+          value: "60erjLglS-eH86jbwVrXbg"
+        - name: KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR
+          value: "1"
+        - name: KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR
+          value: "1"
+        - name: KAFKA_TRANSACTION_STATE_LOG_MIN_ISR
+          value: "1"
+        - name: KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS
+          value: "0"
+        
+        # Topic Configuration
+        - name: KAFKA_AUTO_CREATE_TOPICS_ENABLE
+          value: "true"
+        - name: KAFKA_NUM_PARTITIONS
+          value: "3"
+        
+        # Message Size Limits
+        - name: KAFKA_MESSAGE_MAX_BYTES
+          value: "10485760"
+        - name: KAFKA_REPLICA_FETCH_MAX_BYTES
+          value: "10485760"
+        - name: KAFKA_LOG_SEGMENT_BYTES
+          value: "1073741824"
+        - name: KAFKA_SOCKET_REQUEST_MAX_BYTES
+          value: "104857600"
+        
+        # Storage and Performance Configuration
+        - name: KAFKA_LOG_DIRS
+          value: "/var/lib/kafka/data"
+        - name: KAFKA_HEAP_OPTS
+          value: "-Xmx1024m -Xms1024m"
+        - name: KAFKA_JVM_PERFORMANCE_OPTS
+          value: "-server -XX:+UseG1GC -XX:MaxGCPauseMillis=20 -XX:InitiatingHeapOccupancyPercent=35"
+        
+        resources:
+          requests:
+            memory: "768Mi"
+            cpu: "500m"
+          limits:
+            memory: "1.5Gi"
+            cpu: "800m"
+        
+        volumeMounts:
+        - name: kafka-storage
+          mountPath: /var/lib/kafka/data
+        
+        # Health checks
+        livenessProbe:
+          exec:
+            command:
+            - /bin/bash
+            - -c
+            - "kafka-broker-api-versions.sh --bootstrap-server localhost:9092 --timeout 5000 > /dev/null 2>&1"
+          initialDelaySeconds: 90
+          periodSeconds: 30
+          timeoutSeconds: 15
+          failureThreshold: 3
+        
+        readinessProbe:
+          exec:
+            command:
+            - /bin/bash
+            - -c
+            - "kafka-broker-api-versions.sh --bootstrap-server localhost:9092 --timeout 5000 > /dev/null 2>&1"
+          initialDelaySeconds: 45
+          periodSeconds: 15
+          timeoutSeconds: 10
+          failureThreshold: 3
+      
+      volumes:
+      - name: kafka-storage
+        persistentVolumeClaim:
+          claimName: kafka-pvc
+
+# Kafka Service
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: kafka-service
+  namespace: social-chat
+  labels:
+    app: kafka
+    component: message-broker
+  annotations:
+    description: "Service endpoint for Kafka message broker"
+    tutorial: "Internal service for Kafka messaging"
+spec:
+  type: ClusterIP
+  ports:
+  - port: 9092
+    targetPort: 9092
+    protocol: TCP
+    name: kafka
+  - port: 9093
+    targetPort: 9093
+    protocol: TCP
+    name: controller
+  selector:
+    app: kafka
+
+# =================================================================
+# KAFKA CONCEPTS FOR BEGINNERS
+# =================================================================
+#
+# 1. Kafka Architecture:
+#    - Brokers: Server instances that store and serve data
+#    - Topics: Categories of messages
+#    - Partitions: Subdivisions of topics for parallelism
+#    - Controllers: Manage cluster metadata
+#
+# 2. KRaft Mode:
+#    - New Kafka without Zookeeper dependency
+#    - Controller and broker roles combined
+#    - Simpler deployment and management
+#
+# 3. Configuration Highlights:
+#    - Single node setup (NODE_ID=1)
+#    - Auto-create topics enabled
+#    - Replication factor=1 (development)
+#    - 3 partitions per topic by default
+#
+# 4. Connection from Application:
+#    - Bootstrap servers: kafka-service:9092
+#    - Use KafkaJS client library
+#
+# TROUBLESHOOTING COMMANDS:
+# - kubectl exec -it kafka-<pod-id> -n social-chat -- kafka-topics.sh --bootstrap-server localhost:9092 --list
+# - kubectl exec -it kafka-<pod-id> -n social-chat -- kafka-console-consumer.sh --bootstrap-server localhost:9092 --topic <topic-name> --from-beginning
+# - kubectl logs kafka-<pod-id> -n social-chat
+# ================================================================= 

@@ -16,8 +16,8 @@ import { UserRepo } from './driven-adapters/repos/user-repository.adapter';
 import { AssetServiceAdapter } from './driven-adapters/services/asset-service.adapter';
 import { AuthController } from './driving-adapters/controllers/auth.controller';
 import { AuthWebHook } from './driving-adapters/controllers/auth.web-hook';
-import { GoogleStrategy } from './driving-adapters/strategies/google.strategy';
-import { LocalStrategy } from './driving-adapters/strategies/local.strategy';
+import { GoogleStrategy } from './strategies/google.strategy';
+import { LocalStrategy } from './strategies/local.strategy';
 
 @Module({
     imports: [

@@ -1,7 +1,7 @@
 import { MinioModule } from '@infras/minio/minio.module';
 import { Module } from '@nestjs/common';
 
-import { LocalGuard } from '../../commons/guards/local.guard';
+import { LocalGuard } from '../../common/guards/local.guard';
 
 import { AssetService } from './application/asset.service';
 import { ASSET_REPO_TOKEN } from './application/contracts/asset-repository.contract';

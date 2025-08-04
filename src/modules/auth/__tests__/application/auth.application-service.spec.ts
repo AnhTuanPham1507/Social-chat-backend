@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 
-import * as hashUtil from '../../../../commons/utils/hash.util';
+import * as hashUtil from '../../../../common/utils/hash.util';
 import { AssetEntity } from '../../../../modules/asset/domain/entities/asset/asset.entity';
 import { AuthApplicationService } from '../../application/application-services/auth.application-service';
 import {

@@ -6,7 +6,7 @@ import {
     UpdatedAt,
     UUID,
 } from '@beincom/domain';
-import { URL } from '@commons/core/value-objects/url.value-object';
+import { URL } from '@common/core/value-objects/url.value-object';
 
 interface IAvatarProps {
     url?: URL;

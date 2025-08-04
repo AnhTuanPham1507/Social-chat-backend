@@ -1,0 +1,141 @@
+# =================================================================
+# REDIS CACHE CONFIGURATION
+# =================================================================
+# Redis provides high-performance caching for the application
+# =================================================================
+
+# Redis Deployment
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: redis
+  namespace: social-chat
+  labels:
+    app: redis
+    component: cache
+  annotations:
+    description: "Redis cache for Social Chat Backend"
+    tutorial: "Redis provides fast in-memory data storage"
+spec:
+  replicas: 1  # Redis single instance for development
+  selector:
+    matchLabels:
+      app: redis
+  template:
+    metadata:
+      labels:
+        app: redis
+        component: cache
+    spec:
+      containers:
+      - name: redis
+        image: redis:7.2.5-alpine
+        ports:
+        - containerPort: 6379
+          name: redis-port
+        
+        # Redis with password authentication
+        command:
+        - redis-server
+        - --requirepass
+        - $(REDIS_PASSWORD)
+        
+        env:
+        - name: REDIS_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: app-secrets
+              key: REDIS_PASSWORD
+        
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "100m"
+          limits:
+            memory: "512Mi"
+            cpu: "300m"
+        
+        volumeMounts:
+        - name: redis-storage
+          mountPath: /data
+        
+        # Health checks for Redis
+        livenessProbe:
+          exec:
+            command:
+            - redis-cli
+            - --no-auth-warning
+            - -a
+            - $(REDIS_PASSWORD)
+            - ping
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        
+        readinessProbe:
+          exec:
+            command:
+            - redis-cli
+            - --no-auth-warning
+            - -a
+            - $(REDIS_PASSWORD)
+            - ping
+          initialDelaySeconds: 5
+          periodSeconds: 5
+          timeoutSeconds: 3
+          failureThreshold: 3
+      
+      volumes:
+      - name: redis-storage
+        persistentVolumeClaim:
+          claimName: redis-pvc
+
+# Redis Service
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: redis-service
+  namespace: social-chat
+  labels:
+    app: redis
+    component: cache
+  annotations:
+    description: "Service endpoint for Redis cache"
+    tutorial: "Internal service for Redis access"
+spec:
+  type: ClusterIP
+  ports:
+  - port: 6379
+    targetPort: 6379
+    protocol: TCP
+    name: redis
+  selector:
+    app: redis
+
+# =================================================================
+# REDIS CONCEPTS FOR BEGINNERS
+# =================================================================
+#
+# 1. Redis Use Cases:
+#    - Session storage
+#    - Application caching
+#    - Temporary data storage
+#    - Message queuing (simple use cases)
+#
+# 2. Redis Configuration:
+#    - Runs as single instance (cluster setup is complex)
+#    - Password authentication enabled for security
+#    - Persistent storage for data durability
+#
+# 3. Connection from Application:
+#    - Host: redis-service
+#    - Port: 6379
+#    - Password: Retrieved from secret
+#
+# TROUBLESHOOTING COMMANDS:
+# - kubectl exec -it redis-<pod-id> -n social-chat -- redis-cli -a <password>
+# - kubectl logs redis-<pod-id> -n social-chat
+# ================================================================= 

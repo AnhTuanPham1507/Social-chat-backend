@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 
-import { GoogleOAuthGuard } from '../../../../commons/guards/google.guard';
-import { LocalGuard } from '../../../../commons/guards/local.guard';
+import { GoogleOAuthGuard } from '../../../../common/guards/google.guard';
+import { LocalGuard } from '../../../../common/guards/local.guard';
 import {
     AUTH_APPLICATION_SERVICE_TOKEN,
     IAuthApplicationService,

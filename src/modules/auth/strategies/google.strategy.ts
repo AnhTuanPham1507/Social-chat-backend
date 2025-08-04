@@ -1,14 +1,14 @@
-import {
-    AUTH_APPLICATION_SERVICE_TOKEN,
-    IAuthApplicationService,
-} from '@modules/auth/application/application-services/auth.application-service';
-import { GoogleLoginPayloadDTO } from '@modules/auth/driving-adapters/dtos/google-login-payload.dto';
 import { Inject, Injectable } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { Strategy } from 'passport-google-oauth20';
-import { ResponseLoginDTO } from 'src/modules/auth/driving-adapters/dtos/response-login.dto';
 
-import { AuthHelper } from '../../auth.helper';
+import {
+    AUTH_APPLICATION_SERVICE_TOKEN,
+    IAuthApplicationService,
+} from '../application/application-services/auth.application-service';
+import { AuthHelper } from '../auth.helper';
+import { GoogleLoginPayloadDTO } from '../driving-adapters/dtos/google-login-payload.dto';
+import { ResponseLoginDTO } from '../driving-adapters/dtos/response-login.dto';
 
 @Injectable()
 export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {

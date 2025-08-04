@@ -1,11 +1,6 @@
-import { GoogleOAuthGuard } from '@commons/guards/google.guard';
-import { LocalGuard } from '@commons/guards/local.guard';
+import { GoogleOAuthGuard } from '@common/guards/google.guard';
 import { MIME_TYPE } from '@modules/asset/domain/entities/asset/mime-type.value-object';
-import {
-    AUTH_APPLICATION_SERVICE_TOKEN,
-    IAuthApplicationService,
-} from '@modules/auth/application/application-services/auth.application-service';
-import ENDPOINT from '@modules/auth/constants/endpoint.constant';
+import { LoginPayloadDTO } from '@modules/auth/driving-adapters/dtos/login-payload.dto';
 import {
     Controller,
     Get,
@@ -30,8 +25,13 @@ import {
     ApiConsumes,
 } from '@nestjs/swagger';
 import { Response } from 'express';
-import { LoginPayloadDTO } from 'src/modules/auth/driving-adapters/dtos/login-payload.dto';
+import { LocalGuard } from 'src/common/guards/local.guard';
 
+import {
+    AUTH_APPLICATION_SERVICE_TOKEN,
+    IAuthApplicationService,
+} from '../../application/application-services/auth.application-service';
+import ENDPOINT from '../../constants/endpoint.constant';
 import RegisterPayloadDTO from '../dtos/register-payload.dto';
 
 @Controller(ENDPOINT.AUTH.BASE)

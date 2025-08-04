@@ -6,9 +6,9 @@ import {
     UpdatedAt,
     UUID,
 } from '@beincom/domain';
-import { Email } from '@commons/core/value-objects/email.value-object';
+import { Email } from '@common/core/value-objects/email.value-object';
 
-import { Phone } from '../../../../../commons/core/value-objects/phone.value-object';
+import { Phone } from '../../../../../common/core/value-objects/phone.value-object';
 
 import { USER_SEX, UserSex } from './user-sex.value-object';
 

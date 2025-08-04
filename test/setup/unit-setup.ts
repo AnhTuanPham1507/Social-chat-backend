@@ -1,5 +1,5 @@
 import 'reflect-metadata';
-import '../../src/modules/auth/__tests__/setup/transactional-mock.setup';
+import '@modules/auth/__tests__/setup/transactional-mock.setup';
 
 // Global test setup for unit tests
 beforeAll(async () => {

@@ -34,29 +34,58 @@ services:
         networks:
             - my-network
 
-    adminer:
-        image: adminer
-        restart: always
+    kafka:
+        image: apache/kafka:latest
+        container_name: kafka
+        environment:
+            KAFKA_NODE_ID: 1
+            KAFKA_PROCESS_ROLES: 'broker,controller'
+            KAFKA_CONTROLLER_QUORUM_VOTERS: '1@kafka:9093'
+            KAFKA_LISTENERS: 'PLAINTEXT://0.0.0.0:9092,CONTROLLER://kafka:9093'
+            KAFKA_ADVERTISED_LISTENERS: 'PLAINTEXT://kafka:9092'
+            KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: 'CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT'
+            KAFKA_CONTROLLER_LISTENER_NAMES: 'CONTROLLER'
+            KAFKA_INTER_BROKER_LISTENER_NAME: 'PLAINTEXT'
+            CLUSTER_ID: '60erjLglS-eH86jbwVrXbg'
+            KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+            KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+            KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+            KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+            KAFKA_AUTO_CREATE_TOPICS_ENABLE: 'true'
+            KAFKA_NUM_PARTITIONS: 3
+            # Message size limits (increase for larger messages)
+            KAFKA_MESSAGE_MAX_BYTES: 10485760
+            KAFKA_REPLICA_FETCH_MAX_BYTES: 10485760
+            KAFKA_LOG_SEGMENT_BYTES: 1073741824
+            # Connection settings
+            KAFKA_SOCKET_REQUEST_MAX_BYTES: 104857600
         ports:
-            - 8080:8080
+            - '9092:9092'
+            - '9093:9093'
+        volumes:
+            - kafka_data:/var/lib/kafka/data
+        healthcheck:
+            test: ["CMD-SHELL", "kafka-broker-api-versions.sh --bootstrap-server localhost:9092 > /dev/null 2>&1"]
+            interval: 10s
+            timeout: 10s
+            retries: 5
         networks:
             - my-network
 
-    rabbitmq:
-        image: rabbitmq:3-management
-        container_name: rabbitmq
-        environment:
-            RABBITMQ_DEFAULT_USER: rabbitmq
-            RABBITMQ_DEFAULT_PASS: rabbitmq
+    backend:
+        build:
+            context: .
+            dockerfile: Dockerfile
+        container_name: social-chat-backend
+        depends_on:
+            - postgres
+            - kafka
+            - cache
+            - minio
+        env_file:
+            - env/.container.env
         ports:
-            - '5672:5672' # AMQP port
-            - '15672:15672' # Management plugin port
-        volumes:
-            - rbmq_data:/var/lib/rabbitmq
-        command: >
-            sh -c "rabbitmq-plugins enable rabbitmq_management &&
-                    rabbitmq-plugins enable rabbitmq_prometheus &&
-                    rabbitmq-server"
+            - '3000:3000'
         networks:
             - my-network
 
@@ -84,7 +113,7 @@ services:
 volumes:
     cache:
     pg_data:
-    rbmq_data:
+    kafka_data:
     minio-data:
 
 networks:

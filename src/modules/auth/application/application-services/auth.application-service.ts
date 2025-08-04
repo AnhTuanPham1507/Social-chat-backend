@@ -1,4 +1,4 @@
-import { generateHash, validateHashString } from '@commons/utils/hash.util';
+import { generateHash, validateHashString } from '@common/utils/hash.util';
 import { ASSET_TYPE } from '@modules/asset/domain/entities/asset/asset-type.value-object';
 import { ACCOUNT_PROVIDER } from '@modules/auth/domain/entities/account/account-provider.value-object';
 import { AccountEntity } from '@modules/auth/domain/entities/account/account.entity';

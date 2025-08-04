@@ -12,8 +12,8 @@ module.exports = {
     },
     setupFilesAfterEnv: ['<rootDir>/test/setup/e2e-setup.ts'],
     moduleNameMapper: {
-        '^@modules/(.*)$': '<rootDir>/src/modules/$1',
-        '^@commons/(.*)$': '<rootDir>/src/commons/$1',
+        '^@modules/(.*)$': '<rootDir>/@modules/$1',
+        '^@common/(.*)$': '<rootDir>/src/commons/$1',
         '^@configs/(.*)$': '<rootDir>/src/configs/$1',
         '^@infras/(.*)$': '<rootDir>/src/infras/$1',
         '^@test/(.*)$': '<rootDir>/test/$1',

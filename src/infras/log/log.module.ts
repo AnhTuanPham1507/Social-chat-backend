@@ -1,6 +1,6 @@
 /* eslint-disable no-console */
 import { DomainException } from '@beincom/domain';
-import { HEADER_VERSIONING, REQ_ID_HEADER } from '@commons/constants/app.const';
+import { HEADER_VERSIONING, REQ_ID_HEADER } from '@common/constants/app.const';
 import { Global, Module } from '@nestjs/common/decorators';
 import { Request, Response } from 'express';
 import { ClsService } from 'nestjs-cls';

@@ -1,6 +1,6 @@
 import { randomUUID } from 'crypto';
 
-import { REQ_ID_HEADER } from '@commons/constants/app.const';
+import { REQ_ID_HEADER } from '@common/constants/app.const';
 import { LogModule } from '@infras/log/log.module';
 import { MinioModule } from '@infras/minio/minio.module';
 import { PostgresModule } from '@infras/postgres/postgres.module';
@@ -17,7 +17,7 @@ import { AuthModule } from './modules/auth/auth.module';
         ConfigModule.forRoot({
             isGlobal: true,
             cache: true,
-            envFilePath: `.env`,
+            envFilePath: `./env/.env`,
             load: [configs],
         }),
         ClsModule.forRoot({

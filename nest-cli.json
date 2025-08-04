@@ -5,10 +5,10 @@
     "compilerOptions": {
         "plugins": ["@nestjs/swagger/plugin"],
         "paths": {
-            "@commons/*": ["./src/commons/*", "./dist/src/commons/*"],
+            "@common/*": ["./src/commons/*", "./dist/src/commons/*"],
             "@configs/*": ["./src/configs/*", "./dist/src/configs/*"],
             "@infras/*": ["./src/infras/*", "./dist/src/infras/*"],
-            "@modules/*": ["./src/modules/*", "./dist/src/modules/*"]
+            "@modules/*": ["./@modules/*", "./dist/@modules/*"]
         }
     }
   }

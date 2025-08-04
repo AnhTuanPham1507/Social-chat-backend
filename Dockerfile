@@ -35,8 +35,8 @@ RUN yarn install --frozen-lockfile --production && yarn cache clean
 # Copy built application from builder stage
 COPY --from=builder --chown=nestjs:nodejs /app/dist ./dist
 
-# Copy any additional files needed at runtime
-COPY --chown=nestjs:nodejs .development.env ./
+# Copy any additional files needed at runtime (if they exist)
+COPY --chown=nestjs:nodejs package.json ./
 
 # Switch to non-root user
 USER nestjs
@@ -45,8 +45,8 @@ USER nestjs
 EXPOSE 3000
 
 # Health check
-HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-  CMD node dist/health-check.js || exit 1
+# HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+#   CMD node scripts/health-check.js || exit 1
 
 # Start the application
-CMD ["node", "dist/main.js"] 
+CMD ["node", "dist/src/main.js"] 

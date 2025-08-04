@@ -1,4 +1,4 @@
-import { GoogleOAuthGuard } from '@commons/guards/google.guard';
+import { GoogleOAuthGuard } from '@common/guards/google.guard';
 import ENDPOINT from '@modules/auth/constants/endpoint.constant';
 import {
     Controller,

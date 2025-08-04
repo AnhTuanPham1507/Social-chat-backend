@@ -1,4 +1,4 @@
-import { BaseException } from '@commons/core/base-exception.interface';
+import { BaseException } from '@common/core/base-exception.interface';
 
 export class AccountNotFoundException extends BaseException {
     private static ERROR_CODE = 'application.auth.account_not_found';

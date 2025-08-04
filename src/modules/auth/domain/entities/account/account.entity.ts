@@ -1,5 +1,5 @@
 import { CreatedAt, DeletedAt, Entity, UpdatedAt, UUID } from '@beincom/domain';
-import { Email } from '@commons/core/value-objects/email.value-object';
+import { Email } from '@common/core/value-objects/email.value-object';
 
 import { UserEntity } from '../user/user.entity';
 
