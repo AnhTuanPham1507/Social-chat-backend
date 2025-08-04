@@ -1,4 +1,8 @@
-import { DomainPrimitiveProperties, ValueObject, ValueObjectProperties } from "@beincom/domain";
+import {
+    DomainPrimitiveProperties,
+    ValueObject,
+    ValueObjectProperties,
+} from '@beincom/domain';
 
 export enum MIME_TYPE {
     // Image MIME Types
@@ -39,7 +43,7 @@ export class MimeType extends ValueObject<MIME_TYPE> {
     constructor(props: ValueObjectProperties<MIME_TYPE>) {
         super(props);
     }
-    
+
     // eslint-disable-next-line @typescript-eslint/no-empty-function
     public validate({}: DomainPrimitiveProperties<MIME_TYPE>): void {}
 

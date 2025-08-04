@@ -1,18 +1,17 @@
-import { ApiProperty } from "@nestjs/swagger";
+import { ApiProperty } from '@nestjs/swagger';
 
 export class ResponseLoginDTO {
-    
     @ApiProperty({
-        example: 'access token'
+        example: 'access token',
     })
     accessToken: string;
 
     @ApiProperty({
-        example: 'refresh token'
+        example: 'refresh token',
     })
     refreshToken: string;
 
-    constructor(accessToken: string, refreshToken: string){
+    constructor(accessToken: string, refreshToken: string) {
         this.accessToken = accessToken;
         this.refreshToken = refreshToken;
     }

@@ -12,7 +12,7 @@ alwaysApply: true
 - **Framework**: NestJS (Node.js)
 - **Database**: PostgreSQL with TypeORM
 - **Object Storage**: MinIO
-- **Message Broker**: RabbitMQ
+- **Message Broker**: Kafka
 - **Cache**: Redis
 
 ### Architecture
@@ -97,7 +97,6 @@ social-chat-backend/
 │           │   └── strategies/    # Authentication strategies
 │           └── driven-adapters/   # Driven adapters (repositories)
 ├── test/                       # Test files
-├── .development.env            # Development environment variables
 ├── .editorconfig               # Editor configuration
 ├── .eslintrc.js                # ESLint configuration
 ├── .gitignore                  # Git ignore file
@@ -291,20 +290,20 @@ The application supports OAuth authentication (Google) with callback endpoints.
 4. **Update application service**:
    - Implement the login method for the provider
 
-### 3. RabbitMQ Message Consumers
+### 3. Kafka Message Consumers
 
-The application is configured to use RabbitMQ for message-based communication, but no consumers are currently implemented.
+The application is configured to use Kafka for message-based communication, but no consumers are currently implemented.
 
 #### Steps to implement a new message consumer:
 
 1. **Define message pattern**:
-   - Create a constant for the message pattern in a constants file
+   - Create a constant for the topic pattern in a constants file
 
 2. **Create DTO**:
    - Define a DTO for the message payload
 
 3. **Create controller with message handler**:
-   - Use `@MessagePattern()` decorator to define the handler
+   - Use `@MessagePattern()` decorator to define the handler for Kafka topics
    - Inject appropriate application service
 
    ```typescript
@@ -325,8 +324,8 @@ The application is configured to use RabbitMQ for message-based communication, b
 4. **Update module**:
    - Register the controller in the module
 
-5. **Ensure RabbitMQ connection**:
-   - The main.ts already configures RabbitMQ connection
+5. **Ensure Kafka connection**:
+   - The main.ts already configures Kafka connection
    - Make sure to start microservices with `await app.startAllMicroservices()`
 
 ## Development Guidelines

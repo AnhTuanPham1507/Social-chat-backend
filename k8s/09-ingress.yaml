@@ -1,0 +1,130 @@
+# =================================================================
+# INGRESS CONFIGURATION (OPTIONAL FOR BEGINNERS)
+# =================================================================
+# Ingress provides HTTP/HTTPS access to services from outside the cluster
+# This is an alternative to LoadBalancer service for web applications
+# =================================================================
+
+# Ingress Controller Configuration (for learning)
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: social-chat-ingress
+  namespace: social-chat
+  labels:
+    app: social-chat-backend
+    component: ingress
+  annotations:
+    description: "Ingress for Social Chat Backend application"
+    tutorial: "Ingress provides HTTP routing and SSL termination"
+    # Common ingress annotations (uncomment based on your ingress controller)
+    # nginx.ingress.kubernetes.io/rewrite-target: /
+    # nginx.ingress.kubernetes.io/ssl-redirect: "false"
+    # ingress.kubernetes.io/ssl-redirect: "false"
+spec:
+  # Define ingress class (nginx, traefik, etc.)
+  ingressClassName: nginx  # Change based on your setup
+  
+  rules:
+  # Main application access
+  - host: social-chat.local  # Add to /etc/hosts: 127.0.0.1 social-chat.local
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: backend-service
+            port:
+              number: 3000
+  
+  # MinIO Console access (optional)
+  - host: minio.local  # Add to /etc/hosts: 127.0.0.1 minio.local
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: minio-console-service
+            port:
+              number: 9001
+
+  # TLS configuration (optional, for HTTPS)
+  # tls:
+  # - hosts:
+  #   - social-chat.local
+  #   - minio.local
+  #   secretName: social-chat-tls
+
+# =================================================================
+# INGRESS CONCEPTS FOR BEGINNERS
+# =================================================================
+#
+# 1. What is Ingress?
+#    - API object that manages external access to services
+#    - Provides HTTP/HTTPS routing, load balancing, SSL termination
+#    - More feature-rich than NodePort or LoadBalancer
+#
+# 2. Ingress Controller:
+#    - Implementation that fulfills the Ingress resource
+#    - Popular controllers: NGINX, Traefik, HAProxy, Istio
+#    - Must be installed separately in the cluster
+#
+# 3. Host-based Routing:
+#    - Different hostnames route to different services
+#    - social-chat.local → backend-service
+#    - minio.local → minio-console-service
+#
+# 4. Path-based Routing:
+#    - Different paths route to different services
+#    - /api → backend-service
+#    - /static → file-server-service
+#
+# 5. TLS/SSL Termination:
+#    - Ingress can handle HTTPS certificates
+#    - Certificates stored in Kubernetes Secrets
+#    - Automatic certificate management with cert-manager
+#
+# SETUP REQUIREMENTS:
+#
+# 1. Install Ingress Controller:
+#    For NGINX Ingress on minikube:
+#    minikube addons enable ingress
+#
+#    For kind:
+#    kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/main/deploy/static/provider/kind/deploy.yaml
+#
+#    For Docker Desktop:
+#    kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/main/deploy/static/provider/cloud/deploy.yaml
+#
+# 2. Add hostnames to /etc/hosts (Linux/Mac) or C:\Windows\System32\drivers\etc\hosts (Windows):
+#    127.0.0.1 social-chat.local
+#    127.0.0.1 minio.local
+#
+# 3. Access applications:
+#    - Backend: http://social-chat.local
+#    - MinIO Console: http://minio.local
+#
+# ALTERNATIVE ACCESS METHODS:
+#
+# If you don't want to use Ingress, you can access services via:
+#
+# 1. Port Forwarding:
+#    kubectl port-forward svc/backend-service 3000:3000 -n social-chat
+#    kubectl port-forward svc/minio-console-service 9001:9001 -n social-chat
+#
+# 2. NodePort (change service type):
+#    Backend on http://localhost:30000
+#    MinIO Console on http://localhost:30001
+#
+# 3. LoadBalancer (cloud providers):
+#    Automatic external IP assignment
+#
+# TROUBLESHOOTING COMMANDS:
+# - kubectl get ingress -n social-chat
+# - kubectl describe ingress social-chat-ingress -n social-chat
+# - kubectl get pods -n ingress-nginx  # Check ingress controller
+# - kubectl logs -n ingress-nginx -l app.kubernetes.io/name=ingress-nginx
+# ================================================================= 

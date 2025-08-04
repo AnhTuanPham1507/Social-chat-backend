@@ -1,16 +1,18 @@
-import { ApiProperty } from "@nestjs/swagger";
-import { IsEmail, IsNotEmpty, IsStrongPassword } from "class-validator";
+import { ApiProperty } from '@nestjs/swagger';
+import { IsEmail, IsNotEmpty, IsStrongPassword } from 'class-validator';
 
 export class LoginPayloadDTO {
-
     @IsNotEmpty({
-        message: "Email là thông tin bắt buộc"
+        message: 'Email là thông tin bắt buộc',
     })
-    @IsEmail({}, {
-        message: "Email phải đúng định dạng"
-    })
+    @IsEmail(
+        {},
+        {
+            message: 'Email phải đúng định dạng',
+        },
+    )
     @ApiProperty({
-        example: 'phamanhtuan9a531@gmail.com'
+        example: 'phamanhtuan9a531@gmail.com',
     })
     email: string;
 

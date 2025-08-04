@@ -1,0 +1,174 @@
+# =================================================================
+# POSTGRESQL DATABASE CONFIGURATION
+# =================================================================
+# Deployment manages the PostgreSQL pod lifecycle
+# Service provides stable network endpoint for database access
+# =================================================================
+
+# PostgreSQL Deployment
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: postgres
+  namespace: social-chat
+  labels:
+    app: postgres
+    component: database
+  annotations:
+    description: "PostgreSQL database for Social Chat Backend"
+    tutorial: "Deployment ensures PostgreSQL pod is always running"
+spec:
+  replicas: 1  # Database should have only 1 replica to avoid data conflicts
+  selector:
+    matchLabels:
+      app: postgres
+  template:
+    metadata:
+      labels:
+        app: postgres
+        component: database
+    spec:
+      containers:
+      - name: postgres
+        image: postgres:16-alpine  # Use specific version for consistency
+        ports:
+        - containerPort: 5432
+          name: postgres-port
+        
+        # Environment variables from ConfigMap and Secrets
+        env:
+        - name: POSTGRES_DB
+          valueFrom:
+            configMapKeyRef:
+              name: app-config
+              key: DB_DATABASE
+        - name: POSTGRES_USER
+          valueFrom:
+            configMapKeyRef:
+              name: app-config
+              key: DB_USERNAME
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: app-secrets
+              key: DB_PASSWORD
+        - name: PGDATA
+          value: /var/lib/postgresql/data/pgdata
+        - name: TZ
+          value: "Asia/Ho_Chi_Minh"
+        - name: PGTZ
+          value: "Asia/Ho_Chi_Minh"
+        
+        # Resource limits (important for stability)
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "250m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+        
+        # Volume mount for persistent storage
+        volumeMounts:
+        - name: postgres-storage
+          mountPath: /var/lib/postgresql/data
+        
+        # Health checks
+        livenessProbe:
+          exec:
+            command:
+            - pg_isready
+            - -U
+            - postgres
+            - -d
+            - social-chat-db
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        
+        readinessProbe:
+          exec:
+            command:
+            - pg_isready
+            - -U
+            - postgres
+            - -d
+            - social-chat-db
+          initialDelaySeconds: 10
+          periodSeconds: 5
+          timeoutSeconds: 3
+          failureThreshold: 3
+      
+      volumes:
+      - name: postgres-storage
+        persistentVolumeClaim:
+          claimName: postgres-pvc
+
+# PostgreSQL Service
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres-service
+  namespace: social-chat
+  labels:
+    app: postgres
+    component: database
+  annotations:
+    description: "Service endpoint for PostgreSQL database"
+    tutorial: "Service provides stable DNS name and load balancing"
+spec:
+  type: ClusterIP  # Internal service (not exposed outside cluster)
+  ports:
+  - port: 5432          # Port exposed by the service
+    targetPort: 5432    # Port on the container
+    protocol: TCP
+    name: postgres
+  selector:
+    app: postgres  # Routes traffic to pods with this label
+
+# =================================================================
+# POSTGRESQL CONCEPTS FOR BEGINNERS
+# =================================================================
+#
+# 1. Deployment:
+#    - Manages ReplicaSet which manages Pods
+#    - Ensures desired number of pods are running
+#    - Handles rolling updates and rollbacks
+#    - For databases, typically use replicas: 1
+#
+# 2. Service:
+#    - Provides stable network identity for pods
+#    - Acts as internal load balancer
+#    - DNS name: postgres-service.social-chat.svc.cluster.local
+#    - Other pods can connect using just "postgres-service"
+#
+# 3. Environment Variables:
+#    - valueFrom.configMapKeyRef: Gets value from ConfigMap
+#    - valueFrom.secretKeyRef: Gets value from Secret
+#    - Direct value: Uses literal value
+#
+# 4. Resource Management:
+#    - requests: Minimum resources needed
+#    - limits: Maximum resources allowed
+#    - CPU measured in "cores" (1000m = 1 core)
+#    - Memory measured in bytes (Mi = Mebibytes)
+#
+# 5. Health Checks:
+#    - livenessProbe: Checks if container is running
+#    - readinessProbe: Checks if container is ready for traffic
+#    - pg_isready: PostgreSQL utility to check server status
+#
+# 6. Persistent Volumes:
+#    - volumeMounts: Where to mount storage in container
+#    - persistentVolumeClaim: References the PVC we created
+#    - Ensures data survives pod restarts
+#
+# TROUBLESHOOTING COMMANDS:
+# - kubectl get pods -n social-chat
+# - kubectl logs postgres-<pod-id> -n social-chat
+# - kubectl describe pod postgres-<pod-id> -n social-chat
+# - kubectl exec -it postgres-<pod-id> -n social-chat -- psql -U postgres
+# ================================================================= 

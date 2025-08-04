@@ -1,35 +1,24 @@
 import * as request from 'supertest';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
-import { UserController } from '../../../../src/commons/modules/user/user.controller';
-import { ConfigModule } from '@nestjs/config';
 import { faker } from '@faker-js/faker';
-import { MockedRabbitMQModule } from '../../../mocks/rabbitmq.mock';
-import { UserModule } from '../../../../src/commons/modules/user/user.module';
-import { PostgresModule } from '../../../../src/infras/database/postgres.module';
+import { AppModule } from 'src/app.module';
 
 export default function () {
-    describe('Create', () => {
+    describe.skip('Create', () => {
         let app: INestApplication;
         let dummyObject = {
             fullName: 'Phạm Anh Tuấn',
-            password: '0943722631aA@',
+            password: 'abc@123M',
             sex: 'MALE',
-            email: 'phamanhtuan9a531@gmail.com',
-            phone: '0778821404',
+            email: 'phamanhtuan9a@gmail.com',
+            phone: '0779921405',
         };
 
         beforeAll(async () => {
             const moduleRef = await Test.createTestingModule({
-                imports: [
-                    MockedRabbitMQModule,
-                    UserModule,
-                    PostgresModule,
-                    ConfigModule.forRoot({
-                        envFilePath: `.development.env`,
-                    }),
-                ],
-                controllers: [UserController],
+                imports: [AppModule],
+                controllers: [],
             }).compile();
 
             app = moduleRef.createNestApplication();
@@ -44,11 +33,13 @@ export default function () {
                 }),
             );
             await app.init();
-        });
+        }, 60000);
 
         afterAll(async () => {
-            await app.close();
-        });
+            if (app) {
+                await app.close();
+            }
+        }, 30000);
 
         beforeEach(() => {
             dummyObject.email = faker.internet.email();

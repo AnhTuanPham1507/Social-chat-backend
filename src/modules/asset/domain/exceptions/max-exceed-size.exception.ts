@@ -1,4 +1,4 @@
-import { BaseException } from "@commons/core/base-exception.interface";
+import { BaseException } from '@common/core/base-exception.interface';
 
 export class MaxAssetSizeException extends BaseException {
     private static readonly ERROR_CODE = 'domain.asset.max_size_exception';
@@ -7,6 +7,3 @@ export class MaxAssetSizeException extends BaseException {
         super(MaxAssetSizeException.ERROR_CODE);
     }
 }
-
-
-

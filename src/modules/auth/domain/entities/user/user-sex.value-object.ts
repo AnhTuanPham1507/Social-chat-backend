@@ -1,14 +1,18 @@
-import { DomainPrimitiveProperties, ValueObject, ValueObjectProperties } from "@beincom/domain";
+import {
+    DomainPrimitiveProperties,
+    ValueObject,
+    ValueObjectProperties,
+} from '@beincom/domain';
 
 export enum USER_SEX {
     MALE = 'MALE',
     FEMALE = 'FEMALE',
     OTHER = 'OTHER',
 }
-  
+
 export class UserSex extends ValueObject<USER_SEX> {
     constructor(props: ValueObjectProperties<USER_SEX>) {
-    super(props);
+        super(props);
     }
 
     // eslint-disable-next-line @typescript-eslint/no-empty-function

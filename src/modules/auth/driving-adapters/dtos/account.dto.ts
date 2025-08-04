@@ -1,5 +1,3 @@
-
-
 import { ACCOUNT_PROVIDER } from '@modules/auth/domain/entities/account/account-provider.value-object';
 import { AccountEntity } from '@modules/auth/domain/entities/account/account.entity';
 import { ROLE } from '@modules/auth/domain/entities/account/role.value-object';

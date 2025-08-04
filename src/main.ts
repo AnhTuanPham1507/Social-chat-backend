@@ -1,13 +1,14 @@
-import { NestFactory } from '@nestjs/core';
-import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
-import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
-import { RmqOptions, Transport } from '@nestjs/microservices';
+import { NestFactory } from '@nestjs/core';
+import { KafkaOptions, Transport } from '@nestjs/microservices';
+import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import * as cookieParser from 'cookie-parser';
 import { initializeTransactionalContext } from 'typeorm-transactional';
 
+import { AppModule } from './app.module';
+
 async function bootstrap() {
-    initializeTransactionalContext()
+    initializeTransactionalContext();
 
     const app = await NestFactory.create(AppModule);
 
@@ -24,23 +25,6 @@ async function bootstrap() {
         }),
     );
 
-    app.connectMicroservice<RmqOptions>({
-        transport: Transport.RMQ,
-        options: {
-            urls: [process.env.MQ_HOST],
-            prefetchCount: 1,
-            persistent: true,
-            noAck: false,
-            queueOptions: {
-                durable: true,
-            },
-            socketOptions: {
-                heartbeatIntervalInSeconds: 60,
-                reconnectTimeInSeconds: 5,
-            },
-        },
-    });
-
     const config = new DocumentBuilder()
         .setTitle('Social chat APIs')
         .setDescription('Tài liệu API của website social chat')
@@ -49,6 +33,7 @@ async function bootstrap() {
     const document = SwaggerModule.createDocument(app, config);
     SwaggerModule.setup('api/documentation', app, document);
 
+    await app.startAllMicroservices();
     await app.listen(3000);
 }
 bootstrap();

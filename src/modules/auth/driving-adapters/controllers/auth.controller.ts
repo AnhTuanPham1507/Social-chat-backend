@@ -1,3 +1,6 @@
+import { GoogleOAuthGuard } from '@common/guards/google.guard';
+import { MIME_TYPE } from '@modules/asset/domain/entities/asset/mime-type.value-object';
+import { LoginPayloadDTO } from '@modules/auth/driving-adapters/dtos/login-payload.dto';
 import {
     Controller,
     Get,
@@ -11,6 +14,7 @@ import {
     UseInterceptors,
     UploadedFile,
 } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import {
     ApiBadRequestResponse,
     ApiBody,
@@ -20,16 +24,15 @@ import {
     ApiUnauthorizedResponse,
     ApiConsumes,
 } from '@nestjs/swagger';
-import { LoginPayloadDTO } from 'src/modules/auth/driving-adapters/dtos/login-payload.dto';
-
 import { Response } from 'express';
-import { LocalGuard } from '@commons/guards/local.guard';
-import { GoogleOAuthGuard } from '@commons/guards/google.guard';
+import { LocalGuard } from 'src/common/guards/local.guard';
+
+import {
+    AUTH_APPLICATION_SERVICE_TOKEN,
+    IAuthApplicationService,
+} from '../../application/application-services/auth.application-service';
+import ENDPOINT from '../../constants/endpoint.constant';
 import RegisterPayloadDTO from '../dtos/register-payload.dto';
-import { AUTH_APPLICATION_SERVICE_TOKEN, IAuthApplicationService } from '@modules/auth/application/application-services/auth.application-service';
-import { FileInterceptor } from '@nestjs/platform-express';
-import ENDPOINT from '@modules/auth/constants/endpoint.constant';
-import { MIME_TYPE } from '@modules/asset/domain/entities/asset/mime-type.value-object';
 
 @Controller(ENDPOINT.AUTH.BASE)
 @ApiTags('Auth')
@@ -58,7 +61,7 @@ export class AuthController {
     @ApiInternalServerErrorResponse({
         description: 'Xảy ra lỗi không xác thực',
     })
-    login(@Request() req, @Res() res: Response): void {
+    public login(@Request() req, @Res() res: Response): void {
         res.cookie('accessToken', req.user.accessToken, {
             httpOnly: true, // Ensures the cookie is not accessible via JavaScript
             secure: process.env.NODE_ENV === 'production', // Ensures the cookie is sent only over HTTPS in production
@@ -73,12 +76,12 @@ export class AuthController {
             maxAge: 7200000, // Cookie expiration time in milliseconds (1 hour here)
         });
 
-        res.json({message: 'Đăng nhập thành công'});
+        res.json({ message: 'Đăng nhập thành công' });
     }
 
     @Get(ENDPOINT.AUTH.GOOGLE_LOGIN)
     @UseGuards(GoogleOAuthGuard)
-    googleAuth() {}    
+    public googleAuth() {}
 
     @Post(ENDPOINT.AUTH.REGISTER)
     @ApiConsumes('multipart/form-data')
@@ -86,7 +89,10 @@ export class AuthController {
         type: RegisterPayloadDTO,
     })
     @UseInterceptors(FileInterceptor('avatar'))
-    async register(@Request() req, @UploadedFile() avatar: Express.Multer.File) {
+    public async register(
+        @Request() req,
+        @UploadedFile() avatar: Express.Multer.File,
+    ) {
         const userData = req.body;
 
         userData.avatar = {
@@ -95,7 +101,7 @@ export class AuthController {
             fileSize: avatar.size,
             mimeType: avatar.mimetype as MIME_TYPE,
         };
-        
+
         return this._authApplicationService.register(userData);
     }
 }

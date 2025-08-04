@@ -1,4 +1,4 @@
-import { IDatabaseConfig } from "./interfaces/database-config.interface";
+import { IDatabaseConfig } from './interfaces/database-config.interface';
 
 export const getDatabaseConfig = (): IDatabaseConfig => ({
     host: process.env.DB_HOST || 'localhost',
@@ -7,4 +7,4 @@ export const getDatabaseConfig = (): IDatabaseConfig => ({
     password: process.env.DB_PASSWORD || 'postgres',
     database: process.env.DB_DATABASE || 'social-chat-db',
     synchronize: Boolean(process.env.DB_SYNCHRONIZE === 'true'),
-})
+});

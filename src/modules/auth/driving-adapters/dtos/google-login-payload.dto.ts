@@ -1,4 +1,3 @@
-
 export class GoogleLoginPayloadDTO {
     sub: string;
     email: string;

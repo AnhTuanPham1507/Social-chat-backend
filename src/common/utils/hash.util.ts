@@ -7,6 +7,9 @@ export function generateHash(rawData: string, saltRounds: number = 10): string {
     return hash;
 }
 
-export function validateHashString(rawData: string, hash: string): Promise<boolean> {
+export function validateHashString(
+    rawData: string,
+    hash: string,
+): Promise<boolean> {
     return bcrypt.compare(rawData, hash);
 }

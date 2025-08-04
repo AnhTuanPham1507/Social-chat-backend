@@ -1,0 +1,18 @@
+# =================================================================
+# NAMESPACE CONFIGURATION
+# =================================================================
+# This creates an isolated environment for our Social Chat Backend
+# All resources will be deployed within this namespace
+# =================================================================
+
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: social-chat
+  labels:
+    app: social-chat-backend
+    environment: development
+    created-by: beginner-tutorial
+  annotations:
+    description: "Namespace for Social Chat Backend application and its dependencies"
+    tutorial: "This isolates our application from other workloads in the cluster" 

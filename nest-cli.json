@@ -1,4 +1,15 @@
 {
-  "collection": "@nestjs/schematics",
-  "sourceRoot": "src"
-}
+    "language": "ts",
+    "collection": "@nestjs/schematics",
+    "sourceRoot": "src",
+    "compilerOptions": {
+        "plugins": ["@nestjs/swagger/plugin"],
+        "paths": {
+            "@common/*": ["./src/commons/*", "./dist/src/commons/*"],
+            "@configs/*": ["./src/configs/*", "./dist/src/configs/*"],
+            "@infras/*": ["./src/infras/*", "./dist/src/infras/*"],
+            "@modules/*": ["./@modules/*", "./dist/@modules/*"]
+        }
+    }
+  }
+  
