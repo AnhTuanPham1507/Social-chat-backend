@@ -1,15 +1,16 @@
 import { randomUUID } from 'crypto';
 
 import { REQ_ID_HEADER } from '@common/constants/app.const';
+import { DatabaseModule } from '@infras/database/database.module';
+import { ExternalServiceModule } from '@infras/external-services';
 import { LogModule } from '@infras/log/log.module';
 import { MinioModule } from '@infras/minio/minio.module';
-import { PostgresModule } from '@infras/postgres/postgres.module';
 import { AssetModule } from '@modules/asset/asset.module';
 import { Module } from '@nestjs/common/decorators';
 import { ConfigModule } from '@nestjs/config';
 import { ClsModule } from 'nestjs-cls';
 
-import { configs } from './configs';
+import { configs } from './common/configs';
 import { AuthModule } from './modules/auth/auth.module';
 
 @Module({
@@ -23,7 +24,7 @@ import { AuthModule } from './modules/auth/auth.module';
         ClsModule.forRoot({
             global: true,
             middleware: {
-                mount: false,
+                mount: true,
                 saveReq: true,
                 generateId: true,
                 idGenerator: (req: Request) => {
@@ -32,10 +33,11 @@ import { AuthModule } from './modules/auth/auth.module';
             },
         }),
         LogModule,
-        PostgresModule,
+        DatabaseModule,
         MinioModule,
         AuthModule,
         AssetModule,
+        ExternalServiceModule,
     ],
     providers: [],
 })

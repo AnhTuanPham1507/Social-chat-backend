@@ -24,7 +24,7 @@ services:
         restart: always
         environment:
             POSTGRES_PASSWORD: postgres
-            POSTGRES_DB: social-chat-db
+            POSTGRES_DB: social-chat-local
             TZ: 'Asia/Ho_Chi_Minh'
             PGTZ: 'Asia/Ho_Chi_Minh'
         volumes:
@@ -72,23 +72,6 @@ services:
         networks:
             - my-network
 
-    backend:
-        build:
-            context: .
-            dockerfile: Dockerfile
-        container_name: social-chat-backend
-        depends_on:
-            - postgres
-            - kafka
-            - cache
-            - minio
-        env_file:
-            - env/.container.env
-        ports:
-            - '3000:3000'
-        networks:
-            - my-network
-
     minio:
         image: minio/minio:latest
         container_name: minio
@@ -110,11 +93,37 @@ services:
         networks:
             - my-network
 
+    keycloak:
+        image: quay.io/keycloak/keycloak:25.0.2
+        container_name: keycloak
+        environment:
+            KC_DB: postgres
+            KC_DB_URL_HOST: postgres
+            KC_DB_URL_DATABASE: keycloak
+            KC_DB_USERNAME: postgres
+            KC_DB_PASSWORD: postgres
+            KEYCLOAK_ADMIN : admin
+            KEYCLOAK_ADMIN_PASSWORD : admin
+        ports:
+            - '8080:8080'
+        command: start-dev
+        volumes:
+            - keycloak-data:/opt/keycloak/data
+        healthcheck:
+            test: ["CMD-SHELL", "curl -f http://localhost:8080/health/ready || exit 1"]
+            interval: 30s
+            timeout: 10s
+            retries: 5
+            start_period: 60s
+        networks:
+            - my-network
+
 volumes:
     cache:
     pg_data:
     kafka_data:
     minio-data:
+    keycloak-data:
 
 networks:
     my-network:

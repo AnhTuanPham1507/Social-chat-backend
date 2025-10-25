@@ -1,6 +1,6 @@
+import { GlobalExceptionFilter } from '@common/filters/global.filter';
 import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
-import { KafkaOptions, Transport } from '@nestjs/microservices';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import * as cookieParser from 'cookie-parser';
 import { initializeTransactionalContext } from 'typeorm-transactional';
@@ -14,6 +14,12 @@ async function bootstrap() {
 
     app.use(cookieParser());
 
+    app.enableCors({
+        origin: '*',
+        methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+        credentials: true,
+    });
+
     app.useGlobalPipes(
         new ValidationPipe({
             whitelist: true,
@@ -25,6 +31,8 @@ async function bootstrap() {
         }),
     );
 
+    app.useGlobalFilters(new GlobalExceptionFilter());
+
     const config = new DocumentBuilder()
         .setTitle('Social chat APIs')
         .setDescription('Tài liệu API của website social chat')
@@ -34,6 +42,6 @@ async function bootstrap() {
     SwaggerModule.setup('api/documentation', app, document);
 
     await app.startAllMicroservices();
-    await app.listen(3000);
+    await app.listen(3001);
 }
 bootstrap();

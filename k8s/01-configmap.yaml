@@ -32,7 +32,7 @@ data:
   DB_HOST: "postgres-service"  # This will resolve to the PostgreSQL service
   DB_PORT: "5432"
   DB_USERNAME: "postgres"
-  DB_DATABASE: "social-chat-db"
+  DB_DATABASE: "social-chat-local"
   
   # Google OAuth Configuration (non-sensitive)
   GOOGLE_CLIENT_ID: "1094278495089-bhbpvmseeiadev94mjt4h1207n3n1leu.apps.googleusercontent.com"

@@ -351,7 +351,7 @@ kubectl get pods -n social-chat -l app=postgres
 kubectl exec -it postgres-<pod-id> -n social-chat -- pg_isready -U postgres
 
 # Connect to database
-kubectl exec -it postgres-<pod-id> -n social-chat -- psql -U postgres -d social-chat-db
+kubectl exec -it postgres-<pod-id> -n social-chat -- psql -U postgres -d social-chat-local
 
 # Test from backend pod
 kubectl exec -it backend-<pod-id> -n social-chat -- nslookup postgres-service

@@ -1,3 +1,4 @@
+import { API_CLIENTS } from '@infras/external-services';
 import { AssetModule } from '@modules/asset/asset.module';
 import { Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
@@ -7,17 +8,15 @@ import {
     AUTH_APPLICATION_SERVICE_TOKEN,
     AuthApplicationService,
 } from './application/application-services/auth.application-service';
-import { ACCOUNT_REPO_TOKEN } from './application/contracts/account-repository.contract';
 import { ASSET_SERVICE_TOKEN } from './application/contracts/asset-service.contract';
+import { IAM_SERVICE_TOKEN } from './application/contracts/iam-service.contract';
 import { USER_REPO_TOKEN } from './application/contracts/user-repository.contract';
+import { USER_MAPPER_TOKEN, UserMapper } from './application/mappers';
 import { AuthHelper } from './auth.helper';
-import { AccountRepo } from './driven-adapters/repos/account-repository.adapter';
 import { UserRepo } from './driven-adapters/repos/user-repository.adapter';
 import { AssetServiceAdapter } from './driven-adapters/services/asset-service.adapter';
+import { IAMServiceAdapter } from './driven-adapters/services/iam-service.adapter';
 import { AuthController } from './driving-adapters/controllers/auth.controller';
-import { AuthWebHook } from './driving-adapters/controllers/auth.web-hook';
-import { GoogleStrategy } from './strategies/google.strategy';
-import { LocalStrategy } from './strategies/local.strategy';
 
 @Module({
     imports: [
@@ -29,16 +28,13 @@ import { LocalStrategy } from './strategies/local.strategy';
         }),
         AssetModule,
     ],
-    controllers: [AuthController, AuthWebHook],
+    controllers: [AuthController],
     providers: [
         {
             provide: AUTH_APPLICATION_SERVICE_TOKEN,
             useClass: AuthApplicationService,
         },
-        {
-            provide: ACCOUNT_REPO_TOKEN,
-            useClass: AccountRepo,
-        },
+
         {
             provide: ASSET_SERVICE_TOKEN,
             useClass: AssetServiceAdapter,
@@ -47,9 +43,17 @@ import { LocalStrategy } from './strategies/local.strategy';
             provide: USER_REPO_TOKEN,
             useClass: UserRepo,
         },
+
+        {
+            provide: USER_MAPPER_TOKEN,
+            useClass: UserMapper,
+        },
+        {
+            provide: IAM_SERVICE_TOKEN,
+            useClass: IAMServiceAdapter,
+        },
         AuthHelper,
-        LocalStrategy,
-        GoogleStrategy,
+        ...API_CLIENTS,
     ],
 })
 export class AuthModule {}

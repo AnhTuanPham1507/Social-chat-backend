@@ -1,3 +1,4 @@
+import { IllegalArgumentException } from '@beincom/common';
 import {
     DomainPrimitiveProperties,
     ValueObject,
@@ -7,7 +8,7 @@ import {
 export enum USER_SEX {
     MALE = 'MALE',
     FEMALE = 'FEMALE',
-    OTHER = 'OTHER',
+    UNKNOWN = 'UNKNOWN',
 }
 
 export class UserSex extends ValueObject<USER_SEX> {
@@ -15,10 +16,13 @@ export class UserSex extends ValueObject<USER_SEX> {
         super(props);
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-empty-function
-    public validate({}: DomainPrimitiveProperties<USER_SEX>): void {}
+    public validate({ value }: DomainPrimitiveProperties<USER_SEX>): void {
+        if (!Object.values(USER_SEX).includes(value)) {
+            throw new IllegalArgumentException('Invalid user sex');
+        }
+    }
 
-    public static fromString(value: USER_SEX) {
-        return new UserSex({ value });
+    public static fromString(value?: USER_SEX) {
+        return new UserSex({ value: value || USER_SEX.UNKNOWN });
     }
 }

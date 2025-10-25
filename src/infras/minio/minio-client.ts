@@ -1,7 +1,7 @@
 import {
     IMinioConfig,
     MINIO_CONFIG,
-} from '@configs/interfaces/minio-config.interface';
+} from '@common/configs/interfaces/minio-config.interface';
 import { Provider } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as Minio from 'minio';

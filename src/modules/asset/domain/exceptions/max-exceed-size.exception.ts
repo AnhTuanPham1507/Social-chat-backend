@@ -1,7 +1,10 @@
-import { BaseException } from '@common/core/base-exception.interface';
+import { BaseDomainException } from '@common/core/exceptions/base-exception.interface';
 
-export class MaxAssetSizeException extends BaseException {
-    private static readonly ERROR_CODE = 'domain.asset.max_size_exception';
+import { DOMAIN_ASSET_ERROR_CODES } from './error-code.const';
+
+export class MaxAssetSizeException extends BaseDomainException {
+    private static readonly ERROR_CODE =
+        DOMAIN_ASSET_ERROR_CODES.ASSET.MAX_SIZE_EXCEPTION;
 
     constructor() {
         super(MaxAssetSizeException.ERROR_CODE);

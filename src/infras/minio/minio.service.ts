@@ -1,7 +1,7 @@
 import {
     IMinioConfig,
     MINIO_CONFIG,
-} from '@configs/interfaces/minio-config.interface';
+} from '@common/configs/interfaces/minio-config.interface';
 import { MIME_TYPE } from '@modules/asset/domain/entities/asset/mime-type.value-object';
 import { Inject, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';

@@ -9,7 +9,7 @@ export enum ASSET_TYPE {
     VIDEO = 'video',
     AUDIO = 'audio',
     DOCUMENT = 'document',
-    OTHER = 'other',
+    UNKNOWN = 'unknown',
 }
 
 export class AssetType extends ValueObject<ASSET_TYPE> {

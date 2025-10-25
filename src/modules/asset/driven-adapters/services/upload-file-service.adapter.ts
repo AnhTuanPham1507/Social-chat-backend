@@ -15,6 +15,7 @@ export class UploadFileService implements IUploadFileService {
         mimeType: MIME_TYPE;
     }): Promise<string> {
         const { fileBuffer, fileName, fileSize, mimeType } = payload;
+
         return this.minioService.uploadFile(
             fileBuffer,
             fileName,
