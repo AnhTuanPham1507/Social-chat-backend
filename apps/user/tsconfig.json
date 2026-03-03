@@ -1,0 +1,40 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "outDir": "./dist",
+    "baseUrl": ".",
+    "rootDir": "../..",
+    "emitDecoratorMetadata": true,
+    "paths": {
+      "@application/*": ["src/application/*"],
+      "@driving-adapters/*": ["src/driving-adapters/*"],
+      "@driven-adapters/*": ["src/driven-adapters/*"],
+
+      "@social-chat/common": ["../../packages/common/index.ts"],
+      "@social-chat/common/*": ["../../packages/common/*"],
+      "@social-chat/domain": ["../../packages/domain/index.ts"],
+      "@social-chat/domain/*": ["../../packages/domain/*"],
+      "@social-chat/infrastructure": ["../../packages/infrastructure/index.ts"],
+      "@social-chat/infrastructure/*": ["../../packages/infrastructure/*"],
+      "@social-chat/shared-libs": ["../../packages/libs/index.ts"],
+      "@social-chat/shared-libs/*": ["../../packages/libs/*"]
+    }
+  },
+  "ts-node": {
+    "require": ["tsconfig-paths/register"]
+  },
+  "include": [
+    "src/**/*.ts",
+    "../../packages/common/**/*.ts",
+    "../../packages/domain/**/*.ts",
+    "../../packages/infrastructure/**/*.ts",
+    "../../packages/libs/**/*.ts"
+  ],
+  "exclude": [
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/*.spec.ts",
+    "**/*.test.ts",
+    "**/__tests__/**"
+  ]
+}

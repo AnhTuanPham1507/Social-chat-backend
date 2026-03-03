@@ -1,0 +1,46 @@
+# Compiled output
+dist
+*.tsbuildinfo
+
+# Compiled files in source directories (should only be in dist/)
+*.js
+*.d.ts
+*.js.map
+*.d.ts.map
+!jest.config.js
+!eslint.config.js
+
+# Dependencies
+node_modules
+
+# Logs
+logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+*~
+
+# Test coverage
+coverage
+.nyc_output
+
+
+
+
+
+
+
+
+

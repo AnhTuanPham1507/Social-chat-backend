@@ -1,32 +1,38 @@
 {
-    "compilerOptions": {
-        "module": "commonjs",
-        "declaration": true,
-        "removeComments": true,
-        "emitDecoratorMetadata": true,
-        "experimentalDecorators": true,
-        "allowSyntheticDefaultImports": true,
-        "target": "es2022",
-        "sourceMap": true,
-        "outDir": "./dist",
-        "baseUrl": ".",
-        "rootDir": ".",
-        "incremental": true,
-        "skipLibCheck": true,
-        "strictNullChecks": false,
-        "noImplicitAny": false,
-        "strictBindCallApply": false,
-        "forceConsistentCasingInFileNames": false,
-        "noFallthroughCasesInSwitch": false,
-        "useDefineForClassFields": false,
-        "strict": true,
-        "paths": {
-            "@common/*": ["src/common/*"],
-            "@configs/*": ["src/common/configs/*"],
-            "@infras/*": ["src/infras/*"],
-            "@modules/*": ["src/modules/*"]   
-        }
-    },
-    "include": ["src/**/*", "test/**/*"],
-    "exclude": ["node_modules", "dist"]
+  "compilerOptions": {
+    "target": "es2022",
+    "module": "commonjs",
+    "lib": ["es2022"],
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    "outDir": "./dist",
+    "removeComments": true,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "allowSyntheticDefaultImports": true,
+    "skipLibCheck": true,
+    "strictNullChecks": false,
+    "noImplicitAny": false,
+    "strictBindCallApply": false,
+    "forceConsistentCasingInFileNames": false,
+    "noFallthroughCasesInSwitch": false,
+    "useDefineForClassFields": false,
+    "strict": true,
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+    "incremental": true,
+    "composite": true,
+    "baseUrl": ".",
+    "paths": {
+      "@social-chat/common": ["packages/common/index.ts"],
+      "@social-chat/common/*": ["packages/common/*"],
+      "@social-chat/domain": ["packages/domain/index.ts"],
+      "@social-chat/domain/*": ["packages/domain/*"],
+      "@social-chat/infrastructure": ["packages/infrastructure/index.ts"],
+      "@social-chat/infrastructure/*": ["packages/infrastructure/*"],
+      "@social-chat/shared-libs": ["packages/libs/index.ts"],
+      "@social-chat/shared-libs/*": ["packages/libs/*"]
+    }
+  }
 }

@@ -1,0 +1,28 @@
+{
+  "name": "@social-chat/auth",
+  "version": "0.0.1",
+  "description": "Authentication service for Social Chat",
+  "main": "dist/src/main.js",
+  "scripts": {
+    "build": "nest build",
+    "dev": "cross-env NODE_ENV=development nest start --watch",
+    "start": "cross-env NODE_ENV=production node -r tsconfig-paths/register dist/src/main.js",
+    "start:prod": "cross-env NODE_ENV=production node -r tsconfig-paths/register dist/src/main.js",
+    "clean": "rimraf dist",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint \"**/*.ts\"",
+    "lint:fix": "eslint \"**/*.ts\" --fix"
+  },
+  "dependencies": {
+    "cookie-parser": "^1.4.6"
+  },
+  "peerDependencies": {
+    "nestjs-cls": "^5.0.0",
+    "typeorm-transactional": "^0.5.0",
+    "cookie-parser": "^1.4.6"
+  },
+  "publishConfig": {
+    "access": "restricted"
+  }
+}
+

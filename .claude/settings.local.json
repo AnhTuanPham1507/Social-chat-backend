@@ -1,0 +1,30 @@
+{
+  "permissions": {
+    "allow": [
+      "Skill(bmad:bmm:workflows:create-tech-spec)",
+      "Bash(grep:*)",
+      "Bash(pnpm lint:*)",
+      "Bash(pnpm test:*)",
+      "Bash(pnpm build:*)",
+      "Skill(bmad:bmm:workflows:workflow-init)",
+      "Skill(bmad:core:workflows:party-mode)",
+      "Skill(bmad:core:workflows:brainstorming)",
+      "Skill(bmad:bmm:workflows:create-prd)",
+      "Skill(bmad:bmm:workflows:create-architecture)",
+      "Skill(bmad:bmm:workflows:create-epics-and-stories)",
+      "Bash(yarn build:domain:*)",
+      "Bash(yarn workspace @social-chat/domain build:*)",
+      "Bash(yarn build:auth)",
+      "Bash(yarn build:user:*)",
+      "Bash(tree:*)",
+      "Skill(bmad:bmm:workflows:workflow-status)",
+      "Bash(xargs ls:*)",
+      "Bash(dir:*)",
+      "Bash(yarn add:*)",
+      "Bash(yarn auth:dev)",
+      "Bash(netstat:*)",
+      "Bash(findstr:*)",
+      "Bash(find:*)"
+    ]
+  }
+}

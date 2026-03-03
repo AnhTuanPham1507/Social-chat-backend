@@ -1,0 +1,19 @@
+{
+  "name": "@social-chat/asset",
+  "version": "0.0.1",
+  "description": "Asset management service for Social Chat",
+  "main": "dist/src/main.js",
+  "scripts": {
+    "build": "nest build",
+    "dev": "cross-env NODE_ENV=development nest start --watch",
+    "start": "cross-env NODE_ENV=production node -r tsconfig-paths/register dist/src/main.js",
+    "start:prod": "cross-env NODE_ENV=production node -r tsconfig-paths/register dist/src/main.js",
+    "clean": "rimraf dist",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint \"**/*.ts\"",
+    "lint:fix": "eslint \"**/*.ts\" --fix"
+  },
+  "publishConfig": {
+    "access": "restricted"
+  }
+}

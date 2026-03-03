@@ -1,0 +1,29 @@
+# Learn Story - Learning-Focused Story Implementation Workflow
+name: learn-story
+description: "Interactive learning workflow for implementing user stories. Guides you through each layer with concepts to learn, letting YOU write the code."
+author: "Custom"
+
+# Config
+config_source: "{project-root}/_bmad/bmm/config.yaml"
+output_folder: "{config_source}:output_folder"
+date: system-generated
+
+# Workflow components
+installed_path: "{project-root}/_bmad/bmm/workflows/learn-story"
+instructions: "{installed_path}/instructions.md"
+
+# Input patterns - stories document
+input_file_patterns:
+  epics:
+    whole: "{output_folder}/*epics*.md"
+    load_strategy: FULL_LOAD
+  fullstack:
+    whole: "{output_folder}/*fullstack*.md"
+    load_strategy: FULL_LOAD
+  architecture:
+    whole: "{output_folder}/*architecture*.md"
+    load_strategy: FULL_LOAD
+
+# No template - this is an action workflow
+template: false
+standalone: true

@@ -1,0 +1,27 @@
+{
+  "name": "@social-chat/domain",
+  "version": "0.0.1",
+  "description": "Domain entities, value objects, and business logic for Social Chat",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "clean": "rimraf dist",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint \"**/*.ts\"",
+    "lint:fix": "eslint \"**/*.ts\" --fix",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:cov": "jest --coverage"
+  },
+  "dependencies": {
+    "@beincom/domain": "^0.1.7"
+  },
+  "peerDependencies": {
+    "class-transformer": "^0.5.1",
+    "class-validator": "^0.14.3"
+  },
+  "publishConfig": {
+    "access": "restricted"
+  }
+}
