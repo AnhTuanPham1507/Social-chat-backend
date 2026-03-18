@@ -1,15 +1,21 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEnum, IsNumber, IsString, Max, Min } from 'class-validator';
-import { MIME_TYPE } from '@social-chat/domain';
+import {
+  IsEnum,
+  IsNumber,
+  IsString,
+  IsArray,
+  Min,
+  ArrayMinSize,
+  ArrayMaxSize,
+  ValidateNested,
+} from 'class-validator';
+import { Type } from 'class-transformer';
+import { ASSET_PURPOSE, MIME_TYPE } from '@social-chat/domain';
 
 export class PresignUploadRequestDTO {
-  @ApiProperty({ example: 'avatars' })
-  @IsString()
-  bucket: string;
-
-  @ApiProperty({ example: 'avatars' })
-  @IsString()
-  folder: string;
+  @ApiProperty({ enum: ASSET_PURPOSE, example: ASSET_PURPOSE.AVATAR })
+  @IsEnum(ASSET_PURPOSE)
+  purpose: ASSET_PURPOSE;
 
   @ApiProperty({ example: 'my-photo.jpg' })
   @IsString()
@@ -22,7 +28,6 @@ export class PresignUploadRequestDTO {
   @ApiProperty({ example: 1024000, description: 'File size in bytes' })
   @IsNumber()
   @Min(1)
-  @Max(5 * 1024 * 1024)
   size: number;
 }
 
@@ -31,10 +36,7 @@ export class PresignUploadResponseDTO {
   assetId: string;
 
   @ApiProperty()
-  postURL: string;
-
-  @ApiProperty()
-  formData: Record<string, string>;
+  uploadUrl: string;
 
   @ApiProperty()
   key: string;
@@ -45,11 +47,44 @@ export class ConfirmUploadResponseDTO {
   assetId: string;
 
   @ApiProperty()
-  bucket: string;
-
-  @ApiProperty()
   key: string;
 
   @ApiProperty()
   url: string;
+}
+
+// ============================================
+// Bulk Presign Upload
+// ============================================
+
+export class BulkPresignUploadRequestDTO {
+  @ApiProperty({ type: [PresignUploadRequestDTO], maxItems: 20 })
+  @IsArray()
+  @ArrayMinSize(1)
+  @ArrayMaxSize(20)
+  @ValidateNested({ each: true })
+  @Type(() => PresignUploadRequestDTO)
+  items: PresignUploadRequestDTO[];
+}
+
+export class BulkPresignUploadResponseDTO {
+  @ApiProperty({ type: [PresignUploadResponseDTO] })
+  items: PresignUploadResponseDTO[];
+}
+
+export class ValidateAssetRequestDTO {
+  @ApiProperty({ example: 'avatars/uuid-123.jpg', description: 'Object key of the asset' })
+  @IsString()
+  key: string;
+}
+
+export class ValidateAssetResponseDTO {
+  @ApiProperty()
+  valid: boolean;
+
+  @ApiProperty()
+  assetId: string;
+
+  @ApiProperty()
+  key: string;
 }

@@ -1,4 +1,4 @@
-import { AssetEntity, ASSET_TYPE, MIME_TYPE, ASSET_STATUS } from '@social-chat/domain';
+import { AssetEntity, ASSET_PURPOSE, ASSET_TYPE, MIME_TYPE, ASSET_STATUS } from '@social-chat/domain';
 import { AssetModel } from '@social-chat/infrastructure';
 
 export class AssetPersistenceMapper {
@@ -10,8 +10,11 @@ export class AssetPersistenceMapper {
       originalName: entity.originalName,
       size: entity.size,
       assetType: entity.assetType,
+      purpose: entity.purpose,
       mimeType: entity.mimeType,
       status: entity.status,
+      metadata: entity.metadata,
+      createdBy: entity.createdBy,
       createdAt: entity.createdAt,
       updatedAt: entity.updatedAt,
       deletedAt: entity.deletedAt,
@@ -26,8 +29,11 @@ export class AssetPersistenceMapper {
       originalName: model.originalName,
       size: Number(model.size), // bigint comes as string from postgres
       assetType: model.assetType as ASSET_TYPE,
+      purpose: model.purpose as ASSET_PURPOSE,
       mimeType: model.mimeType as MIME_TYPE,
       status: model.status as ASSET_STATUS,
+      metadata: model.metadata ?? null,
+      createdBy: model.createdBy,
       createdAt: model.createdAt,
       updatedAt: model.updatedAt,
       deletedAt: model.deletedAt || undefined,

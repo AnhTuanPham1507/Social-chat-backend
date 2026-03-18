@@ -1,0 +1,2 @@
+export const S3_CLIENT_TOKEN = 'S3_CLIENT_TOKEN';
+export const R2_CONFIG_TOKEN = 'R2_CONFIG_TOKEN';

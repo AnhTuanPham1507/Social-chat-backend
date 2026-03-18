@@ -5,7 +5,7 @@ import { DataSource } from 'typeorm';
 import { addTransactionalDataSource } from 'typeorm-transactional';
 
 import * as models from './models';
-import { BaseAssetRepository, BaseUserRepository } from './repos';
+import { BaseAssetRepository, BasePostRepository, BaseUserRepository } from './repos';
 import { SnakeNamingStrategy } from './snake-naming.strategy';
 
 export interface DatabaseModuleAsyncOptions {
@@ -82,12 +82,14 @@ export class DatabaseModule {
                 // Repositories
                 BaseUserRepository,
                 BaseAssetRepository,
+                BasePostRepository,
             ],
             exports: [
                 TypeOrmModule,
                 // Repositories
                 BaseUserRepository,
                 BaseAssetRepository,
+                BasePostRepository,
             ],
         };
     }

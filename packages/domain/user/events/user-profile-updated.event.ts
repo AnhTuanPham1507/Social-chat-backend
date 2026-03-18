@@ -13,7 +13,7 @@ export class UserProfileUpdatedEvent extends DomainEvent {
     readonly userId: string,
     readonly updatedFields: string[],
   ) {
-    super();
+    super(userId);
   }
 
   get eventName(): string {

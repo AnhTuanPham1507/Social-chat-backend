@@ -10,6 +10,7 @@
     "auth:dev": "yarn workspace @social-chat/auth dev",
     "user:dev": "yarn workspace @social-chat/user dev",
     "asset:dev": "yarn workspace @social-chat/asset dev",
+    "feed:dev": "yarn workspace @social-chat/feed dev",
     "lint": "yarn workspaces foreach -pv run lint",
     "lint:fix": "yarn workspaces foreach -pv run lint:fix",
     "clean": "yarn workspaces foreach -pv run clean && rm -rf node_modules",

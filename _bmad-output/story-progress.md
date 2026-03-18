@@ -10,7 +10,7 @@ Track your learning progress through all stories.
 |-------|--------|------|-------|
 | 1.1: Core Domain Base Classes | ✅ Done | - | Entity, AggregateRoot, ValueObject exist |
 | 1.2: Domain Event Infrastructure | ✅ Done | - | DomainEvent, IEventPublisher exist |
-| 1.3: Kafka Event Publisher | ⬜ TODO | | |
+| 1.3: Kafka Event Publisher | ✅ Done | 2026-03-07 | Full Kafka infra: KafkaProducerService, KafkaBaseConsumer, MessagingModule, aggregateId in DomainEvent, event publisher adapters per service |
 | 1.4: Refactor User Entity | ✅ Done | - | Factory methods, events |
 | 1.5: CQRS Infrastructure | ⬜ TODO | | |
 
@@ -24,7 +24,7 @@ Track your learning progress through all stories.
 | 2.2: JWT Token Validation | ✅ Done | - | JwtGuard |
 | 2.3: User Profile Creation | ✅ Done | - | Auto in callback |
 | 2.4: Update User Profile | ✅ Done | - | PATCH /users/profile (autonomous mode) |
-| 2.5: Upload Profile Picture | 🔄 IN PROGRESS | 2026-02-23 | Steps 1-6 done, Step 7 (user integration) remaining |
+| 2.5: Upload Profile Picture | ✅ Done | 2026-03-17 | Complete: presign upload, R2 storage, Kafka events, imgproxy resizing, Coconut video transcoding, user integration |
 | 2.6: Register Device Token | ⬜ TODO | | |
 | 2.7: User Logout | ✅ Done | - | logout endpoint |
 | 2.8: RBAC Guard | ⬜ TODO | | |
@@ -136,8 +136,8 @@ Track your learning progress through all stories.
 
 | Epic | Total | Done | Progress |
 |------|-------|------|----------|
-| Epic 1: DDD Foundation | 5 | 3 | 60% |
-| Epic 2: User Identity | 8 | 6 | 75% |
+| Epic 1: DDD Foundation | 5 | 4 | 80% |
+| Epic 2: User Identity | 8 | 7 | 88% |
 | Epic 3: Social Network | 7 | 0 | 0% |
 | Epic 4: Content | 11 | 0 | 0% |
 | Epic 5: Feed | 4 | 0 | 0% |
@@ -145,7 +145,7 @@ Track your learning progress through all stories.
 | Epic 7: Presence | 4 | 0 | 0% |
 | Epic 8: Notifications | 7 | 0 | 0% |
 | Epic 9: AI | 7 | 0 | 0% |
-| **TOTAL** | **65** | **9** | **14%** |
+| **TOTAL** | **65** | **11** | **17%** |
 
 ---
 
@@ -168,7 +168,17 @@ Track concepts you've practiced:
 - [x] Persistence mappers (AssetPersistenceMapper)
 - [x] Microservice bootstrap (separate app on port 3003)
 - [ ] CQRS (Command/Query separation)
-- [ ] Event publishing to Kafka
+- [x] Kafka messaging architecture design (topic naming, partitioning, consumer groups, message schema)
+- [x] Event publishing to Kafka (KafkaProducerService, event publisher adapters)
+- [x] Kafka consumer as driving adapter (KafkaBaseConsumer, AssetConfirmedConsumer)
+- [x] DDD aggregateId concept (partition key for ordering guarantees)
+- [x] Async image processing via event-driven architecture (Kafka → imgproxy)
+- [x] Image variant generation (purpose-based variants, naming conventions)
+- [x] Driven adapter pattern for event publishing (per-service adapters)
+- [x] Video transcoding via external API (Coconut) with webhook callbacks
+- [x] Webhook controller as driving adapter for async processing results
+- [x] Cloudflare R2 object storage (S3-compatible)
+- [x] User service integration with asset service (cross-service flow)
 - [ ] WebSocket connections
 - [ ] Pagination patterns
 - [ ] Real-time updates

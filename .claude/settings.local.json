@@ -24,7 +24,18 @@
       "Bash(yarn auth:dev)",
       "Bash(netstat:*)",
       "Bash(findstr:*)",
-      "Bash(find:*)"
+      "Bash(find:*)",
+      "Bash(npx tsc:*)",
+      "Bash(npx nest:*)",
+      "Bash(npm install:*)",
+      "Bash(mv event-publisher:*)",
+      "Bash(docker ps:*)",
+      "Bash(docker exec:*)",
+      "Bash(node:*)",
+      "WebFetch(domain:docs.coconut.co)",
+      "WebFetch(domain:coconut.co)",
+      "Bash(ls:*)",
+      "Bash(npx next:*)"
     ]
   }
 }

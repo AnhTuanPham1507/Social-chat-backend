@@ -4,6 +4,7 @@ import { USER_APPLICATION_SERVICE_TOKEN, UserApplicationService } from './applic
 import { UserController } from './driving-adapters/controllers/user.controller';
 import { USER_REPO_TOKEN } from './application/contracts/user-repository.contract';
 import { UserRepo } from './driven-adapters/repos/user-repository.adapter';
+import { UserEventPublisherAdapter } from './driven-adapters/event-publisher/user-event-publisher.adapter';
 
 @Module({
     controllers: [UserController],
@@ -16,7 +17,7 @@ import { UserRepo } from './driven-adapters/repos/user-repository.adapter';
             provide: USER_REPO_TOKEN,
             useClass: UserRepo,
         },
-
+        UserEventPublisherAdapter,
     ],
 })
 export class UserModule {}

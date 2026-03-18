@@ -15,7 +15,7 @@ version: '3.9'
 #   - Redis:         Cache, sessions, presence, pub/sub
 #   - Kafka:         Event streaming, service communication
 #   - Elasticsearch: Search (users, posts, hashtags)
-#   - MinIO:         Object storage (images, videos, attachments)
+#   - R2:            Object storage via Cloudflare R2 (no local container needed)
 #   - Keycloak:      OAuth2/OIDC identity provider
 #   - Kong:          API Gateway
 #
@@ -67,14 +67,16 @@ services:
             - discovery.type=single-node
             - xpack.security.enabled=false
             - xpack.security.enrollment.enabled=false
-            - ES_JAVA_OPTS=-Xms512m -Xmx512m
+            - ES_JAVA_OPTS=-Xms1g -Xmx1g
             - cluster.name=social-chat-cluster
+            - network.host=0.0.0.0
+            - logger.level=WARN
         volumes:
             - es_data:/usr/share/elasticsearch/data
         ports:
             - '9200:9200'
             - '9300:9300'
-        mem_limit: 1g
+        mem_limit: 2g
         healthcheck:
             test: ['CMD-SHELL', 'curl -f http://localhost:9200/_cluster/health || exit 1']
             interval: 30s
@@ -121,31 +123,6 @@ services:
             interval: 10s
             timeout: 10s
             retries: 5
-        networks:
-            - social-chat-network
-
-    # =========================================================================
-    # OBJECT STORAGE
-    # =========================================================================
-
-    minio:
-        image: minio/minio:latest
-        container_name: social-chat-minio
-        restart: always
-        environment:
-            - MINIO_ROOT_USER=${MINIO_ROOT_USER:-minioadmin}
-            - MINIO_ROOT_PASSWORD=${MINIO_ROOT_PASSWORD:-minioadmin}
-        ports:
-            - '9000:9000'
-            - '9001:9001'
-        volumes:
-            - minio_data:/data
-        command: server /data --console-address ":9001"
-        healthcheck:
-            test: ['CMD', 'curl', '-f', 'http://localhost:9000/minio/health/live']
-            interval: 30s
-            timeout: 20s
-            retries: 3
         networks:
             - social-chat-network
 
@@ -218,20 +195,33 @@ services:
             KC_DB_URL: jdbc:postgresql://host.docker.internal:5432/keycloak
             KC_DB_USERNAME: postgres
             KC_DB_PASSWORD: postgres
+            KC_BOOTSTRAP_ADMIN_USERNAME: admin
+            KC_BOOTSTRAP_ADMIN_PASSWORD: admin
             KEYCLOAK_ADMIN: admin
             KEYCLOAK_ADMIN_PASSWORD: admin
             KC_FEATURES: scripts
+            # SMTP Configuration for Gmail
+            KC_SPI_EMAIL_HOST: smtp.gmail.com
+            KC_SPI_EMAIL_PORT: 587
+            KC_SPI_EMAIL_FROM: ${GMAIL_ADDRESS:-your-email@gmail.com}
+            KC_SPI_EMAIL_FROM_DISPLAY_NAME: Social Chat
+            KC_SPI_EMAIL_AUTH: 'true'
+            KC_SPI_EMAIL_STARTTLS: 'true'
+            KC_SPI_EMAIL_STARTTLS_REQUIRED: 'true'
+            KC_SPI_EMAIL_SSL: 'false'
+            KC_SPI_EMAIL_USERNAME: ${GMAIL_ADDRESS:-your-email@gmail.com}
+            KC_SPI_EMAIL_PASSWORD: ${GMAIL_APP_PASSWORD:-your-app-password}
         extra_hosts:
             - 'host.docker.internal:host-gateway'
         ports:
-            - '8080:8080'
+            - '8888:8080'
         command:
             - start-dev
             - --spi-script-upload-enabled=true
         volumes:
             - keycloak_data:/opt/keycloak/data
         healthcheck:
-            test: ['CMD-SHELL', 'curl -f http://localhost:8080/health/ready || exit 1']
+            test: ['CMD-SHELL', 'curl -f http://localhost:8888/health/ready || exit 1']
             interval: 30s
             timeout: 10s
             retries: 5
@@ -296,8 +286,6 @@ volumes:
         name: social-chat-es-data
     kafka_data:
         name: social-chat-kafka-data
-    minio_data:
-        name: social-chat-minio-data
     keycloak_data:
         name: social-chat-keycloak-data
 

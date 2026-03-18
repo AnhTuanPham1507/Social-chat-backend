@@ -9,17 +9,16 @@ import { USER_REPO_TOKEN } from './application/contracts/user-repository.contrac
 import { UserRepo } from './driven-adapters/repos/user-repository.adapter';
 import { IAMServiceAdapter } from './driven-adapters/services/iam-service.adapter';
 import { AuthController } from './driving-adapters/controllers/auth.controller';
-import { EventPublisherModule } from '@social-chat/infrastructure';
 import { IAM_SERVICE_TOKEN } from '@application/contracts/iam-service.contract';
 import { ConfigService } from '@nestjs/config';
 import { SOCIAL_CHAT_KEYCLOAK_CONFIG } from '@social-chat/common';
+import { EVENT_PUBLISHER } from '@social-chat/domain';
 import { LibAuthModule } from '@social-chat/shared-libs';
+import { AuthEventPublisherAdapter } from './driven-adapters/event-publisher/auth-event-publisher.adapter';
 
 @Module({
   imports: [
     PassportModule,
-    // Import EventPublisherModule to provide EVENT_PUBLISHER token
-    EventPublisherModule,
     LibAuthModule.forRootAsync({
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => {
@@ -41,7 +40,11 @@ import { LibAuthModule } from '@social-chat/shared-libs';
     {
       provide: IAM_SERVICE_TOKEN,
       useClass: IAMServiceAdapter,
-    }
+    },
+    {
+      provide: EVENT_PUBLISHER,
+      useClass: AuthEventPublisherAdapter,
+    },
   ],
   exports: [AUTH_APPLICATION_SERVICE_TOKEN, IAM_SERVICE_TOKEN],
 })

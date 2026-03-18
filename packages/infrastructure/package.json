@@ -17,9 +17,11 @@
     "migration:revert:ts": "ts-node --transpile-only ./node_modules/typeorm/cli.js migration:revert -d database/typeorm.config.ts"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.1009.0",
+    "@aws-sdk/s3-request-presigner": "^3.1009.0",
     "ioredis": "^5.4.1",
     "jwks-rsa": "^3.1.0",
-    "minio": "^8.0.0",
+    "kafkajs": "^2.2.4",
     "nestjs-pino": "^4.0.0",
     "pg": "^8.12.0",
     "typeorm": "^0.3.20",
@@ -37,6 +39,3 @@
     "access": "restricted"
   }
 }
-
-
-

@@ -15,7 +15,7 @@ export class UserCreatedEvent extends DomainEvent {
     readonly email: string,
     readonly fullName: string,
   ) {
-    super();
+    super(userId);
   }
 
   get eventName(): string {

@@ -1,0 +1,22 @@
+{
+  "name": "@social-chat/feed",
+  "version": "0.0.1",
+  "description": "Feed management service for Social Chat",
+  "main": "dist/src/main.js",
+  "scripts": {
+    "build": "nest build",
+    "dev": "cross-env NODE_ENV=development nest start --watch",
+    "start": "node -r tsconfig-paths/register dist/src/main.js",
+    "start:prod": "node -r tsconfig-paths/register dist/src/main.js",
+    "clean": "rimraf dist",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint \"**/*.ts\"",
+    "lint:fix": "eslint \"**/*.ts\" --fix"
+  },
+  "peerDependencies": {
+    "nestjs-cls": "^5.0.0"
+  },
+  "publishConfig": {
+    "access": "restricted"
+  }
+}

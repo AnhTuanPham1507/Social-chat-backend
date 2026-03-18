@@ -30,6 +30,12 @@ export abstract class DomainEvent {
   readonly eventId: string;
 
   /**
+   * The ID of the aggregate root that raised this event.
+   * Used as Kafka partition key to guarantee ordering per aggregate.
+   */
+  readonly aggregateId: string;
+
+  /**
    * Timestamp when the event occurred.
    */
   readonly occurredOn: Date;
@@ -40,8 +46,9 @@ export abstract class DomainEvent {
    */
   readonly eventVersion: number = 1;
 
-  constructor() {
+  constructor(aggregateId: string) {
     this.eventId = randomUUID();
+    this.aggregateId = aggregateId;
     this.occurredOn = new Date();
   }
 
@@ -65,6 +72,7 @@ export abstract class DomainEvent {
   toJSON(): Record<string, unknown> {
     return {
       eventId: this.eventId,
+      aggregateId: this.aggregateId,
       eventName: this.eventName,
       eventVersion: this.eventVersion,
       occurredOn: this.occurredOn.toISOString(),
@@ -79,7 +87,7 @@ export abstract class DomainEvent {
    */
   protected getPayload(): Record<string, unknown> {
     // Get all own properties except base class properties
-    const baseProps = ['eventId', 'occurredOn', 'eventVersion'];
+    const baseProps = ['eventId', 'aggregateId', 'occurredOn', 'eventVersion'];
     const payload: Record<string, unknown> = {};
 
     for (const key of Object.keys(this)) {

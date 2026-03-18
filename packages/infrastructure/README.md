@@ -177,7 +177,6 @@ This package requires the following environment variables:
 
 ### MinIO
 - `MINIO_ENDPOINT`
-- `MINIO_PORT`
 - `MINIO_ACCESS_KEY`
 - `MINIO_SECRET_KEY`
 

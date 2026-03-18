@@ -27,7 +27,9 @@ export * from './configs/interfaces/app-config.interface';
 export * from './configs/interfaces/database-config.interface';
 export * from './configs/interfaces/jwt-config.interface';
 export * from './configs/interfaces/keycloak-config.interface';
-export * from './configs/interfaces/minio-config.interface';
+export * from './configs/interfaces/kafka-config.interface';
+export * from './configs/interfaces/r2-config.interface';
+export * from './configs/interfaces/coconut-config.interface';
 export * from './configs/interfaces/redis-config.interface';
 
 // Base Interfaces

@@ -2,10 +2,11 @@ import { randomUUID } from 'crypto';
 
 import { configs, REQ_ID_HEADER } from '@social-chat/common';
 import { DATABASE_CONFIG, IDatabaseConfig } from '@social-chat/common';
-import { IMinioConfig, MINIO_CONFIG } from '@social-chat/common';
+import { IKafkaAppConfig, KAFKA_CONFIG } from '@social-chat/common';
+import { IR2Config, R2_CONFIG } from '@social-chat/common';
 import { DatabaseModule, REDIS_SERVICE_TOKEN, RedisModule } from '@social-chat/infrastructure';
 import { LogModule } from '@social-chat/infrastructure';
-import { MinioModule } from '@social-chat/infrastructure';
+import { MessagingModule, ObjectStorageModule } from '@social-chat/infrastructure';
 import { Module } from '@nestjs/common/decorators';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { ClsModule } from 'nestjs-cls';
@@ -49,10 +50,16 @@ import { REDIS_CONFIG, SHARED_STORE_CONFIG } from '@social-chat/common';
                 return configService.get<IDatabaseConfig>(DATABASE_CONFIG);
             },
         }),
-        MinioModule.forRootAsync({
+        ObjectStorageModule.forRootAsync({
             inject: [ConfigService],
             useFactory: (configService: ConfigService) => {
-                return configService.get<IMinioConfig>(MINIO_CONFIG);
+                return configService.get<IR2Config>(R2_CONFIG);
+            },
+        }),
+        MessagingModule.forRootAsync({
+            inject: [ConfigService],
+            useFactory: (configService: ConfigService) => {
+                return configService.get<IKafkaAppConfig>(KAFKA_CONFIG);
             },
         }),
         AuthModule,

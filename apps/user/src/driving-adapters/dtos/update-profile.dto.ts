@@ -1,5 +1,5 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import { IsEnum, IsOptional, IsString, IsUrl, Length } from 'class-validator';
+import { IsEnum, IsOptional, IsString, Length } from 'class-validator';
 import { USER_SEX } from '@social-chat/domain';
 
 export class UpdateProfileDto {
@@ -19,9 +19,8 @@ export class UpdateProfileDto {
     @IsEnum(USER_SEX, { message: 'Sex must be MALE, FEMALE, or UNKNOWN' })
     sex?: USER_SEX;
 
-    @ApiPropertyOptional({ description: 'Avatar URL' })
+    @ApiPropertyOptional({ description: 'Avatar object key from asset service (e.g., avatars/uuid-123.jpg)' })
     @IsOptional()
     @IsString()
-    @IsUrl({}, { message: 'Avatar URL must be a valid URL' })
     avatarUrl?: string;
 }

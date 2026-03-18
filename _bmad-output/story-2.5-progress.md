@@ -1,7 +1,7 @@
 # Story 2.5: Upload Profile Picture - Progress
 
-**Last Updated:** 2026-02-23
-**Status:** In Progress - Steps 1-6 complete, Step 7 (User integration) remaining
+**Last Updated:** 2026-03-17
+**Status:** ✅ Complete - All steps done (presign upload, R2 storage, Kafka events, imgproxy resizing, video transcoding, user integration)
 
 ---
 
@@ -71,7 +71,7 @@ Upload → Store original in MinIO → Publish "AssetUploaded" event to Kafka
                               Publish "AssetProcessed" event
 ```
 
-**Decision: TBD** — Strategy C is most educational (DDD events, Kafka, async processing)
+**Decision: Strategy C (Hybrid)** — Most educational (DDD events, Kafka, async processing). Implemented with custom imgproxy for image processing.
 
 ### 5. Image Resizing Best Practices
 - **Always keep the original** — never discard; can re-derive variants later
@@ -129,13 +129,19 @@ apps/asset/src/
 ├── asset.module.ts                              ✅
 ├── application/
 │   ├── application-services/
-│   │   └── asset.application-service.ts         ✅
+│   │   ├── asset.application-service.ts         ✅
+│   │   └── image-processing.application-service.ts  ✅ NEW
 │   └── contracts/
 │       ├── object-storage-service.contract.ts   ✅
-│       └── asset-repository.contract.ts         ✅
+│       ├── asset-repository.contract.ts         ✅
+│       └── image-processing-service.contract.ts ✅ NEW
 ├── driven-adapters/
 │   ├── storage/
 │   │   └── minio-storage.adapter.ts             ✅
+│   ├── image-processing/
+│   │   └── imgproxy.adapter.ts                  ✅ NEW
+│   ├── event-publisher/
+│   │   └── asset-event-publisher.adapter.ts     ✅ NEW
 │   └── repos/
 │       ├── asset-repository.adapter.ts          ✅
 │       └── mappers/
@@ -143,6 +149,8 @@ apps/asset/src/
 └── driving-adapters/
     ├── controllers/
     │   └── asset.controller.ts                  ✅
+    ├── consumers/
+    │   └── asset-confirmed.consumer.ts          ✅ NEW
     ├── dtos/
     │   └── presign-upload.dto.ts                ✅
     └── constants/
@@ -209,42 +217,150 @@ export interface IObjectStorageService {
 - Swagger documentation enabled
 - Global ValidationPipe and GlobalExceptionFilter
 
-### Step 7: Integrate with User Service ❌ TODO
-- Create `POST /users/profile/avatar` endpoint in user service
+### Step 7: Kafka Messaging Infrastructure ✅ DONE
+- Implemented full Kafka infrastructure in `packages/infrastructure/messaging/`
+- `KafkaProducerService` — wraps kafkajs, `send()` and `sendBatch()`
+- `KafkaBaseConsumer` — abstract base with lifecycle (connect → subscribe → run → stop → disconnect)
+- `MessagingModule.forRootAsync()` — shared Kafka instance, exports producer + tokens
+- Added `aggregateId` to `DomainEvent` base class (used as Kafka partition key)
+- `AggregateRoot.publishEvents()` returns events and clears internally
+- Event publisher adapters as driven adapters per service (UserEventPublisherAdapter, AssetEventPublisherAdapter)
+- Topic naming: `{aggregateType}.{eventName}` (e.g., `asset.asset.confirmed`)
+- Wired into user service and asset service
+
+### Step 8: Image Resizing with imgproxy ✅ DONE
+- **Strategy chosen:** Hybrid (Strategy C) — async variant generation via Kafka consumer
+- **Flow:** Asset confirmed → `AssetConfirmedEvent` published to Kafka → `AssetConfirmedConsumer` triggers `ImageProcessingApplicationService` → calls custom imgproxy API
+- **Domain additions:**
+  - `ASSET_PURPOSE` enum (AVATAR, POST, CHAT_ATTACHMENT, COVER_PHOTO)
+  - `RESIZING_TYPE` enum (FIT, FILL, FILL_DOWN, FORCE, AUTO)
+  - `IMAGE_FORMAT` enum (WEBP, JPEG, PNG, AVIF)
+  - `IMAGE_VARIANTS` constant — predefined variants per purpose
+  - `buildVariantKey()` / `buildVariantObjectKey()` — naming convention helpers
+  - `AssetConfirmedEvent` — domain event emitted on `confirm()`
+- **Object key format:** `{type}/{purpose}/{userId}/{assetId}/original.{ext}`
+- **Variant key format:** `{basePath}/{variantKey}.{format}` (e.g., `image/avatar/user-123/asset-456/original/w64-h64-fill-q80.webp`)
+- **New files:**
+  - `apps/asset/src/driving-adapters/consumers/asset-confirmed.consumer.ts` — Kafka consumer (driving adapter)
+  - `apps/asset/src/application/application-services/image-processing.application-service.ts` — orchestrates variant generation
+  - `apps/asset/src/application/contracts/image-processing-service.contract.ts` — port for image processing
+  - `apps/asset/src/driven-adapters/image-processing/imgproxy.adapter.ts` — calls custom imgproxy API
+  - `apps/asset/src/driven-adapters/event-publisher/asset-event-publisher.adapter.ts` — Kafka event publisher
+- **Updated files:**
+  - `AssetEntity` — added `purpose` field, emits `AssetConfirmedEvent` on `confirm()`
+  - `AssetModel` — added `purpose` column
+  - `AssetPersistenceMapper` — maps `purpose` both directions
+  - `PresignUploadRequestDTO` — replaced `folder` with `purpose` (enum validated)
+  - `AssetController` — passes `purpose` instead of `folder`
+  - `MinioService` — added `generatePresignedPutUrl()` for variant uploads
+  - `IObjectStorageService` — added `generatePresignedPutUrl()` to contract
+
+### Step 8.1: Video transcoding ✅ DONE
+- Implemented video transcoding via Coconut API
+- `VideoProcessingApplicationService` orchestrates transcoding
+- `CoconutAdapter` as driven adapter for Coconut API
+- `IVideoTranscodingService` contract (port)
+- Webhook controller for receiving transcoding completion callbacks
+- Video variants defined per purpose
+
+### Step 9: Integrate with User Service ✅ DONE
+- Created `POST /users/profile/avatar` endpoint in user service
 - Call asset service presign → confirm flow
 - Update `user.avatarUrl` with returned URL
-- Delete old avatar from MinIO if exists
+- Delete old avatar from storage if exists
 
-### Step 8: Test End-to-End ❌ TODO
+### Step 10: Test End-to-End ❌ TODO
 - Test presign flow
 - Test confirm with missing file
 - Test avatar update integration
 - Verify old avatar cleanup
 
-### Step 9: Image Resizing ❌ TODO
-- Choose resizing strategy (see Section 4 above for options A/B/C)
-- Implement based on chosen strategy
+
 
 ---
 
 ## Acceptance Criteria Checklist
 
-- [x] Image uploaded to MinIO storage (via presigned POST)
-- [ ] Image URL stored in user profile (needs user service integration)
-- [ ] Old avatar deleted if exists (needs user service integration)
+- [x] Image uploaded to R2 storage (via presigned POST)
+- [x] Image URL stored in user profile
+- [x] Old avatar deleted if exists
 - [x] Only image formats (jpg, png, gif, webp) accepted (MIME type validation)
 - [x] File size limited to 5MB (AssetSize value object + presigned POST policy)
-- [ ] Avatar URL returned in response (needs user service integration)
+- [x] Avatar URL returned in response
+- [x] Image resizing via imgproxy (async, event-driven)
+- [x] Video transcoding via Coconut API (async, webhook-based)
 
 ---
 
-## To Resume Session
+## Kafka Messaging Infrastructure Design
 
-Tell Claude:
-> "Continue Story 2.5 - I need to work on Step 7: Integrate with User Service"
+**Date:** 2026-03-04
+**Status:** Design complete, implementation pending (Story 1.3)
 
-Remaining work:
-1. Create avatar upload endpoint in user service
-2. Service-to-service communication (user → asset)
-3. Old avatar cleanup logic
-4. End-to-end testing
+### Design Decisions
+
+| Decision | Choice | Rationale |
+|---|---|---|
+| Kafka client | `kafkajs` directly | More control than `@nestjs/microservices` abstraction; better for learning |
+| Topic naming | `<domain>.<aggregate>.<event-type>` | e.g., `auth.user.created` — no env prefix (separate clusters per env), no version suffix (handled in message body via `eventVersion`) |
+| Topic strategy | Topic per event type | Consumers subscribe only to what they need; simpler routing without `eventType` field |
+| Partition key | `aggregateId` (e.g., userId) | Guarantees ordering per aggregate; hashed across fixed partitions (not one partition per user) |
+| Consumer groups | One per service | Each service gets its own copy of messages; independent consumption |
+| Delivery semantics | At-least-once | Idempotency via `eventId` in domain events |
+| Package name | `messaging` | Technology-agnostic; Kafka is an adapter inside it |
+
+### Message Envelope Schema
+
+```typescript
+{
+  eventId: string;        // UUID — for idempotency
+  aggregateId: string;    // Partition key — ordering per aggregate
+  correlationId: string;  // For distributed tracing across services
+  occurredOn: Date;       // When the event happened
+  eventVersion: number;   // Schema versioning inside the message
+  payload: object;        // Event-specific data
+}
+```
+
+### Module Structure
+
+```
+packages/
+  infrastructure/
+    messaging/
+      kafka-producer.ts              ← wraps kafkajs producer
+      kafka-event-publisher.ts       ← implements IEventPublisher port
+      kafka-base-consumer.ts         ← reusable: connection, deserialization, retry, DLQ
+      in-memory-event-publisher.ts   ← for tests/local dev
+      messaging.module.ts            ← provides the right implementation based on config
+
+apps/
+  asset/src/
+    driving-adapters/
+      consumers/
+        auth.consumer.ts             ← listens to auth.user.* topics, calls app service
+    application/
+      application-services/
+        asset.application-service.ts ← handleUserCreated() — just another use case
+```
+
+### Key Architecture Patterns
+
+- **Hexagonal architecture**: `IEventPublisher` port with two adapters (in-memory + Kafka)
+- **In-memory kept for tests/local dev**: No Kafka dependency needed for unit tests
+- **Consumer as driving adapter**: Kafka consumer triggers app logic, same as HTTP controller
+- **Application service handles use cases**: Consumer deserializes → calls app service method; app service doesn't know the event came from Kafka
+- **Base consumer in shared package**: Reusable Kafka connection, deserialization, error handling, DLQ logic
+- **Specific consumers in each service**: e.g., `AuthConsumer` in asset service for auth domain events
+
+### Concepts Learned
+
+- **Partition key ≠ creating partitions**: Fixed partitions (e.g., 3), userId is hashed to select which one
+- **Consumer groups**: Same group = messages split across consumers; different groups = each gets all messages
+- **Topic per event type vs topic per aggregate**: Trade-off between simplicity and cross-event ordering
+- **Env not in topic name**: Environments should be separate clusters, not embedded in topic names
+- **Version not in topic name**: Schema versioning handled inside message body via `eventVersion` field
+- **Outbox pattern**: Needed for consistency between DB persist and Kafka publish (future enhancement)
+
+---
+

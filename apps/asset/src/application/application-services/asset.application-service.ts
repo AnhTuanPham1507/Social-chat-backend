@@ -1,7 +1,16 @@
 import { randomUUID } from 'crypto';
-import { Inject, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, Inject, Injectable, NotFoundException } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 
-import { AssetEntity, ASSET_TYPE, MIME_TYPE } from '@social-chat/domain';
+import {
+  AssetEntity,
+  ASSET_PURPOSE,
+  ASSET_STATUS,
+  ASSET_TYPE,
+  MIME_TYPE,
+  type ImageVariantDefinition,
+} from '@social-chat/domain';
+import { IR2Config, R2_CONFIG } from '@social-chat/common';
 import {
   ASSET_REPO_TOKEN,
   IAssetRepository,
@@ -10,82 +19,144 @@ import {
   OBJECT_STORAGE_SERVICE_TOKEN,
   IObjectStorageService,
 } from '@application/contracts/object-storage-service.contract';
+import { AssetEventPublisherAdapter } from '../../driven-adapters/event-publisher/asset-event-publisher.adapter';
+import { AssetPathService } from './asset-path.service';
+import { ImageProcessingApplicationService } from './image-processing.application-service';
 
 export const ASSET_APPLICATION_SERVICE_TOKEN = Symbol(
   'ASSET_APPLICATION_SERVICE',
 );
 
 export interface PresignUploadInput {
-  bucket: string;
-  folder: string;
-  originalName: string;
+  purpose: ASSET_PURPOSE;
   mimeType: MIME_TYPE;
+  originalName: string;
   size: number;
+  createdBy: string;
 }
 
 export interface PresignUploadOutput {
   assetId: string;
-  postURL: string;
-  formData: Record<string, string>;
+  uploadUrl: string;
   key: string;
 }
 
 export interface ConfirmUploadOutput {
   assetId: string;
-  bucket: string;
   key: string;
   url: string;
 }
 
+export interface ValidateAssetOutput {
+  valid: boolean;
+  assetId: string;
+  key: string;
+}
+
+export interface InitiateMultipartUploadInput {
+  purpose: ASSET_PURPOSE;
+  mimeType: MIME_TYPE;
+  originalName: string;
+  size: number;
+  totalParts: number;
+  createdBy: string;
+}
+
+export interface InitiateMultipartUploadOutput {
+  assetId: string;
+  key: string;
+  uploadId: string;
+  partUrls: { partNumber: number; url: string }[];
+}
+
+export interface CompleteMultipartUploadInput {
+  assetId: string;
+  uploadId: string;
+  parts: { partNumber: number; etag: string }[];
+}
+
+export interface ResizeImageInput {
+  assetId: string;
+  variant: Partial<ImageVariantDefinition>;
+}
+
+export interface ResizeImageOutput {
+  url: string;
+  variantKey: string;
+}
+
 export interface IAssetApplicationService {
   presignUpload(input: PresignUploadInput): Promise<PresignUploadOutput>;
+  bulkPresignUpload(inputs: PresignUploadInput[]): Promise<PresignUploadOutput[]>;
   confirmUpload(assetId: string): Promise<ConfirmUploadOutput>;
+  initiateMultipartUpload(input: InitiateMultipartUploadInput): Promise<InitiateMultipartUploadOutput>;
+  completeMultipartUpload(input: CompleteMultipartUploadInput): Promise<ConfirmUploadOutput>;
+  abortMultipartUpload(assetId: string, uploadId: string): Promise<void>;
+  resizeImage(input: ResizeImageInput): Promise<ResizeImageOutput>;
+  deleteAsset(assetId: string, userId: string): Promise<void>;
 }
 
 @Injectable()
 export class AssetApplicationService implements IAssetApplicationService {
+  private readonly _bucket: string;
+
   constructor(
     @Inject(ASSET_REPO_TOKEN)
     private readonly _assetRepo: IAssetRepository,
     @Inject(OBJECT_STORAGE_SERVICE_TOKEN)
     private readonly _storageService: IObjectStorageService,
-  ) {}
+    private readonly _eventPublisher: AssetEventPublisherAdapter,
+    private readonly _assetPathService: AssetPathService,
+    private readonly _imageProcessingService: ImageProcessingApplicationService,
+    private readonly _configService: ConfigService,
+  ) {
+    this._bucket = this._configService.get<IR2Config>(R2_CONFIG).bucket;
+  }
 
   async presignUpload(input: PresignUploadInput): Promise<PresignUploadOutput> {
-    // Generate a unique object key: folder/uuid-timestamp.ext
-    const ext = this._getExtension(input.originalName);
-    const key = `${input.folder}/${randomUUID()}-${Date.now()}${ext}`;
-
-    // Derive asset type from mime type
-    const assetType = this._deriveAssetType(input.mimeType);
+    const assetId = randomUUID();
+    const assetType = this._assetPathService.deriveAssetType(input.mimeType);
+    const key = this._assetPathService.generateOriginalKey(
+      assetId,
+      input.createdBy,
+      input.purpose,
+      input.mimeType,
+      input.originalName,
+    );
 
     // Create domain entity (validates size, sets PENDING status)
     const asset = AssetEntity.create({
-      bucket: input.bucket,
+      bucket: this._bucket,
       key,
       originalName: input.originalName,
       mimeType: input.mimeType,
       size: input.size,
       assetType,
+      purpose: input.purpose,
+      createdBy: input.createdBy,
     });
 
     // Persist asset with PENDING status
     await this._assetRepo.insert(asset);
 
-    // Generate pre-signed POST for direct upload
-    const presigned = await this._storageService.generatePresignedPost({
-      bucket: input.bucket,
+    // Generate pre-signed PUT URL for direct upload
+    const uploadUrl = await this._storageService.generatePresignedPutUrl({
       key,
       contentType: input.mimeType,
-      maxSize: input.size,
+      contentLength: input.size,
     });
 
     return {
       assetId: asset.id,
-      postURL: presigned.postURL,
-      formData: presigned.formData,
+      uploadUrl,
       key,
     };
+  }
+
+  async bulkPresignUpload(
+    inputs: PresignUploadInput[],
+  ): Promise<PresignUploadOutput[]> {
+    return Promise.all(inputs.map((input) => this.presignUpload(input)));
   }
 
   async confirmUpload(assetId: string): Promise<ConfirmUploadOutput> {
@@ -94,47 +165,161 @@ export class AssetApplicationService implements IAssetApplicationService {
       throw new NotFoundException(`Asset ${assetId} not found`);
     }
 
-    if (asset.isConfirmed) {
-      return {
-        assetId: asset.id,
-        bucket: asset.bucket,
-        key: asset.key,
-        url: this._storageService.getPublicUrl(asset.bucket, asset.key),
-      };
+    // Prevent double-confirm — idempotent response if already past PENDING
+    if (asset.status !== ASSET_STATUS.PENDING) {
+      throw new BadRequestException('Asset already confirmed');
     }
 
     // Verify the file was actually uploaded to storage
-    const exists = await this._storageService.verifyFileExists(
-      asset.bucket,
-      asset.key,
-    );
+    const exists = await this._storageService.verifyFileExists(asset.key);
     if (!exists) {
       throw new NotFoundException(
         `File not found in storage. Upload may not be complete.`,
       );
     }
 
-    // Transition to CONFIRMED
+    // Transition to CONFIRMED — emits AssetConfirmedEvent
     asset.confirm();
     await this._assetRepo.update(asset);
 
+    // Publish domain events (triggers image variant generation via Kafka)
+    const events = asset.publishEvents();
+    await this._eventPublisher.publishAll(events);
+
     return {
       assetId: asset.id,
-      bucket: asset.bucket,
       key: asset.key,
-      url: this._storageService.getPublicUrl(asset.bucket, asset.key),
+      url: this._storageService.getPublicUrl(asset.key),
     };
   }
 
-  private _getExtension(filename: string): string {
-    const lastDot = filename.lastIndexOf('.');
-    return lastDot >= 0 ? filename.substring(lastDot) : '';
+  async initiateMultipartUpload(
+    input: InitiateMultipartUploadInput,
+  ): Promise<InitiateMultipartUploadOutput> {
+    const assetId = randomUUID();
+    const assetType = this._assetPathService.deriveAssetType(input.mimeType);
+    const key = this._assetPathService.generateOriginalKey(
+      assetId,
+      input.createdBy,
+      input.purpose,
+      input.mimeType,
+      input.originalName,
+    );
+
+    // Create domain entity (validates size, sets PENDING status)
+    const asset = AssetEntity.create({
+      bucket: this._bucket,
+      key,
+      originalName: input.originalName,
+      mimeType: input.mimeType,
+      size: input.size,
+      assetType,
+      purpose: input.purpose,
+      createdBy: input.createdBy,
+    });
+
+    await this._assetRepo.insert(asset);
+
+    // Initiate multipart upload in R2
+    const uploadId = await this._storageService.initiateMultipartUpload(
+      key,
+      input.mimeType,
+    );
+
+    // Generate presigned URLs for all parts
+    const partUrls = await this._storageService.generatePresignedPartUrls(
+      key,
+      uploadId,
+      input.totalParts,
+    );
+
+    return {
+      assetId: asset.id,
+      key,
+      uploadId,
+      partUrls,
+    };
   }
 
-  private _deriveAssetType(mimeType: MIME_TYPE): ASSET_TYPE {
-    if (mimeType.startsWith('image/')) return ASSET_TYPE.IMAGE;
-    if (mimeType.startsWith('video/')) return ASSET_TYPE.VIDEO;
-    if (mimeType.startsWith('audio/')) return ASSET_TYPE.AUDIO;
-    return ASSET_TYPE.DOCUMENT;
+  async completeMultipartUpload(
+    input: CompleteMultipartUploadInput,
+  ): Promise<ConfirmUploadOutput> {
+    const asset = await this._assetRepo.findById(input.assetId);
+    if (!asset) {
+      throw new NotFoundException(`Asset ${input.assetId} not found`);
+    }
+
+    const result = await this.confirmUpload(asset.id);
+    // Complete the multipart upload in R2 (combines all parts into one object)
+    await this._storageService.completeMultipartUpload(
+      asset.key,
+      input.uploadId,
+      input.parts,
+    );
+
+    return result;
+  }
+
+  async abortMultipartUpload(
+    assetId: string,
+    uploadId: string,
+  ): Promise<void> {
+    const asset = await this._assetRepo.findById(assetId);
+    if (!asset) {
+      throw new NotFoundException(`Asset ${assetId} not found`);
+    }
+
+    // Abort the multipart upload (cleans up uploaded parts in R2)
+    await this._storageService.abortMultipartUpload(asset.key, uploadId);
+
+    // Delete the PENDING asset record
+    await this._assetRepo.delete(assetId);
+  }
+
+  async resizeImage(input: ResizeImageInput): Promise<ResizeImageOutput> {
+    const asset = await this._assetRepo.findById(input.assetId);
+    if (!asset) {
+      throw new NotFoundException(`Asset ${input.assetId} not found`);
+    }
+
+    if (!asset.isConfirmed) {
+      throw new BadRequestException('Asset must be confirmed before resizing');
+    }
+
+    if (asset.assetType !== ASSET_TYPE.IMAGE) {
+      throw new BadRequestException('Only image assets can be resized');
+    }
+
+    // No variant options → return original URL directly
+    if (!input.variant) {
+      return {
+        url: this._storageService.getPublicUrl(asset.key),
+        variantKey: asset.key,
+      };
+    }
+
+    return this._imageProcessingService.resizeImage(
+      asset.key,
+      input.variant,
+    );
+  }
+
+  async deleteAsset(assetId: string, userId: string): Promise<void> {
+    const asset = await this._assetRepo.findById(assetId);
+
+    if (!asset) {
+      throw new NotFoundException(`Asset ${assetId} not found`);
+    }
+
+    if (asset.createdBy !== userId) {
+      throw new ForbiddenException(`You do not own this asset`);
+    }
+
+    // Delete original file and all variants from storage
+    const prefix = this._assetPathService.generateVariantPrefix(asset.key);
+    await this._storageService.deleteByPrefix(prefix);
+
+    // Delete asset record
+    await this._assetRepo.delete(assetId);
   }
 }

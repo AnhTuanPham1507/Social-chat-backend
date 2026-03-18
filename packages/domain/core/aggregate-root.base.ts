@@ -1,5 +1,6 @@
 import { randomUUID } from 'crypto';
 import { DomainEvent } from './domain-event.base';
+import { IEventPublisher } from './event-publisher.port';
 
 export type UUID = string;
 
@@ -109,6 +110,18 @@ export abstract class AggregateRoot<TProps> {
    */
   protected addDomainEvent(event: DomainEvent): void {
     this._domainEvents.push(event);
+  }
+
+  /**
+   * Publishes all collected domain events and clears them.
+   * Ensures events are only cleared after successful publishing.
+   */
+  publishEvents(): DomainEvent[] {
+    const publishedEvents = [...this._domainEvents];
+
+    this._domainEvents = [];
+
+    return publishedEvents;
   }
 
   /**

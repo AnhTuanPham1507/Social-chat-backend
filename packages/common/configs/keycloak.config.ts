@@ -9,14 +9,13 @@ import { IKeycloakConfig } from './interfaces/keycloak-config.interface';
 function getKeycloakAuthCallbackUri(): string {
     // If KEYCLOAK_AUTH_CALLBACK_URL is explicitly set, use it
     if (process.env.KEYCLOAK_AUTH_CALLBACK_URL) {
-        console.log('hehehehe', process.env.KEYCLOAK_AUTH_CALLBACK_URL);
         return process.env.KEYCLOAK_AUTH_CALLBACK_URL;
     }
 
     // Otherwise, construct from APP_URL if available
     if (process.env.APP_URL) {
         const baseUrl = process.env.APP_URL.replace(/\/$/, ''); // Remove trailing slash
-        return `${baseUrl}/auth/callback`;
+        return `${baseUrl}/auth/auth/callback`;
     }
 
     // Fallback: throw error if neither is provided

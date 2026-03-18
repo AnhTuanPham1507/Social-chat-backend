@@ -10,12 +10,12 @@ export * from './cache-storage/redis-base.service';
 export * from './cache-storage/const';
 export * from './cache-storage/redis-key.helper';
 
-// Event Publisher
-export * from './event-publisher';
+// Messaging
+export * from './messaging';
 
-// Minio
-export * from './minio/minio.module';
-export * from './minio/minio.service';
+// Object Storage (R2)
+export * from './object-storage/object-storage.module';
+export * from './object-storage/r2-storage.service';
 
 // External Services
 export * from './external-services';

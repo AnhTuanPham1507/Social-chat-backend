@@ -1,6 +1,6 @@
 import { randomUUID } from 'crypto';
 
-import { DATABASE_CONFIG, IDatabaseConfig, SOCIAL_CHAT_KEYCLOAK_CONFIG } from '@social-chat/common';
+import { DATABASE_CONFIG, IDatabaseConfig, IKafkaAppConfig, KAFKA_CONFIG, SOCIAL_CHAT_KEYCLOAK_CONFIG } from '@social-chat/common';
 import { REDIS_CONFIG, SHARED_STORE_CONFIG } from '@social-chat/common';
 import { REQ_ID_HEADER } from '@social-chat/common';
 import { Module } from '@nestjs/common';
@@ -9,7 +9,7 @@ import { PassportModule } from '@nestjs/passport';
 import { ClsModule } from 'nestjs-cls';
 
 import { configs } from '@social-chat/common';
-import { DatabaseModule, LogModule, REDIS_SERVICE_TOKEN, RedisModule } from '@social-chat/infrastructure';
+import { DatabaseModule, LogModule, MessagingModule, REDIS_SERVICE_TOKEN, RedisModule } from '@social-chat/infrastructure';
 
 import { UserModule } from './user.module';
 import { LibAuthModule } from '@social-chat/shared-libs';
@@ -48,6 +48,12 @@ import { LibAuthModule } from '@social-chat/shared-libs';
             inject: [ConfigService],
             useFactory: (configService: ConfigService) => {
                 return configService.get<IDatabaseConfig>(DATABASE_CONFIG);
+            },
+        }),
+        MessagingModule.forRootAsync({
+            inject: [ConfigService],
+            useFactory: (configService: ConfigService) => {
+                return configService.get<IKafkaAppConfig>(KAFKA_CONFIG);
             },
         }),
         PassportModule,
