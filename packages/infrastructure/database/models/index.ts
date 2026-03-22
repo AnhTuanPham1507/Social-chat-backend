@@ -17,7 +17,6 @@ export * from './user-presence.model';
 
 // Feed models
 export * from './post.model';
-export * from './post-attachment.model';
 export * from './post-reaction.model';
 export * from './post-comment.model';
 export * from './comment-reaction.model';

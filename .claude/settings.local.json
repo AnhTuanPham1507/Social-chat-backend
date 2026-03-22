@@ -35,7 +35,8 @@
       "WebFetch(domain:docs.coconut.co)",
       "WebFetch(domain:coconut.co)",
       "Bash(ls:*)",
-      "Bash(npx next:*)"
+      "Bash(npx next:*)",
+      "WebSearch"
     ]
   }
 }

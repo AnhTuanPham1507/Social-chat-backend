@@ -9,7 +9,6 @@ import {
     OneToMany,
 } from 'typeorm';
 import { UserModel } from './user.model';
-import { PostAttachmentModel } from './post-attachment.model';
 import { PostReactionModel } from './post-reaction.model';
 import { PostCommentModel } from './post-comment.model';
 
@@ -46,6 +45,9 @@ export class PostModel extends BaseModel {
     @Column('uuid', { nullable: true })
     originalPostId?: string;
 
+    @Column('text', { array: true, default: '{}' })
+    attachmentKeys: string[];
+
     @ManyToOne(() => UserModel)
     @JoinColumn({ name: 'author_id' })
     author: UserModel;
@@ -53,9 +55,6 @@ export class PostModel extends BaseModel {
     @ManyToOne(() => PostModel, { nullable: true })
     @JoinColumn({ name: 'original_post_id' })
     originalPost?: PostModel;
-
-    @OneToMany(() => PostAttachmentModel, (a) => a.post)
-    attachments: PostAttachmentModel[];
 
     @OneToMany(() => PostReactionModel, (r) => r.post)
     reactions: PostReactionModel[];

@@ -1,12 +1,11 @@
-import { Body, Controller, Get, Inject, Patch, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Inject, Patch, UseGuards } from '@nestjs/common';
 import { ApiTags, ApiOkResponse, ApiNotFoundResponse, ApiUnauthorizedResponse, ApiBearerAuth, ApiBadRequestResponse } from '@nestjs/swagger';
 import USER_ENDPOINT from '../constants/endpoint.constant';
-import { JwtGuard } from '@social-chat/common';
-import { Request } from 'express';
 import { IUserApplicationService, USER_APPLICATION_SERVICE_TOKEN } from '@application/services/user.application-service';
 import { UserDTO } from '@driving-adapters/dtos/user.dto';
 import { UpdateProfileDto } from '@driving-adapters/dtos/update-profile.dto';
 import { UserMapper } from '@driving-adapters/mappers/user.mapper';
+import { CurrentUser, JwtGuard } from '@social-chat/shared-libs';
 
 @Controller(USER_ENDPOINT.BASE)
 @ApiTags('Users')
@@ -22,9 +21,7 @@ export class UserController {
     @ApiOkResponse({ type: UserDTO, description: 'User profile retrieved successfully' })
     @ApiNotFoundResponse({ description: 'User not found' })
     @ApiUnauthorizedResponse({ description: 'Unauthorized - Invalid or missing token' })
-    public async getUserProfile(@Req() req: Request & { user?: any }): Promise<UserDTO> {
-        const email = req.user?.email as string;
-
+    public async getUserProfile(@CurrentUser('email') email: string): Promise<UserDTO> {
         const user = await this._userApplicationService.getUserProfile(email);
         return UserMapper.fromAppModelToDTO(user);
     }
@@ -35,11 +32,10 @@ export class UserController {
     @ApiNotFoundResponse({ description: 'User not found' })
     @ApiUnauthorizedResponse({ description: 'Unauthorized - Invalid or missing token' })
     public async updateUserProfile(
-        @Req() req: Request & { user?: any },
+        @CurrentUser('email') email: string,
         @Body() dto: UpdateProfileDto,
     ): Promise<UserDTO> {
-        const email = req.user?.email as string;
-
+        console.log(email);
         const user = await this._userApplicationService.updateUserProfile(email, dto);
         return UserMapper.fromAppModelToDTO(user);
     }

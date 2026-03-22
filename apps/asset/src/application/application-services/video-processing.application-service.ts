@@ -30,17 +30,14 @@ export interface ProcessVideoInput {
   size: number;
 }
 
-export interface CoconutOutputUrl {
-  format: string;
-  url: string;
-}
-
 export interface CoconutOutput {
   key: string;
   type: string;
   format: string;
-  urls: (string | CoconutOutputUrl)[];
   status: string;
+  url?: string;
+  urls?: string[];
+  metadata?: Record<string, any>;
 }
 
 export interface HandleTranscodingWebhookInput {
@@ -186,16 +183,15 @@ export class VideoProcessingApplicationService {
     const urls: Record<string, string> = {};
 
     for (const output of outputs) {
-      if (output.type === 'httpstream' && output.urls?.length > 0) {
-        const hlsEntry = output.urls[0];
-        urls.hlsUrl =
-          typeof hlsEntry === 'string' ? hlsEntry : hlsEntry.url;
+      const outputUrl = output.url ?? output.urls?.[0];
+      if (!outputUrl) continue;
+
+      if (output.type === 'httpstream') {
+        urls.hlsUrl = outputUrl;
       }
 
-      if (output.type === 'image' && output.urls?.length > 0) {
-        const thumbEntry = output.urls[0];
-        urls.thumbnailUrl =
-          typeof thumbEntry === 'string' ? thumbEntry : thumbEntry.url;
+      if (output.type === 'image') {
+        urls.thumbnailUrl = outputUrl;
       }
     }
 

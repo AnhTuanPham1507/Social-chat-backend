@@ -20,3 +20,28 @@ export interface IIdTokenPayload {
     email: string;
     fullName: string;
 }
+
+export class AuthUserDto {
+    id: string;
+    email: string;
+    name: string;
+    avatarUrl?: string;
+    phone?: string;
+    roles: string[];
+
+    constructor(params: {
+        id: string;
+        email: string;
+        name: string;
+        avatarUrl?: string;
+        phone?: string;
+        roles: string[];
+    }) {
+        this.id = params.id;
+        this.email = params.email;
+        this.name = params.name;
+        this.avatarUrl = params.avatarUrl;
+        this.phone = params.phone;
+        this.roles = params.roles;
+    }
+}

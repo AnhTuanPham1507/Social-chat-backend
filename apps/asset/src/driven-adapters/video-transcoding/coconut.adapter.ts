@@ -65,8 +65,16 @@ export class CoconutAdapter implements IVideoTranscodingService {
           },
           variants: input.variants,
         },
-        'jpg:300x': {
-          path: '/thumbnail.jpg',
+        'jpg:160x90': {
+          path: '/thumbnails/thumbs_%05d.jpg',
+          interval: 2,
+          sprite: {
+            columns: 10,
+            limit: 100,
+          },
+          vtt: {
+            filename: 'thumbnails.vtt',
+          },
         },
       },
     };

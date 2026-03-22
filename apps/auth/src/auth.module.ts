@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { PassportModule } from '@nestjs/passport';
 
 import {
@@ -13,7 +13,7 @@ import { IAM_SERVICE_TOKEN } from '@application/contracts/iam-service.contract';
 import { ConfigService } from '@nestjs/config';
 import { SOCIAL_CHAT_KEYCLOAK_CONFIG } from '@social-chat/common';
 import { EVENT_PUBLISHER } from '@social-chat/domain';
-import { LibAuthModule } from '@social-chat/shared-libs';
+import { LibAuthModule, RefreshTokenMiddleware } from '@social-chat/shared-libs';
 import { AuthEventPublisherAdapter } from './driven-adapters/event-publisher/auth-event-publisher.adapter';
 
 @Module({
@@ -48,4 +48,8 @@ import { AuthEventPublisherAdapter } from './driven-adapters/event-publisher/aut
   ],
   exports: [AUTH_APPLICATION_SERVICE_TOKEN, IAM_SERVICE_TOKEN],
 })
-export class AuthModule {}
+export class AuthModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(RefreshTokenMiddleware).forRoutes('*');
+  }
+}

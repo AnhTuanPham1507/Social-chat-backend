@@ -7,12 +7,9 @@ import {
   Post,
   Body,
   Param,
-  Req,
   UseGuards,
 } from '@nestjs/common';
 import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
-import { Request } from 'express';
-import { JwtGuard } from '@social-chat/common';
 
 import {
   ASSET_APPLICATION_SERVICE_TOKEN,
@@ -37,10 +34,11 @@ import {
   CompleteMultipartUploadResponseDTO,
   AbortMultipartUploadRequestDTO,
 } from '../dtos/multipart-upload.dto';
+import { CurrentUser, JwtGuard } from '@social-chat/shared-libs';
 
 @Controller(ENDPOINT.ASSET.BASE)
 @ApiTags('Assets')
-// @UseGuards(JwtGuard)
+@UseGuards(JwtGuard)
 @ApiBearerAuth()
 export class AssetController {
   constructor(
@@ -55,11 +53,9 @@ export class AssetController {
   @Post(ENDPOINT.ASSET.PRESIGN_UPLOAD)
   @HttpCode(HttpStatus.CREATED)
   async presignUpload(
-    @Req() req: Request & { user?: any },
+    @CurrentUser('id') userId: string,
     @Body() dto: PresignUploadRequestDTO,
   ): Promise<PresignUploadResponseDTO> {
-    // const userId = req.user?.sub as string;
-    const userId = '9882e956-1252-4df2-a8d6-c151198eab34'
 
     const result = await this._assetAppService.presignUpload({
       purpose: dto.purpose,
@@ -84,10 +80,9 @@ export class AssetController {
   @Post(ENDPOINT.ASSET.BULK_PRESIGN_UPLOAD)
   @HttpCode(HttpStatus.CREATED)
   async bulkPresignUpload(
-    @Req() req: Request & { user?: any },
+    @CurrentUser('id') userId: string,
     @Body() dto: BulkPresignUploadRequestDTO,
   ): Promise<BulkPresignUploadResponseDTO> {
-    const userId = req.user?.sub as string;
 
     const items = await this._assetAppService.bulkPresignUpload(
       dto.items.map((item) => ({
@@ -146,10 +141,9 @@ export class AssetController {
   @Post(ENDPOINT.ASSET.INITIATE_MULTIPART)
   @HttpCode(HttpStatus.CREATED)
   async initiateMultipartUpload(
-    @Req() req: Request & { user?: any },
+    @CurrentUser('id') userId: string,
     @Body() dto: InitiateMultipartUploadRequestDTO,
   ): Promise<InitiateMultipartUploadResponseDTO> {
-    const userId = req.user?.sub as string;
 
     return this._assetAppService.initiateMultipartUpload({
       purpose: dto.purpose,
@@ -196,11 +190,9 @@ export class AssetController {
   @Delete(ENDPOINT.ASSET.DELETE)
   @HttpCode(HttpStatus.NO_CONTENT)
   async deleteAsset(
-    @Req() req: Request & { user?: any },
+    @CurrentUser('id') userId: string,
     @Param('assetId') assetId: string,
   ): Promise<void> {
-    const userId = req.user?.sub as string;
-
     await this._assetAppService.deleteAsset(assetId, userId);
   }
 }

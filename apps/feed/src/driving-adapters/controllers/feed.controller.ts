@@ -11,7 +11,6 @@ import {
     Patch,
     Post,
     Query,
-    Req,
     UseGuards,
 } from '@nestjs/common';
 import {
@@ -26,14 +25,13 @@ import {
     ApiNoContentResponse,
 } from '@nestjs/swagger';
 import FEED_ENDPOINT from '../constants/endpoint.constant';
-import { JwtGuard } from '@social-chat/common';
-import { Request } from 'express';
 import { IFeedApplicationService, FEED_APPLICATION_SERVICE_TOKEN } from '@application/services/feed.application-service';
 import { PostDTO } from '@driving-adapters/dtos/post.dto';
 import { CreatePostDto } from '@driving-adapters/dtos/create-post.dto';
 import { UpdatePostDto } from '@driving-adapters/dtos/update-post.dto';
 import { PaginationQueryDto } from '@driving-adapters/dtos/pagination-query.dto';
 import { PostMapper } from '@driving-adapters/mappers/post.mapper';
+import { CurrentUser, JwtGuard } from '@social-chat/shared-libs';
 
 @Controller(FEED_ENDPOINT.BASE)
 @ApiTags('Feed')
@@ -50,11 +48,9 @@ export class FeedController {
     @ApiBadRequestResponse({ description: 'Invalid input data' })
     @ApiUnauthorizedResponse({ description: 'Unauthorized - Invalid or missing token' })
     public async createPost(
-        @Req() req: Request & { user?: any },
+        @CurrentUser('id') userId: string,
         @Body() dto: CreatePostDto,
     ): Promise<PostDTO> {
-        const userId = req.user?.sub as string;
-
         const post = await this._feedApplicationService.createPost(userId, dto);
         return PostMapper.fromAppModelToDTO(post);
     }
@@ -73,11 +69,9 @@ export class FeedController {
     @ApiOkResponse({ type: [PostDTO], description: 'User posts retrieved successfully' })
     @ApiUnauthorizedResponse({ description: 'Unauthorized - Invalid or missing token' })
     public async getMyPosts(
-        @Req() req: Request & { user?: any },
+        @CurrentUser('id') userId: string,
         @Query() query: PaginationQueryDto,
     ): Promise<PostDTO[]> {
-        const userId = req.user?.sub as string;
-
         const posts = await this._feedApplicationService.getPostsByAuthor(userId, query.page, query.limit);
         return posts.map(PostMapper.fromAppModelToDTO);
     }
@@ -111,12 +105,10 @@ export class FeedController {
     @ApiForbiddenResponse({ description: 'Not allowed to update this post' })
     @ApiUnauthorizedResponse({ description: 'Unauthorized - Invalid or missing token' })
     public async updatePost(
-        @Req() req: Request & { user?: any },
+        @CurrentUser('id') userId: string,
         @Param('id', ParseUUIDPipe) id: string,
         @Body() dto: UpdatePostDto,
     ): Promise<PostDTO> {
-        const userId = req.user?.sub as string;
-
         const post = await this._feedApplicationService.updatePost(userId, id, dto);
         return PostMapper.fromAppModelToDTO(post);
     }
@@ -128,11 +120,9 @@ export class FeedController {
     @ApiForbiddenResponse({ description: 'Not allowed to delete this post' })
     @ApiUnauthorizedResponse({ description: 'Unauthorized - Invalid or missing token' })
     public async deletePost(
-        @Req() req: Request & { user?: any },
+        @CurrentUser('id') userId: string,
         @Param('id', ParseUUIDPipe) id: string,
     ): Promise<void> {
-        const userId = req.user?.sub as string;
-
         await this._feedApplicationService.deletePost(userId, id);
     }
 }

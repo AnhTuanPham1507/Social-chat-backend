@@ -1,15 +1,17 @@
-import { createParamDecorator, ExecutionContext } from '@nestjs/common';
+import { createParamDecorator, ExecutionContext, UnauthorizedException } from '@nestjs/common';
 
-import { IAccessTokenPayload } from '../dtos/jwt-payload.dto';
+import { AuthUserDto } from '../dtos/jwt-payload.dto';
 
 export const CurrentUser = createParamDecorator(
-    (data: keyof IAccessTokenPayload | undefined, ctx: ExecutionContext) => {
+    (data: keyof AuthUserDto | undefined, ctx: ExecutionContext) => {
         const request = ctx.switchToHttp().getRequest();
-        const user = request.user as IAccessTokenPayload | undefined;
+        const user = request.user as AuthUserDto | undefined;
 
         if (!user) {
-            return undefined;
+            throw new UnauthorizedException();
         }
+
+        console.log(user, 'hehehe');
 
         return data ? user[data] : user;
     },

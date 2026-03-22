@@ -1,7 +1,8 @@
-import { IKeycloakConfig } from "@social-chat/common";
+import { IKeycloakConfig, isProduction } from "@social-chat/common";
 import {  KeycloakApiClient } from "./services/keycloak.service";
 import { Module, DynamicModule } from "@nestjs/common";
 import { JwtStrategy } from "./strategies";
+import { RefreshTokenMiddleware, REFRESH_TOKEN_OPTIONS } from "./middlewares";
 
 export const KEYCLOAK_MODULE_OPTIONS = Symbol('KEYCLOAK_MODULE_OPTIONS');
 
@@ -26,8 +27,13 @@ export class LibAuthModule {
           provide: KeycloakApiClient,
           useFactory: () => new KeycloakApiClient(options.config),
         },
+        {
+          provide: REFRESH_TOKEN_OPTIONS,
+          useValue: { isProduction: isProduction() },
+        },
+        RefreshTokenMiddleware,
       ],
-      exports: [KeycloakApiClient],
+      exports: [KeycloakApiClient, REFRESH_TOKEN_OPTIONS, RefreshTokenMiddleware],
     };
   }
 
@@ -45,9 +51,14 @@ export class LibAuthModule {
           },
           inject: options.inject || [],
         },
-        JwtStrategy
+        {
+          provide: REFRESH_TOKEN_OPTIONS,
+          useValue: { isProduction: isProduction() },
+        },
+        JwtStrategy,
+        RefreshTokenMiddleware,
       ],
-      exports: [KeycloakApiClient, JwtStrategy],
+      exports: [KeycloakApiClient, JwtStrategy, REFRESH_TOKEN_OPTIONS, RefreshTokenMiddleware],
     };
   }
 }

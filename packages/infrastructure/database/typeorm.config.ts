@@ -13,7 +13,6 @@ import { MessageReadReceiptModel } from './models/message-read-receipt.model';
 import { FriendshipModel } from './models/friendship.model';
 import { UserPresenceModel } from './models/user-presence.model';
 import { PostModel } from './models/post.model';
-import { PostAttachmentModel } from './models/post-attachment.model';
 import { PostReactionModel } from './models/post-reaction.model';
 import { PostCommentModel } from './models/post-comment.model';
 import { CommentReactionModel } from './models/comment-reaction.model';
@@ -40,7 +39,6 @@ const config: DataSourceOptions = {
         FriendshipModel,
         UserPresenceModel,
         PostModel,
-        PostAttachmentModel,
         PostReactionModel,
         PostCommentModel,
         CommentReactionModel,

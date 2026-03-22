@@ -249,7 +249,6 @@ export class AssetApplicationService implements IAssetApplicationService {
       throw new NotFoundException(`Asset ${input.assetId} not found`);
     }
 
-    const result = await this.confirmUpload(asset.id);
     // Complete the multipart upload in R2 (combines all parts into one object)
     await this._storageService.completeMultipartUpload(
       asset.key,
@@ -257,6 +256,8 @@ export class AssetApplicationService implements IAssetApplicationService {
       input.parts,
     );
 
+    const result = await this.confirmUpload(asset.id);
+  
     return result;
   }
 

@@ -3,7 +3,7 @@ import { randomUUID } from 'crypto';
 import { DATABASE_CONFIG, IDatabaseConfig, IKafkaAppConfig, KAFKA_CONFIG, SOCIAL_CHAT_KEYCLOAK_CONFIG } from '@social-chat/common';
 import { REDIS_CONFIG, SHARED_STORE_CONFIG } from '@social-chat/common';
 import { REQ_ID_HEADER } from '@social-chat/common';
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { PassportModule } from '@nestjs/passport';
 import { ClsModule } from 'nestjs-cls';
@@ -12,7 +12,7 @@ import { configs } from '@social-chat/common';
 import { DatabaseModule, LogModule, MessagingModule, REDIS_SERVICE_TOKEN, RedisModule } from '@social-chat/infrastructure';
 
 import { UserModule } from './user.module';
-import { LibAuthModule } from '@social-chat/shared-libs';
+import { LibAuthModule, RefreshTokenMiddleware } from '@social-chat/shared-libs';
 
 @Module({
     imports: [
@@ -68,4 +68,8 @@ import { LibAuthModule } from '@social-chat/shared-libs';
     ],
     providers: [],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+    configure(consumer: MiddlewareConsumer) {
+        consumer.apply(RefreshTokenMiddleware).forRoutes('*');
+    }
+}
