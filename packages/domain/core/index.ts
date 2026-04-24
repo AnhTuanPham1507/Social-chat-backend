@@ -3,4 +3,4 @@ export * from './domain-event.base';
 export * from './aggregate-root.base';
 
 // Ports
-export * from './event-publisher.port';
+export * from './domain-event-bus.port';

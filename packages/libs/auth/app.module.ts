@@ -1,5 +1,5 @@
 import { IKeycloakConfig, isProduction } from "@social-chat/common";
-import {  KeycloakApiClient } from "./services/keycloak.service";
+import { KeycloakApiClient } from "./services/keycloak.service";
 import { Module, DynamicModule } from "@nestjs/common";
 import { JwtStrategy } from "./strategies";
 import { RefreshTokenMiddleware, REFRESH_TOKEN_OPTIONS } from "./middlewares";
@@ -18,7 +18,6 @@ export interface KeycloakModuleAsyncOptions {
 
 @Module({})
 export class LibAuthModule {
-  // Static configuration
   static forRoot(options: KeycloakModuleOptions): DynamicModule {
     return {
       module: LibAuthModule,
@@ -37,7 +36,6 @@ export class LibAuthModule {
     };
   }
 
-  // Async configuration with ConfigService
   static forRootAsync(options: KeycloakModuleAsyncOptions): DynamicModule {
     return {
       module: LibAuthModule,

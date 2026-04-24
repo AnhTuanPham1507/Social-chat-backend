@@ -10,6 +10,8 @@ export class UserMapper {
         dto.phone = user.phone;
         dto.sex = user.sex;
         dto.avatarUrl = user.avatarUrl;
+        dto.interests = user.interests;
+        dto.hasCompletedOnboarding = user.hasCompletedOnboarding;
         dto.createdAt = user.createdAt;
         dto.updatedAt = user.updatedAt;
         dto.deletedAt = user.deletedAt;

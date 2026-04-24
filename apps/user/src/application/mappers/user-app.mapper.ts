@@ -36,6 +36,8 @@ export class UserAppMapper {
       phone: entity.phone?.value,
       sex: entity.sex.value,
       avatarUrl: entity.avatarUrl?.value,
+      interests: entity.interests,
+      hasCompletedOnboarding: entity.hasCompletedOnboarding,
       createdAt: entity.createdAt,
       updatedAt: entity.updatedAt,
       deletedAt: entity.deletedAt,

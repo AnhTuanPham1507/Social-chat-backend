@@ -1,0 +1,21 @@
+{
+  "name": "social-chat-postgres-connector",
+  "config": {
+    "connector.class": "io.debezium.connector.postgresql.PostgresConnector",
+    "database.hostname": "host.docker.internal",
+    "database.port": "${DB_PORT}",
+    "database.user": "${DB_USERNAME}",
+    "database.password": "${DB_PASSWORD}",
+    "database.dbname": "${DB_DATABASE}",
+    "topic.prefix": "social-chat-cdc",
+    "table.include.list": "public.posts,public.reactions,public.comments,public.users",
+    "plugin.name": "pgoutput",
+    "slot.name": "social_chat_debezium",
+    "publication.name": "social_chat_publication",
+    "tombstones.on.delete": "false",
+    "decimal.handling.mode": "string",
+    "time.precision.mode": "connect",
+    "snapshot.mode": "initial",
+    "heartbeat.interval.ms": "10000"
+  }
+}

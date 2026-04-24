@@ -11,7 +11,7 @@ import {
 import { ApiTags, ApiExcludeEndpoint } from '@nestjs/swagger';
 
 import { VideoProcessingApplicationService } from '../../application/application-services/video-processing.application-service';
-import ENDPOINT from '../constants/endpoint.constant';
+import ENDPOINT from '../../constants/endpoint.constant';
 import { mapCoconutWebhookBody } from '../dtos/coconut-webhook.dto';
 
 /**

@@ -1,17 +1,19 @@
 import { randomUUID } from 'crypto';
+import { resolve } from 'path';
 
 import { configs, REQ_ID_HEADER } from '@social-chat/common';
 import { DATABASE_CONFIG, IDatabaseConfig } from '@social-chat/common';
 import { IKafkaAppConfig, KAFKA_CONFIG } from '@social-chat/common';
 import { IR2Config, R2_CONFIG } from '@social-chat/common';
 import { SOCIAL_CHAT_KEYCLOAK_CONFIG } from '@social-chat/common';
-import { DatabaseModule, REDIS_SERVICE_TOKEN, RedisModule } from '@social-chat/infrastructure';
+import { PostgresModule, REDIS_SERVICE_TOKEN, RedisModule } from '@social-chat/infrastructure';
 import { LogModule } from '@social-chat/infrastructure';
 import { MessagingModule, ObjectStorageModule } from '@social-chat/infrastructure';
 import { REDIS_CONFIG, SHARED_STORE_CONFIG } from '@social-chat/common';
 import { Module } from '@nestjs/common/decorators';
 import { MiddlewareConsumer, NestModule } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { EventEmitterModule } from '@nestjs/event-emitter';
 import { PassportModule } from '@nestjs/passport';
 import { ClsModule } from 'nestjs-cls';
 import { LibAuthModule, RefreshTokenMiddleware } from '@social-chat/shared-libs';
@@ -23,7 +25,10 @@ import { AssetModule } from './asset.module';
     ConfigModule.forRoot({
       isGlobal: true,
       cache: true,
-      envFilePath: `.env`,
+      envFilePath: [
+        resolve(__dirname, '..', '..', '..', 'config', '.env.asset'),
+        resolve(__dirname, '..', '..', '..', 'config', '.env.common'),
+      ],
       load: [configs],
     }),
     ClsModule.forRoot({
@@ -37,6 +42,7 @@ import { AssetModule } from './asset.module';
         },
       },
     }),
+    EventEmitterModule.forRoot(),
     RedisModule.registerAsync([
       {
         serviceToken: REDIS_SERVICE_TOKEN.CACHE_SERVICE,
@@ -48,7 +54,7 @@ import { AssetModule } from './asset.module';
       },
     ]),
     LogModule,
-    DatabaseModule.forRootAsync({
+    PostgresModule.forRootAsync({
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => {
         return configService.get<IDatabaseConfig>(DATABASE_CONFIG);
@@ -76,6 +82,7 @@ import { AssetModule } from './asset.module';
     }),
     AssetModule,
   ],
+  providers: [],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {

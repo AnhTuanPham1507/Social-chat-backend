@@ -60,7 +60,9 @@ services:
     # =========================================================================
 
     elasticsearch:
-        image: docker.elastic.co/elasticsearch/elasticsearch:8.11.0
+        build:
+            context: ./docker/elasticsearch
+            dockerfile: Dockerfile
         container_name: social-chat-elasticsearch
         restart: always
         environment:
@@ -92,6 +94,7 @@ services:
     kafka:
         image: apache/kafka:3.7.0
         container_name: social-chat-kafka
+        hostname: kafka
         restart: always
         environment:
             KAFKA_NODE_ID: 1
@@ -119,12 +122,15 @@ services:
         volumes:
             - kafka_data:/var/lib/kafka/data
         healthcheck:
-            test: ['CMD-SHELL', 'kafka-broker-api-versions.sh --bootstrap-server localhost:9092 > /dev/null 2>&1']
+            test: ['CMD-SHELL', '/opt/kafka/bin/kafka-broker-api-versions.sh --bootstrap-server kafka:9092 > /dev/null 2>&1']
             interval: 10s
             timeout: 10s
-            retries: 5
+            retries: 10
+            start_period: 30s
         networks:
-            - social-chat-network
+            social-chat-network:
+                aliases:
+                    - kafka
 
     # =========================================================================
     # API GATEWAY
@@ -230,22 +236,87 @@ services:
             - social-chat-network
 
     # =========================================================================
+    # DOCUMENT DATABASE (Feed Read Model)
+    # =========================================================================
+
+    mongodb:
+        image: mongo:7.0
+        container_name: social-chat-mongodb
+        restart: always
+        environment:
+            MONGO_INITDB_ROOT_USERNAME: ${MONGO_USERNAME:-mongo}
+            MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD:-mongo123}
+        volumes:
+            - mongodb_data:/data/db
+        ports:
+            - '27017:27017'
+        healthcheck:
+            test: ['CMD', 'mongosh', '--eval', "db.adminCommand('ping')"]
+            interval: 10s
+            timeout: 5s
+            retries: 5
+        networks:
+            - social-chat-network
+
+    # =========================================================================
+    # CDC (Change Data Capture)
+    # =========================================================================
+
+    kafka-connect:
+        image: debezium/connect:2.5
+        container_name: social-chat-kafka-connect
+        restart: always
+        environment:
+            BOOTSTRAP_SERVERS: kafka:9092
+            GROUP_ID: social-chat-connect
+            CONFIG_STORAGE_TOPIC: connect-configs
+            OFFSET_STORAGE_TOPIC: connect-offsets
+            STATUS_STORAGE_TOPIC: connect-status
+            CONFIG_STORAGE_REPLICATION_FACTOR: 1
+            OFFSET_STORAGE_REPLICATION_FACTOR: 1
+            STATUS_STORAGE_REPLICATION_FACTOR: 1
+            KEY_CONVERTER: org.apache.kafka.connect.json.JsonConverter
+            VALUE_CONVERTER: org.apache.kafka.connect.json.JsonConverter
+            CONNECT_KEY_CONVERTER_SCHEMAS_ENABLE: 'false'
+            CONNECT_VALUE_CONVERTER_SCHEMAS_ENABLE: 'false'
+        extra_hosts:
+            - 'host.docker.internal:host-gateway'
+        ports:
+            - '8083:8083'
+        volumes:
+            # Mount connector JSON definitions (register via curl from host or from inside the container)
+            - ./scripts/connectors:/etc/kafka-connect/connectors:ro
+            # Persist any custom connector plugins you drop in later
+            - kafka_connect_data:/kafka/connect
+        depends_on:
+            kafka:
+                condition: service_healthy
+        healthcheck:
+            test: ['CMD-SHELL', 'curl -f http://localhost:8083/connectors || exit 1']
+            interval: 10s
+            timeout: 5s
+            retries: 10
+            start_period: 30s
+        networks:
+            - social-chat-network
+
+    # =========================================================================
     # DEVELOPMENT TOOLS (Optional - uncomment if needed)
     # =========================================================================
 
-    # kafka-ui:
-    #     image: provectuslabs/kafka-ui:latest
-    #     container_name: social-chat-kafka-ui
-    #     restart: always
-    #     environment:
-    #         KAFKA_CLUSTERS_0_NAME: social-chat
-    #         KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:9092
-    #     ports:
-    #         - '8081:8080'
-    #     depends_on:
-    #         - kafka
-    #     networks:
-    #         - social-chat-network
+    kafka-ui:
+        image: provectuslabs/kafka-ui:latest
+        container_name: social-chat-kafka-ui
+        restart: always
+        environment:
+            KAFKA_CLUSTERS_0_NAME: social-chat
+            KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:9092
+        ports:
+            - '8081:8080'
+        depends_on:
+            - kafka
+        networks:
+            - social-chat-network
 
     # redis-commander:
     #     image: rediscommander/redis-commander:latest
@@ -288,6 +359,11 @@ volumes:
         name: social-chat-kafka-data
     keycloak_data:
         name: social-chat-keycloak-data
+    mongodb_data:
+        name: social-chat-mongodb-data
+    kafka_connect_data:
+        name: social-chat-kafka-connect-data
+        
 
 # =============================================================================
 # NETWORKS

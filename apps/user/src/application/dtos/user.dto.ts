@@ -7,9 +7,17 @@ export class User {
   phone?: string;
   sex: USER_SEX;
   avatarUrl?: string;
+  interests: string[];
+  hasCompletedOnboarding: boolean;
   createdAt?: Date;
   updatedAt?: Date;
   deletedAt?: Date;
+}
+
+export interface CreateUserInput {
+  id: string;
+  email: string;
+  fullName: string;
 }
 
 export interface UpdateProfileInput {
@@ -17,4 +25,5 @@ export interface UpdateProfileInput {
   phone?: string;
   sex?: USER_SEX;
   avatarUrl?: string;
+  interests?: string[];
 }

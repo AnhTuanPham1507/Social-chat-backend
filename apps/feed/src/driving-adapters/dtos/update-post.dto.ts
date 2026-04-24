@@ -1,5 +1,5 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import { IsEnum, IsOptional, IsString, MaxLength } from 'class-validator';
+import { IsArray, IsEnum, IsOptional, IsString, MaxLength } from 'class-validator';
 import { POST_VISIBILITY } from '@social-chat/domain';
 
 export class UpdatePostDto {
@@ -13,4 +13,10 @@ export class UpdatePostDto {
     @IsOptional()
     @IsEnum(POST_VISIBILITY, { message: 'Visibility must be public, friends, or private' })
     visibility?: POST_VISIBILITY;
+
+    @ApiPropertyOptional({ description: 'Attachment keys', type: [String] })
+    @IsOptional()
+    @IsArray()
+    @IsString({ each: true })
+    attachmentKeys?: string[];
 }

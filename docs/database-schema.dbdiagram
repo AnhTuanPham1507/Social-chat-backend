@@ -83,7 +83,7 @@
       "y": 832
     },
     {
-      "name": "post_comments",
+      "name": "comments",
       "schemaName": "public",
       "x": 1672,
       "y": 1088
@@ -258,7 +258,7 @@
       "firstFieldNames": [
         "author_id"
       ],
-      "firstTableName": "post_comments",
+      "firstTableName": "comments",
       "firstSchemaName": "public",
       "firstRelation": "*",
       "secondFieldNames": [
@@ -513,7 +513,7 @@
       "firstFieldNames": [
         "post_id"
       ],
-      "firstTableName": "post_comments",
+      "firstTableName": "comments",
       "firstSchemaName": "public",
       "firstRelation": "*",
       "secondFieldNames": [
@@ -543,13 +543,13 @@
       "firstFieldNames": [
         "parent_comment_id"
       ],
-      "firstTableName": "post_comments",
+      "firstTableName": "comments",
       "firstSchemaName": "public",
       "firstRelation": "1",
       "secondFieldNames": [
         "id"
       ],
-      "secondTableName": "post_comments",
+      "secondTableName": "comments",
       "secondSchemaName": "public",
       "secondRelation": "1",
       "checkPoints": []
@@ -564,7 +564,7 @@
       "secondFieldNames": [
         "id"
       ],
-      "secondTableName": "post_comments",
+      "secondTableName": "comments",
       "secondSchemaName": "public",
       "secondRelation": "1",
       "checkPoints": []

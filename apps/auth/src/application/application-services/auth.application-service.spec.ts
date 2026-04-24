@@ -1,16 +1,16 @@
 import { Test, TestingModule } from '@nestjs/testing';
 
 import { IAM_SERVICE_TOKEN, IIAMService } from '../contracts/iam-service.contract';
-import { IUserRepository, USER_REPO_TOKEN } from '../contracts/user-repository.contract';
+import { IUserService, USER_SERVICE_TOKEN } from '../contracts/user-service.contract';
 import { AuthTokens, ExchangeTokenInput } from '../dtos/auth.dto';
-import { IIdTokenpayload } from '../dtos/jwt.dto';
+import { IIdTokenPayload } from '../dtos/jwt.dto';
 
 import { AuthApplicationService } from './auth.application-service';
 
 describe('AuthApplicationService', () => {
     let service: AuthApplicationService;
     let mockIamService: jest.Mocked<IIAMService>;
-    let mockUserRepo: jest.Mocked<IUserRepository>;
+    let mockUserService: jest.Mocked<IUserService>;
 
     const mockAuthTokens: AuthTokens = {
         accessToken: 'mock-access-token',
@@ -20,14 +20,10 @@ describe('AuthApplicationService', () => {
         refreshExpiresIn: 86400,
     };
 
-    const mockIdTokenPayload: IIdTokenpayload = {
+    const mockIdTokenPayload: IIdTokenPayload = {
+        sub: 'keycloak-user-uuid',
         email: 'test@example.com',
-        full_name: 'Test User',
-        sub: 'user-123',
-        iss: 'https://issuer.com',
-        aud: 'client-id',
-        exp: Math.floor(Date.now() / 1000) + 3600,
-        iat: Math.floor(Date.now() / 1000),
+        name: 'Test User',
     };
 
     beforeEach(async () => {
@@ -39,10 +35,8 @@ describe('AuthApplicationService', () => {
             getAuthorizationUrl: jest.fn(),
         };
 
-        mockUserRepo = {
-            insert: jest.fn(),
-            findByEmail: jest.fn(),
-            findById: jest.fn(),
+        mockUserService = {
+            createUser: jest.fn(),
         };
 
         const module: TestingModule = await Test.createTestingModule({
@@ -53,8 +47,8 @@ describe('AuthApplicationService', () => {
                     useValue: mockIamService,
                 },
                 {
-                    provide: USER_REPO_TOKEN,
-                    useValue: mockUserRepo,
+                    provide: USER_SERVICE_TOKEN,
+                    useValue: mockUserService,
                 },
             ],
         }).compile();
@@ -75,36 +69,25 @@ describe('AuthApplicationService', () => {
             },
         };
 
-        it('should exchange code for tokens and create a new user', async () => {
+        it('should exchange code for tokens and create user via user service', async () => {
             mockIamService.exchangeCodeForToken.mockResolvedValue(mockAuthTokens);
             mockIamService.verifyToken.mockResolvedValue(mockIdTokenPayload);
-            mockUserRepo.findByEmail.mockResolvedValue(null);
-            mockUserRepo.insert.mockResolvedValue(undefined);
+            mockUserService.createUser.mockResolvedValue({
+                id: 'user-123',
+                email: 'test@example.com',
+                fullName: 'Test User',
+            });
 
             const result = await service.authCallback(exchangeTokenInput);
 
             expect(result).toEqual(mockAuthTokens);
             expect(mockIamService.exchangeCodeForToken).toHaveBeenCalledWith(exchangeTokenInput);
             expect(mockIamService.verifyToken).toHaveBeenCalledWith(mockAuthTokens.idToken);
-            expect(mockUserRepo.findByEmail).toHaveBeenCalledWith(mockIdTokenPayload.email);
-            expect(mockUserRepo.insert).toHaveBeenCalled();
-        });
-
-        it('should not create user if already exists', async () => {
-            const existingUser = {
-                id: 'existing-user-id',
-                email: { value: 'test@example.com' },
-            };
-
-            mockIamService.exchangeCodeForToken.mockResolvedValue(mockAuthTokens);
-            mockIamService.verifyToken.mockResolvedValue(mockIdTokenPayload);
-            mockUserRepo.findByEmail.mockResolvedValue(existingUser as any);
-
-            const result = await service.authCallback(exchangeTokenInput);
-
-            expect(result).toEqual(mockAuthTokens);
-            expect(mockUserRepo.findByEmail).toHaveBeenCalledWith(mockIdTokenPayload.email);
-            expect(mockUserRepo.insert).not.toHaveBeenCalled();
+            expect(mockUserService.createUser).toHaveBeenCalledWith(
+                mockIdTokenPayload.sub,
+                mockIdTokenPayload.email,
+                mockIdTokenPayload.name,
+            );
         });
 
         it('should throw error when code exchange fails', async () => {
@@ -121,6 +104,16 @@ describe('AuthApplicationService', () => {
             mockIamService.verifyToken.mockRejectedValue(new Error('Token expired'));
 
             await expect(service.authCallback(exchangeTokenInput)).rejects.toThrow('Token expired');
+        });
+
+        it('should throw error when user service is unavailable', async () => {
+            mockIamService.exchangeCodeForToken.mockResolvedValue(mockAuthTokens);
+            mockIamService.verifyToken.mockResolvedValue(mockIdTokenPayload);
+            mockUserService.createUser.mockRejectedValue(new Error('Service unavailable'));
+
+            await expect(service.authCallback(exchangeTokenInput)).rejects.toThrow(
+                'Service unavailable',
+            );
         });
     });
 });

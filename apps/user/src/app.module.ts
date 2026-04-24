@@ -1,15 +1,17 @@
 import { randomUUID } from 'crypto';
+import { resolve } from 'path';
 
 import { DATABASE_CONFIG, IDatabaseConfig, IKafkaAppConfig, KAFKA_CONFIG, SOCIAL_CHAT_KEYCLOAK_CONFIG } from '@social-chat/common';
 import { REDIS_CONFIG, SHARED_STORE_CONFIG } from '@social-chat/common';
 import { REQ_ID_HEADER } from '@social-chat/common';
 import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { PassportModule } from '@nestjs/passport';
+import { EventEmitterModule } from '@nestjs/event-emitter';
 import { ClsModule } from 'nestjs-cls';
 
+import { ScheduleModule } from '@nestjs/schedule';
 import { configs } from '@social-chat/common';
-import { DatabaseModule, LogModule, MessagingModule, REDIS_SERVICE_TOKEN, RedisModule } from '@social-chat/infrastructure';
+import { PostgresModule, LogModule, MessagingModule, REDIS_SERVICE_TOKEN, RedisModule } from '@social-chat/infrastructure';
 
 import { UserModule } from './user.module';
 import { LibAuthModule, RefreshTokenMiddleware } from '@social-chat/shared-libs';
@@ -19,7 +21,10 @@ import { LibAuthModule, RefreshTokenMiddleware } from '@social-chat/shared-libs'
         ConfigModule.forRoot({
             isGlobal: true,
             cache: true,
-            envFilePath: `.env`,
+            envFilePath: [
+                resolve(__dirname, '..', '..', '..', 'config', '.env.user'),
+                resolve(__dirname, '..', '..', '..', 'config', '.env.common'),
+            ],
             load: [configs],
         }),
         ClsModule.forRoot({
@@ -33,6 +38,7 @@ import { LibAuthModule, RefreshTokenMiddleware } from '@social-chat/shared-libs'
                 },
             },
         }),
+        EventEmitterModule.forRoot(),
         RedisModule.registerAsync([
             {
                 serviceToken: REDIS_SERVICE_TOKEN.CACHE_SERVICE,
@@ -44,7 +50,7 @@ import { LibAuthModule, RefreshTokenMiddleware } from '@social-chat/shared-libs'
             },
         ]),
         LogModule,
-        DatabaseModule.forRootAsync({
+        PostgresModule.forRootAsync({
             inject: [ConfigService],
             useFactory: (configService: ConfigService) => {
                 return configService.get<IDatabaseConfig>(DATABASE_CONFIG);
@@ -56,7 +62,7 @@ import { LibAuthModule, RefreshTokenMiddleware } from '@social-chat/shared-libs'
                 return configService.get<IKafkaAppConfig>(KAFKA_CONFIG);
             },
         }),
-        PassportModule,
+        ScheduleModule.forRoot(),
         UserModule,
         LibAuthModule.forRootAsync({
             inject: [ConfigService],

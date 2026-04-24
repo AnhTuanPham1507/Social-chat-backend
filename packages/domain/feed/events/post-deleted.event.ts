@@ -1,14 +1,14 @@
 import { DomainEvent } from '../../core/domain-event.base';
+import { PostSnapshot } from '../post-snapshot';
 
 export class PostDeletedEvent extends DomainEvent {
-  constructor(
-    readonly postId: string,
-    readonly authorId: string,
-  ) {
-    super(postId);
+  static readonly EVENT_NAME = 'post.deleted';
+
+  constructor(readonly postSnapshot: PostSnapshot) {
+    super(postSnapshot.id);
   }
 
   get eventName(): string {
-    return 'post.deleted';
+    return PostDeletedEvent.EVENT_NAME;
   }
 }

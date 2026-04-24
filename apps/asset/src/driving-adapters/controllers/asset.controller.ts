@@ -15,7 +15,7 @@ import {
   ASSET_APPLICATION_SERVICE_TOKEN,
   IAssetApplicationService,
 } from '../../application/application-services/asset.application-service';
-import ENDPOINT from '../constants/endpoint.constant';
+import ENDPOINT from '../../constants/endpoint.constant';
 import {
   PresignUploadRequestDTO,
   PresignUploadResponseDTO,

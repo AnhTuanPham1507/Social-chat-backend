@@ -28,6 +28,8 @@ export * from './configs/interfaces/kafka-config.interface';
 export * from './configs/interfaces/r2-config.interface';
 export * from './configs/interfaces/coconut-config.interface';
 export * from './configs/interfaces/redis-config.interface';
+export * from './configs/interfaces/mongo-config.interface';
+export * from './configs/interfaces/elasticsearch-config.interface';
 
 // Base Interfaces
 export * from './interfaces/base-exception.interface';
@@ -36,6 +38,9 @@ export * from './interfaces/error-logging.interface';
 
 // DDD Base Classes
 export * from './ddd';
+
+// Integration Events (public contracts between bounded contexts)
+export * from './integration-events';
 
 
 

@@ -1,8 +1,8 @@
 import { PostEntity } from '@social-chat/domain';
-import { Post } from '../dtos/post.dto';
+import { PostDTO } from '../dtos/post.dto';
 
 export class PostAppMapper {
-    static fromEntityToAppModel(entity: PostEntity): Post {
+    static fromEntityToAppModel(entity: PostEntity): PostDTO {
         return {
             id: entity.id,
             authorId: entity.authorId,
@@ -11,10 +11,13 @@ export class PostAppMapper {
             isEdited: entity.isEdited,
             editedAt: entity.editedAt,
             originalPostId: entity.originalPostId,
-            reactionsCount: entity.reactionsCount,
-            commentsCount: entity.commentsCount,
-            sharesCount: entity.sharesCount,
             attachmentKeys: entity.attachmentKeys,
+            reactions: {
+                counts: { like: 0, love: 0, haha: 0, wow: 0, sad: 0, angry: 0 },
+                mine: null,
+            },
+            totalCommentsCount: 0,
+            totalSharesCount: 0,
             createdAt: entity.createdAt,
             updatedAt: entity.updatedAt,
             deletedAt: entity.deletedAt,

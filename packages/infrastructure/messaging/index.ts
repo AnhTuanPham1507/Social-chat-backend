@@ -1,4 +1,2 @@
-export * from './kafka.config';
-export * from './kafka-producer.service';
-export * from './kafka-base-consumer';
-export * from './messaging.module';
+export * from './kafka';
+export * from './event-emitter';

@@ -34,6 +34,7 @@ interface AssetProps {
  * Size is validated via AssetSize value object.
  */
 export interface CreateAssetProps {
+  id?: UUID;
   bucket: string;
   key: string;
   originalName: string;
@@ -82,18 +83,21 @@ export class AssetEntity extends AggregateRoot<AssetProps> {
     // Validate size against type/purpose limits
     AssetSize.create(props.size, props.assetType, props.purpose);
 
-    return new AssetEntity({
-      bucket: props.bucket,
-      key: props.key,
-      originalName: AssetEntity._sanitizeFilename(props.originalName),
-      mimeType: props.mimeType,
-      size: props.size,
-      assetType: props.assetType,
-      purpose: props.purpose,
-      status: ASSET_STATUS.PENDING,
-      createdBy: props.createdBy,
-      metadata: null,
-    });
+    return new AssetEntity(
+      {
+        bucket: props.bucket,
+        key: props.key,
+        originalName: AssetEntity._sanitizeFilename(props.originalName),
+        mimeType: props.mimeType,
+        size: props.size,
+        assetType: props.assetType,
+        purpose: props.purpose,
+        status: ASSET_STATUS.PENDING,
+        createdBy: props.createdBy,
+        metadata: null,
+      },
+      props.id,
+    );
   }
 
   /**

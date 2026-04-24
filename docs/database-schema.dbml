@@ -84,7 +84,7 @@ Enum notification_type {
   friend_request
   friend_accepted
   post_like
-  post_comment
+  comment
   mention
   group_invite
 }
@@ -280,14 +280,13 @@ Table post_reactions {
   }
 }
 
-Table post_comments {
+Table comments {
   id uuid [pk]
   post_id uuid [not null]
   author_id uuid [not null]
   parent_comment_id uuid
   content text [not null]
-  reactions_count integer [default: 0]
-  replies_count integer [default: 0]
+  attachments text[] [default: '{}']
   is_edited boolean [default: false]
   edited_at timestamp
   created_at timestamp [not null, default: `now()`]
@@ -295,8 +294,8 @@ Table post_comments {
   deleted_at timestamp
 
   indexes {
-    post_id [name: 'idx_post_comments_post']
-    author_id [name: 'idx_post_comments_author']
+    post_id [name: 'idx_comments_post']
+    author_id [name: 'idx_comments_author']
   }
 }
 
@@ -345,7 +344,7 @@ Ref: friendships.addressee_id > users.id
 Ref: user_presences.user_id - users.id
 Ref: posts.author_id > users.id
 Ref: post_reactions.user_id > users.id
-Ref: post_comments.author_id > users.id
+Ref: comments.author_id > users.id
 Ref: comment_reactions.user_id > users.id
 Ref: notifications.user_id > users.id
 Ref: notifications.actor_id > users.id
@@ -372,9 +371,9 @@ Ref: post_attachments.asset_id > assets.id
 // Post relationships
 Ref: post_attachments.post_id > posts.id
 Ref: post_reactions.post_id > posts.id
-Ref: post_comments.post_id > posts.id
+Ref: comments.post_id > posts.id
 Ref: posts.original_post_id - posts.id
 
 // Comment relationships
-Ref: post_comments.parent_comment_id - post_comments.id
-Ref: comment_reactions.comment_id > post_comments.id
+Ref: comments.parent_comment_id - comments.id
+Ref: comment_reactions.comment_id > comments.id

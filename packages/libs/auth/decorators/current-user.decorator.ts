@@ -11,8 +11,6 @@ export const CurrentUser = createParamDecorator(
             throw new UnauthorizedException();
         }
 
-        console.log(user, 'hehehe');
-
         return data ? user[data] : user;
     },
 );

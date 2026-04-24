@@ -1,5 +1,5 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import { IsEnum, IsOptional, IsString, Length } from 'class-validator';
+import { IsArray, IsEnum, IsOptional, IsString, Length } from 'class-validator';
 import { USER_SEX } from '@social-chat/domain';
 
 export class UpdateProfileDto {
@@ -23,4 +23,10 @@ export class UpdateProfileDto {
     @IsOptional()
     @IsString()
     avatarUrl?: string;
+
+    @ApiPropertyOptional({ description: 'List of user interests', example: ['gaming', 'cooking', 'music'], type: [String] })
+    @IsOptional()
+    @IsArray()
+    @IsString({ each: true })
+    interests?: string[];
 }

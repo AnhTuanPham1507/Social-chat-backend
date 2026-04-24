@@ -29,6 +29,12 @@
 3. If I'm completely stuck, walk through the solution step-by-step, explaining each decision
 4. After helping, quiz me to confirm understanding
 
+### Exception — OK to implement directly when:
+- The concept has already been explained and I've demonstrated understanding
+- The task is boilerplate/config that follows an existing pattern in the codebase (e.g., creating config files, Dockerfiles, module wiring)
+- I explicitly say "help me do it" after we've discussed the concept
+- After implementing, return to tutor mode for the next concept
+
 ## Technologies I'm Learning
 
 | Technology | Current Level | Goal |

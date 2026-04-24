@@ -1,15 +1,18 @@
 import { randomUUID } from 'crypto';
+import { resolve } from 'path';
 
-import { DATABASE_CONFIG, IDatabaseConfig, IKafkaAppConfig, KAFKA_CONFIG, SOCIAL_CHAT_KEYCLOAK_CONFIG } from '@social-chat/common';
+import { DATABASE_CONFIG, IDatabaseConfig, IKafkaAppConfig, IMongoConfig, KAFKA_CONFIG, MONGO_CONFIG, SOCIAL_CHAT_KEYCLOAK_CONFIG } from '@social-chat/common';
 import { REDIS_CONFIG, SHARED_STORE_CONFIG } from '@social-chat/common';
 import { REQ_ID_HEADER } from '@social-chat/common';
 import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { EventEmitterModule } from '@nestjs/event-emitter';
+import { MongooseModule } from '@nestjs/mongoose';
 import { PassportModule } from '@nestjs/passport';
 import { ClsModule } from 'nestjs-cls';
 
 import { configs } from '@social-chat/common';
-import { DatabaseModule, LogModule, MessagingModule, REDIS_SERVICE_TOKEN, RedisModule } from '@social-chat/infrastructure';
+import { PostgresModule, LogModule, MessagingModule, REDIS_SERVICE_TOKEN, RedisModule, ElasticsearchInfraModule } from '@social-chat/infrastructure';
 
 import { FeedModule } from './feed.module';
 import { LibAuthModule, RefreshTokenMiddleware } from '@social-chat/shared-libs';
@@ -19,7 +22,10 @@ import { LibAuthModule, RefreshTokenMiddleware } from '@social-chat/shared-libs'
         ConfigModule.forRoot({
             isGlobal: true,
             cache: true,
-            envFilePath: `.env`,
+            envFilePath: [
+                resolve(__dirname, '..', '..', '..', 'config', '.env.feed'),
+                resolve(__dirname, '..', '..', '..', 'config', '.env.common'),
+            ],
             load: [configs],
         }),
         ClsModule.forRoot({
@@ -33,6 +39,7 @@ import { LibAuthModule, RefreshTokenMiddleware } from '@social-chat/shared-libs'
                 },
             },
         }),
+        EventEmitterModule.forRoot(),
         RedisModule.registerAsync([
             {
                 serviceToken: REDIS_SERVICE_TOKEN.CACHE_SERVICE,
@@ -44,10 +51,17 @@ import { LibAuthModule, RefreshTokenMiddleware } from '@social-chat/shared-libs'
             },
         ]),
         LogModule,
-        DatabaseModule.forRootAsync({
+        PostgresModule.forRootAsync({
             inject: [ConfigService],
             useFactory: (configService: ConfigService) => {
                 return configService.get<IDatabaseConfig>(DATABASE_CONFIG);
+            },
+        }),
+        MongooseModule.forRootAsync({
+            inject: [ConfigService],
+            useFactory: (configService: ConfigService) => {
+                const mongoConfig = configService.get<IMongoConfig>(MONGO_CONFIG);
+                return { uri: mongoConfig.uri };
             },
         }),
         MessagingModule.forRootAsync({
@@ -56,6 +70,7 @@ import { LibAuthModule, RefreshTokenMiddleware } from '@social-chat/shared-libs'
                 return configService.get<IKafkaAppConfig>(KAFKA_CONFIG);
             },
         }),
+        ElasticsearchInfraModule,
         PassportModule,
         FeedModule,
         LibAuthModule.forRootAsync({

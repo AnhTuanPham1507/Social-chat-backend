@@ -17,6 +17,8 @@ interface UserProps {
   avatarUrl: UserAvatarUrl;
   phone: UserPhone;
   sex: UserSex;
+  interests: string[];
+  hasCompletedOnboarding: boolean;
 }
 
 /**
@@ -24,11 +26,13 @@ interface UserProps {
  * Uses primitive types that will be converted to value objects.
  */
 export interface CreateUserProps {
+  id?: UUID;
   email: string;
   fullName: string;
   sex?: USER_SEX;
   phone?: string;
   avatarUrl?: string;
+  interests?: string[];
 }
 
 /**
@@ -42,6 +46,8 @@ export interface ReconstituteUserProps {
   sex: USER_SEX;
   phone?: string;
   avatarUrl?: string;
+  interests?: string[];
+  hasCompletedOnboarding: boolean;
   createdAt: Date;
   updatedAt: Date;
   deletedAt?: Date;
@@ -112,9 +118,11 @@ export class UserEntity extends AggregateRoot<UserProps> {
       sex: UserSex.fromString(props.sex),
       phone: UserPhone.fromString(props.phone),
       avatarUrl: UserAvatarUrl.fromString(props.avatarUrl),
+      interests: props.interests ?? [],
+      hasCompletedOnboarding: false,
     };
 
-    const user = new UserEntity(userProps);
+    const user = new UserEntity(userProps, props.id);
 
     // Emit domain event
     user.addDomainEvent(
@@ -138,6 +146,8 @@ export class UserEntity extends AggregateRoot<UserProps> {
       sex: UserSex.fromString(props.sex),
       phone: UserPhone.fromString(props.phone),
       avatarUrl: UserAvatarUrl.fromString(props.avatarUrl),
+      interests: props.interests ?? [],
+      hasCompletedOnboarding: props.hasCompletedOnboarding,
     };
 
     const user = new UserEntity(userProps, props.id);
@@ -160,6 +170,7 @@ export class UserEntity extends AggregateRoot<UserProps> {
         sex: props.sex ?? USER_SEX.UNKNOWN,
         phone: props.phone,
         avatarUrl: props.avatarUrl,
+        hasCompletedOnboarding: false,
         createdAt: props.createdAt,
         updatedAt: props.updatedAt,
         deletedAt: props.deletedAt,
@@ -198,6 +209,14 @@ export class UserEntity extends AggregateRoot<UserProps> {
 
   get sex(): UserSex {
     return this._props.sex;
+  }
+
+  get interests(): string[] {
+    return this._props.interests;
+  }
+
+  get hasCompletedOnboarding(): boolean {
+    return this._props.hasCompletedOnboarding;
   }
 
   // ============================================
@@ -269,11 +288,37 @@ export class UserEntity extends AggregateRoot<UserProps> {
    *
    * @param updates - Object with fields to update
    */
+  /**
+   * Marks onboarding as completed. One-way transition.
+   */
+  completeOnboarding(): void {
+    if (this._props.hasCompletedOnboarding) return;
+    this._props.hasCompletedOnboarding = true;
+    this.markAsUpdated();
+  }
+
+  updateInterests(interests: string[]): void {
+    const normalized = interests.map((i) => i.toLowerCase().trim());
+    const current = this._props.interests;
+
+    if (
+      normalized.length === current.length &&
+      normalized.every((v, i) => v === current[i])
+    ) {
+      return;
+    }
+
+    this._props.interests = normalized;
+    this.markAsUpdated();
+    this.addDomainEvent(new UserProfileUpdatedEvent(this.id, ['interests']));
+  }
+
   updateProfile(updates: {
     fullName?: string;
     avatarUrl?: string;
     phone?: string;
     sex?: USER_SEX;
+    interests?: string[];
   }): void {
     const changedFields: string[] = [];
 
@@ -298,6 +343,18 @@ export class UserEntity extends AggregateRoot<UserProps> {
     if (updates.sex !== undefined && this._props.sex.value !== updates.sex) {
       this._props.sex = UserSex.fromString(updates.sex);
       changedFields.push('sex');
+    }
+
+    if (updates.interests !== undefined) {
+      const normalized = updates.interests.map((i) => i.toLowerCase().trim());
+      this._props.interests = normalized;
+      changedFields.push('interests');
+
+      // First time setting interests = onboarding complete
+      if (!this._props.hasCompletedOnboarding && normalized.length > 0) {
+        this._props.hasCompletedOnboarding = true;
+        changedFields.push('hasCompletedOnboarding');
+      }
     }
 
     if (changedFields.length > 0) {

@@ -35,12 +35,22 @@ export * from './message/message-status.enum';
 
 // Friendship domain
 export * from './friendship/friendship-status.enum';
+export * from './friendship/friendship-type.enum';
+export * from './friendship/friend-request.entity';
+export * from './friendship/friendship.entity';
+export * from './friendship/events/friend-request-sent.event';
+export * from './friendship/events/friend-request-accepted.event';
+export * from './friendship/events/friend-request-declined.event';
+export * from './friendship/events/friend-removed.event';
+export * from './friendship/events/user-blocked.event';
+export * from './friendship/events/user-unblocked.event';
 
 // Presence domain
 export * from './presence/presence-status.enum';
 
 // Reaction domain
 export * from './reaction/reaction-type.enum';
+export * from './reaction/content-type.enum';
 
 // Post domain
 export * from './post/post-visibility.enum';
@@ -48,6 +58,11 @@ export * from './post/post-visibility.enum';
 // Feed domain
 export * from './feed/post.entity';
 export * from './feed/post-content.value-object';
+export * from './feed/post-snapshot';
+export * from './feed/reaction.entity';
+export * from './feed/comment.entity';
+export * from './feed/comment-content.value-object';
+export * from './feed/comment-snapshot';
 export * from './feed/events';
 
 // Notification domain

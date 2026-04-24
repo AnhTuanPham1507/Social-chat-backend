@@ -17,6 +17,7 @@ export interface IAccessTokenPayload {
 }
 
 export interface IIdTokenPayload {
+    sub: string;
     email: string;
     name: string;
 }

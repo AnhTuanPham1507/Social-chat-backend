@@ -7,6 +7,8 @@ import {
   ASSET_PURPOSE,
   ASSET_STATUS,
   ASSET_TYPE,
+  DOMAIN_EVENT_BUS_TOKEN,
+  IDomainEventBus,
   MIME_TYPE,
   type ImageVariantDefinition,
 } from '@social-chat/domain';
@@ -19,7 +21,6 @@ import {
   OBJECT_STORAGE_SERVICE_TOKEN,
   IObjectStorageService,
 } from '@application/contracts/object-storage-service.contract';
-import { AssetEventPublisherAdapter } from '../../driven-adapters/event-publisher/asset-event-publisher.adapter';
 import { AssetPathService } from './asset-path.service';
 import { ImageProcessingApplicationService } from './image-processing.application-service';
 
@@ -105,7 +106,8 @@ export class AssetApplicationService implements IAssetApplicationService {
     private readonly _assetRepo: IAssetRepository,
     @Inject(OBJECT_STORAGE_SERVICE_TOKEN)
     private readonly _storageService: IObjectStorageService,
-    private readonly _eventPublisher: AssetEventPublisherAdapter,
+    @Inject(DOMAIN_EVENT_BUS_TOKEN)
+    private readonly _domainEventBus: IDomainEventBus,
     private readonly _assetPathService: AssetPathService,
     private readonly _imageProcessingService: ImageProcessingApplicationService,
     private readonly _configService: ConfigService,
@@ -126,6 +128,7 @@ export class AssetApplicationService implements IAssetApplicationService {
 
     // Create domain entity (validates size, sets PENDING status)
     const asset = AssetEntity.create({
+      id: assetId,
       bucket: this._bucket,
       key,
       originalName: input.originalName,
@@ -182,9 +185,9 @@ export class AssetApplicationService implements IAssetApplicationService {
     asset.confirm();
     await this._assetRepo.update(asset);
 
-    // Publish domain events (triggers image variant generation via Kafka)
+    // Publish domain events (in-process; AssetConfirmedListener triggers variant/transcoding)
     const events = asset.publishEvents();
-    await this._eventPublisher.publishAll(events);
+    await this._domainEventBus.publishAll(events);
 
     return {
       assetId: asset.id,
@@ -208,6 +211,7 @@ export class AssetApplicationService implements IAssetApplicationService {
 
     // Create domain entity (validates size, sets PENDING status)
     const asset = AssetEntity.create({
+      id: assetId,
       bucket: this._bucket,
       key,
       originalName: input.originalName,

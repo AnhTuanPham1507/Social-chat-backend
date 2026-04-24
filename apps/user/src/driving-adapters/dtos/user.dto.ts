@@ -19,6 +19,12 @@ export class UserDTO {
     @ApiProperty({ description: 'Avatar URL', required: false })
     avatarUrl?: string;
 
+    @ApiProperty({ description: 'User interests', type: [String] })
+    interests: string[];
+
+    @ApiProperty({ description: 'Whether user has completed onboarding' })
+    hasCompletedOnboarding: boolean;
+
     @ApiProperty({ description: 'Account creation date', required: false })
     createdAt?: Date;
 

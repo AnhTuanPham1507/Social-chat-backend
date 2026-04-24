@@ -54,4 +54,38 @@ export class UserRepo implements IUserRepository {
         const userInfoKey = SharedStoreKeyHelper.getUserInfoKey(user.id);
         await this._redisService.hset(userInfoKey, userModel);
     }
+
+    public async findAllPaginated(options: {
+        page: number;
+        limit: number;
+        search?: string;
+        excludeUserId?: string;
+    }): Promise<{ data: UserEntity[]; total: number }> {
+        const { page, limit, search, excludeUserId } = options;
+        const skip = (page - 1) * limit;
+
+        const qb = this._userRepo
+            .getRepository()
+            .createQueryBuilder('u')
+            .where('u.deleted_at IS NULL');
+
+        if (excludeUserId) {
+            qb.andWhere('u.id != :excludeUserId', { excludeUserId });
+        }
+
+        if (search) {
+            qb.andWhere('u.full_name ILIKE :search', { search: `%${search}%` });
+        }
+
+        qb.orderBy('u.full_name', 'ASC');
+
+        const total = await qb.getCount();
+        const models = await qb.skip(skip).take(limit).getMany();
+
+        const entities = models.map((model) =>
+            UserPersistenceMapper.fromModelToEntity(model),
+        );
+
+        return { data: entities, total };
+    }
 }

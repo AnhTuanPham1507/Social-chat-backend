@@ -18,7 +18,7 @@ import {
     AUTH_APPLICATION_SERVICE_TOKEN,
     IAuthApplicationService,
 } from '../../application/application-services/auth.application-service';
-import ENDPOINT from '../constants/endpoint.constant';
+import ENDPOINT from '../../constants/endpoint.constant';
 import { ExchangeTokenDTO } from '../dtos/auth.dto';
 import { isProduction } from '@social-chat/common';
 import { IAM_SERVICE_TOKEN, IIAMService } from '@application/contracts/iam-service.contract';

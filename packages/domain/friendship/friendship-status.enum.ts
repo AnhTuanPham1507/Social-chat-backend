@@ -1,6 +1,5 @@
-export enum FRIENDSHIP_STATUS {
+export enum FRIEND_REQUEST_STATUS {
     PENDING = 'pending',
     ACCEPTED = 'accepted',
-    BLOCKED = 'blocked',
     DECLINED = 'declined',
 }

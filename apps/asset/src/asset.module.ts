@@ -7,6 +7,7 @@ import {
 import { ImageProcessingApplicationService } from './application/application-services/image-processing.application-service';
 import { VideoProcessingApplicationService } from './application/application-services/video-processing.application-service';
 import { AssetPathService } from './application/application-services/asset-path.service';
+import { AssetConfirmedListener } from './application/listeners/asset-confirmed.listener';
 import { ASSET_REPO_TOKEN } from './application/contracts/asset-repository.contract';
 import { OBJECT_STORAGE_SERVICE_TOKEN } from './application/contracts/object-storage-service.contract';
 import { IMAGE_PROCESSING_SERVICE_TOKEN } from './application/contracts/image-processing-service.contract';
@@ -15,10 +16,12 @@ import { AssetRepo } from './driven-adapters/repos/asset-repository.adapter';
 import { ObjectStorageAdapter } from './driven-adapters/storage/object-storage.adapter';
 import { ImgproxyAdapter } from './driven-adapters/image-processing/imgproxy.adapter';
 import { CoconutAdapter } from './driven-adapters/video-transcoding/coconut.adapter';
-import { AssetEventPublisherAdapter } from './driven-adapters/event-publisher/asset-event-publisher.adapter';
 import { AssetController } from './driving-adapters/controllers/asset.controller';
 import { WebhookController } from './driving-adapters/controllers/webhook.controller';
-import { AssetConfirmedConsumer } from './driving-adapters/consumers/asset-confirmed.consumer';
+import { PostDeletedCleanupConsumer } from './driving-adapters/consumers/post-deleted-cleanup.consumer';
+import { CommentDeletedCleanupConsumer } from './driving-adapters/consumers/comment-deleted-cleanup.consumer';
+import { DOMAIN_EVENT_BUS_TOKEN } from '@social-chat/domain';
+import { EventEmitterBusAdapter } from '@social-chat/infrastructure';
 
 @Module({
   controllers: [AssetController, WebhookController],
@@ -43,11 +46,16 @@ import { AssetConfirmedConsumer } from './driving-adapters/consumers/asset-confi
       provide: VIDEO_TRANSCODING_SERVICE_TOKEN,
       useClass: CoconutAdapter,
     },
-    AssetEventPublisherAdapter,
+    {
+      provide: DOMAIN_EVENT_BUS_TOKEN,
+      useClass: EventEmitterBusAdapter,
+    },
     AssetPathService,
     ImageProcessingApplicationService,
     VideoProcessingApplicationService,
-    AssetConfirmedConsumer,
+    AssetConfirmedListener,
+    PostDeletedCleanupConsumer,
+    CommentDeletedCleanupConsumer,
   ],
   exports: [ASSET_APPLICATION_SERVICE_TOKEN],
 })
