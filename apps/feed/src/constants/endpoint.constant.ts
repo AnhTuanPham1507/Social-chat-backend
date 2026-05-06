@@ -6,6 +6,7 @@ const FEED_ENDPOINT = {
     MY_POSTS: '/posts/me',
     USER_POSTS: '/posts/user/:authorId',
     SEARCH_POSTS: '/posts/search',
+    AUTOCOMPLETE_POSTS: '/posts/autocomplete',
     POST_REACTIONS: '/posts/:postId/reactions',
     COMMENTS: '/posts/:postId/comments',
     COMMENT_BY_ID: '/posts/:postId/comments/:commentId',

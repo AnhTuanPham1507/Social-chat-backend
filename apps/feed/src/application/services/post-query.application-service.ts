@@ -21,6 +21,12 @@ export interface IPostQueryApplicationService {
         cursor?: string,
         reactionType?: string,
     ): Promise<CursorPaginatedResult<ReactionReadModel>>;
+    /**
+     * Bulk enrich posts by IDs into full DTOs (with reactions, comments,
+     * shared original, etc.) preserving the input order. Used by search
+     * to hydrate ES-ranked IDs without duplicating enrichment logic.
+     */
+    getPostsByIds(userId: string, ids: string[]): Promise<PostDTO[]>;
 }
 
 @Injectable()
@@ -37,6 +43,21 @@ export class PostQueryApplicationService implements IPostQueryApplicationService
     async getPostsByAuthor(userId: string, authorId: string, page: number, limit: number): Promise<PostDTO[]> {
         const docs = await this._postReadRepo.findByAuthorId(authorId, page, limit);
         return this.enrichWithMyReactions(docs, userId);
+    }
+
+    async getPostsByIds(userId: string, ids: string[]): Promise<PostDTO[]> {
+        if (ids.length === 0) return [];
+
+        const docs = await this._postReadRepo.findManyByIds(ids);
+
+        // Preserve the caller's ranked order — Mongo $in doesn't guarantee it
+        // and the search service depends on ES ranking being preserved.
+        const docMap = new Map(docs.map((d) => [d._id, d]));
+        const orderedDocs = ids
+            .map((id) => docMap.get(id))
+            .filter((d): d is PostReadModel => d !== undefined);
+
+        return this.enrichWithMyReactions(orderedDocs, userId);
     }
 
     async getFeed(

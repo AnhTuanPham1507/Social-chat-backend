@@ -82,6 +82,7 @@ import { LibAuthModule, RefreshTokenMiddleware } from '@social-chat/shared-libs'
         }),
     ],
     providers: [],
+    exports: [FeedModule],
 })
 export class AppModule implements NestModule {
     configure(consumer: MiddlewareConsumer) {

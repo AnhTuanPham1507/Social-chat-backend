@@ -25,6 +25,13 @@ export interface IPostReadRepository {
      */
     findFeedWithCursor(limit: number, cursor?: string): Promise<CursorPaginatedResult<PostReadModel>>;
     findByAuthorId(authorId: string, page: number, limit: number): Promise<PostReadModel[]>;
+    /**
+     * Bulk fetch posts by IDs with the original-post + author $lookup applied,
+     * exactly like the feed query. Used by search to enrich ES-ranked IDs into
+     * full read models. Order of returned docs is NOT guaranteed — callers
+     * that need ranked order must reorder via the input id list themselves.
+     */
+    findManyByIds(ids: string[]): Promise<PostReadModel[]>;
 }
 
 export interface PostReadModel {

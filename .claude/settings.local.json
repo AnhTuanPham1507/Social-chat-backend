@@ -68,7 +68,15 @@
       "Bash(npx --prefix \"C:/Users/EVT-LTP-ThanhTuan/OneDrive/Desktop/source-code/Socialchat-FE\" tsc --noEmit -p \"C:/Users/EVT-LTP-ThanhTuan/OneDrive/Desktop/source-code/Socialchat-FE/tsconfig.json\")",
       "Bash(gh api:*)",
       "WebFetch(domain:api.github.com)",
-      "Bash(yarn type-check:*)"
+      "Bash(yarn type-check:*)",
+      "Bash(yarn --version)",
+      "Bash(docker port *)",
+      "Bash(docker start *)",
+      "Bash(yarn cli *)",
+      "Bash(yarn seed:posts *)",
+      "Bash(yarn workspace *)",
+      "Bash(yarn workspaces *)",
+      "Bash(yarn typecheck *)"
     ]
   }
 }

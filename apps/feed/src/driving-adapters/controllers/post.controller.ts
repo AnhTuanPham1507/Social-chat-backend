@@ -37,7 +37,11 @@ import { UpdatePostDto } from '@driving-adapters/dtos/update-post.dto';
 import { SharePostDto } from '@driving-adapters/dtos/share-post.dto';
 import { PaginationQueryDto } from '@driving-adapters/dtos/pagination-query.dto';
 import { FeedQueryDto } from '@driving-adapters/dtos/feed-query.dto';
-import { PostSearchQueryDto } from '@driving-adapters/dtos/post-search-query.dto';
+import {
+    PostSearchQueryDto,
+    PaginatedSearchPostsDTO,
+} from '@driving-adapters/dtos/post-search-query.dto';
+import { AutocompleteQueryDto, AutocompleteSuggestionDto } from '@driving-adapters/dtos/autocomplete-query.dto';
 import { PostMapper } from '@driving-adapters/mappers/post.mapper';
 import { CurrentUser, JwtGuard } from '@social-chat/shared-libs';
 
@@ -83,13 +87,17 @@ export class PostController {
     }
 
     @Get(FEED_ENDPOINT.SEARCH_POSTS)
-    @ApiOkResponse({ description: 'Search results returned successfully' })
+    @ApiOkResponse({ type: PaginatedSearchPostsDTO, description: 'Search results returned successfully' })
     @ApiBadRequestResponse({ description: 'Invalid search query' })
     @ApiUnauthorizedResponse({ description: 'Unauthorized - Invalid or missing token' })
     public async searchPosts(
+        @CurrentUser('id') userId: string,
         @Query() query: PostSearchQueryDto,
-    ) {
-        return this._postSearchService.searchPosts(
+    ): Promise<PaginatedSearchPostsDTO> {
+        const searchAfter = decodeSearchAfter(query.searchAfter);
+
+        const result = await this._postSearchService.searchPosts(
+            userId,
             query.q,
             {
                 visibility: query.visibility,
@@ -98,7 +106,27 @@ export class PostController {
                 dateTo: query.dateTo ? new Date(query.dateTo) : undefined,
             },
             query.size,
+            searchAfter,
         );
+
+        return {
+            items: result.items.map(PostMapper.fromAppModelToDTO),
+            total: result.total,
+            hasMore: result.hasMore,
+            nextSearchAfter: result.nextSearchAfter
+                ? encodeSearchAfter(result.nextSearchAfter)
+                : null,
+        };
+    }
+
+    @Get(FEED_ENDPOINT.AUTOCOMPLETE_POSTS)
+    @ApiOkResponse({ type: [AutocompleteSuggestionDto], description: 'Autocomplete suggestions' })
+    @ApiBadRequestResponse({ description: 'Invalid query' })
+    @ApiUnauthorizedResponse({ description: 'Unauthorized - Invalid or missing token' })
+    public async autocompletePosts(
+        @Query() query: AutocompleteQueryDto,
+    ): Promise<AutocompleteSuggestionDto[]> {
+        return this._postSearchService.autocomplete(query.q, query.size, query.visibility);
     }
 
     @Get(FEED_ENDPOINT.MY_POSTS)
@@ -165,5 +193,20 @@ export class PostController {
         @Param('id', ParseUUIDPipe) id: string,
     ): Promise<void> {
         await this._postCommandService.deletePost(userId, id);
+    }
+}
+
+function encodeSearchAfter(sort: (string | number)[]): string {
+    return Buffer.from(JSON.stringify(sort), 'utf8').toString('base64url');
+}
+
+function decodeSearchAfter(cursor?: string): (string | number)[] | undefined {
+    if (!cursor) return undefined;
+    try {
+        const json = Buffer.from(cursor, 'base64url').toString('utf8');
+        const parsed = JSON.parse(json);
+        return Array.isArray(parsed) ? parsed : undefined;
+    } catch {
+        return undefined;
     }
 }

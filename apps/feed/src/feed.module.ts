@@ -113,9 +113,10 @@ import {
             provide: COMMENT_READ_REPO_TOKEN,
             useClass: CommentReadRepo,
         },
+        PostSearchRepo,
         {
             provide: POST_SEARCH_REPO_TOKEN,
-            useClass: PostSearchRepo,
+            useExisting: PostSearchRepo,
         },
         {
             provide: DOMAIN_EVENT_BUS_TOKEN,
@@ -131,5 +132,6 @@ import {
         CommentCdcConsumer,
         UserCdcConsumer,
     ],
+    exports: [PostSearchRepo],
 })
 export class FeedModule {}

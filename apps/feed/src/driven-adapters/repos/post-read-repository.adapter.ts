@@ -97,4 +97,15 @@ export class PostReadRepo implements IPostReadRepository {
             },
         ) as Promise<PostReadModel[]>;
     }
+
+    async findManyByIds(ids: string[]): Promise<PostReadModel[]> {
+        if (ids.length === 0) return [];
+        return this._postReadMongoRepo.findManyWithOriginal(
+            { _id: { $in: ids }, postDeletedAt: null },
+            {
+                sort: { postCreatedAt: -1 },
+                limit: ids.length,
+            },
+        ) as Promise<PostReadModel[]>;
+    }
 }

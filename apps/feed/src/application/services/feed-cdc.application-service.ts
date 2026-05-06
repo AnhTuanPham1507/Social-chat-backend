@@ -112,9 +112,13 @@ export class FeedCdcApplicationService implements IFeedCdcApplicationService {
                         visibility: row.visibility,
                         authorId: row.author_id,
                         createdAt: new Date(row.created_at),
+                        updatedAt: new Date(row.updated_at),
                     });
                 } else if (row.deleted_at) {
-                    await this._postSearchRepo.deletePost(row.id);
+                    await this._postSearchRepo.deletePost(
+                        row.id,
+                        new Date(row.deleted_at),
+                    );
                 }
 
                 // Fan out share count changes onto the original post.

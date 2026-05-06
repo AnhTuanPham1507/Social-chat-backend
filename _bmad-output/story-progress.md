@@ -75,7 +75,7 @@ Track your learning progress through all stories.
 |-------|--------|------|-------|
 | 5.1: View Home Feed | ✅ Done | 2026-04-04 | GET /feeds/posts reads from MongoDB read model via FeedQueryApplicationService, CQRS query side complete |
 | 5.2: Feed Pagination | ✅ Done | 2026-04-11 | Cursor-based pagination for feed AND comments/replies: compound-key `(createdAt, _id)` comparison via `$or`, limit+1 hasMore trick, CursorPaginatedResult envelope. Backend: findFeedWithCursor / findByPostIdWithCursor / findRepliesWithCursor. Frontend: useInfiniteFeed + useInfiniteComments consume `{items, nextCursor, hasMore}`, cache patchers updated for envelope shape |
-| 5.3: Search post in advance with elasticsearch | 🔧 In Progress | 2026-04-12 | Full flow implemented: Vietnamese analyzer, multi-field (vi+en), CDC sync, bool query with filters+highlighting, generic BaseElasticsearchService. Pending runtime testing. |
+| 5.3: Search post in advance with elasticsearch | ✅ Done | 2026-04-28 | Full flow: ICU/Vietnamese analyzer + synonyms, CDC sync, function_score recency, bool/should fuzzy+exact+prefix with boost 3/1/0.5, autocomplete via search_as_you_type + bool_prefix (operator='and'), highlight_query for synonym path. Production hardening: atomic alias swap (timestamp suffix + getAlias discovery + updateAliases atomic actions), optimistic concurrency via version_type=external + updatedAt.getTime(), min-char≥2 gate. Pipeline B (completion suggester) and Technique #4 (hybrid vector) explicitly out of scope. |
 
 > Note: Real-time feed delivery (WebSocket push + Fan-out on new post) moved to Epic 8 — shares WebSocket gateway + push infra with notifications.
 
@@ -159,12 +159,12 @@ Track your learning progress through all stories.
 | Epic 2: User Identity | 8 | 7 | 88% |
 | Epic 3: Social Network | 7 | 7 | 100% |
 | Epic 4: Content | 11 | 10 | 91% |
-| Epic 5: Feed | 3 | 2 | 67% (5.3 in progress) |
+| Epic 5: Feed | 3 | 3 | 100% |
 | Epic 6: Messaging | 12 | 0 | 0% |
 | Epic 7: Presence | 4 | 0 | 0% |
 | Epic 8: Notifications | 9 | 0 | 0% |
 | Epic 9: AI | 7 | 0 | 0% |
-| **TOTAL** | **65** | **31** | **48%** |
+| **TOTAL** | **65** | **32** | **49%** |
 
 ---
 
@@ -218,7 +218,7 @@ Bidirectional view: tech goals from `CLAUDE.md` ↔ the stories that build them.
 | **MongoDB** | Intermediate | Intermediate | 1.5 (read model via CDC), 4.8–4.9 (comment read model), 5.1–5.2 (feed + cursor pagination) | 6.x (message history schemas, sharding considerations), 8.x (notification store) |
 | **Kafka** | Intermediate | Intermediate | 1.3 (producer), 1.5 (Debezium CDC), 4.6 (domain events), 4.8 (CDC for comments), 5.3 (CDC to ES), today's consumer group lesson | 6.x (partitioning by conversationId for ordering), 8.9 (fan-out topic design), integration event refactor |
 | **Redis** | Advanced | Basic+ | 3.7 (caching + TTL) | 7.x (pub/sub + sorted sets for presence), 8.3 (counters), 8.x (rate limiting for push) |
-| **Elasticsearch** | Basic | Basic (in progress) | 5.3 (Vietnamese analyzer, multi-field, bool query, highlighting) | 5.3 completion (end-to-end search verification) |
+| **Elasticsearch** | Basic | Intermediate | 5.3 — analyzer (ICU + Vietnamese synonyms), bool/should ranking (boost as BM25 multiplier), function_score recency, search_as_you_type + bool_prefix, highlight_query, atomic alias swap with `updateAliases`, optimistic concurrency `version_type=external` | Possible future: completion suggester (Pipeline B), hybrid BM25+vector (Technique #4) — both explicitly skipped this round |
 | **WebSocket** | Advanced | Basic | — | 6.4 (real-time message delivery), 7.1–7.4 (presence), 8.8 (feed push) |
 | **WebRTC** | Basic | None | — | Future (likely Epic 6 extension — voice/video) |
 | **gRPC** | Basic | None | — | 9.x (AI service comms) |
