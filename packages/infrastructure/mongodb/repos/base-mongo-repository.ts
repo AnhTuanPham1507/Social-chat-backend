@@ -3,6 +3,10 @@ import { Model, SortOrder, UpdateQuery, ProjectionType } from 'mongoose';
 export abstract class BaseMongoRepository<TDocument> {
     constructor(protected readonly model: Model<TDocument>) {}
 
+    async insert(doc: Record<string, any>): Promise<void> {
+        await this.model.create(doc as any);
+    }
+
     async findById(id: string): Promise<TDocument | null> {
         return this.model.findById(id).lean().exec() as Promise<TDocument | null>;
     }

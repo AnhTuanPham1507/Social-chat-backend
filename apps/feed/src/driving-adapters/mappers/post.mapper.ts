@@ -1,11 +1,18 @@
 import { PostDTO as PostAppDTO } from '@application/dtos/post.dto';
-import { PostDTO, SharedOriginalAuthorDTO, SharedOriginalDTO } from '../dtos/post.dto';
+import { PostAuthorDTO, PostDTO, SharedOriginalAuthorDTO, SharedOriginalDTO } from '../dtos/post.dto';
 
 export class PostMapper {
     static fromAppModelToDTO(post: PostAppDTO): PostDTO {
         const dto = new PostDTO();
         dto.id = post.id;
         dto.authorId = post.authorId;
+        if (post.author) {
+            const author = new PostAuthorDTO();
+            author.id = post.author.id;
+            author.name = post.author.name;
+            author.avatar = post.author.avatar;
+            dto.author = author;
+        }
         dto.content = post.content;
         dto.visibility = post.visibility;
         dto.isEdited = post.isEdited;

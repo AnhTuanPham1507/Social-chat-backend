@@ -27,8 +27,8 @@ Track your learning progress through all stories.
 | 2.3: User Profile Creation | ✅ Done | - | Auto in callback |
 | 2.4: Update User Profile | ✅ Done | - | PATCH /users/profile (autonomous mode) |
 | 2.5: Upload Profile Picture | ✅ Done | 2026-03-17 | Complete: presign upload, R2 storage, Kafka events, imgproxy resizing, Coconut video transcoding, user integration |
-| 2.7: User Logout | ✅ Done | - | logout endpoint |
-| 2.8: RBAC Guard | ✅ Done| | |
+| 2.6: User Logout | ✅ Done | - | logout endpoint |
+| 2.7: RBAC Guard | ✅ Done| | |
 
 **Tech applied:** NestJS (Guards, JWT, OAuth2/OIDC), PostgreSQL, Kafka (asset events in 2.5), TypeScript
 
@@ -75,7 +75,7 @@ Track your learning progress through all stories.
 |-------|--------|------|-------|
 | 5.1: View Home Feed | ✅ Done | 2026-04-04 | GET /feeds/posts reads from MongoDB read model via FeedQueryApplicationService, CQRS query side complete |
 | 5.2: Feed Pagination | ✅ Done | 2026-04-11 | Cursor-based pagination for feed AND comments/replies: compound-key `(createdAt, _id)` comparison via `$or`, limit+1 hasMore trick, CursorPaginatedResult envelope. Backend: findFeedWithCursor / findByPostIdWithCursor / findRepliesWithCursor. Frontend: useInfiniteFeed + useInfiniteComments consume `{items, nextCursor, hasMore}`, cache patchers updated for envelope shape |
-| 5.3: Search post in advance with elasticsearch | ✅ Done | 2026-04-28 | Full flow: ICU/Vietnamese analyzer + synonyms, CDC sync, function_score recency, bool/should fuzzy+exact+prefix with boost 3/1/0.5, autocomplete via search_as_you_type + bool_prefix (operator='and'), highlight_query for synonym path. Production hardening: atomic alias swap (timestamp suffix + getAlias discovery + updateAliases atomic actions), optimistic concurrency via version_type=external + updatedAt.getTime(), min-char≥2 gate. Pipeline B (completion suggester) and Technique #4 (hybrid vector) explicitly out of scope. |
+| 5.3: Search post in advance with elasticsearch | ✅ Done | 2026-04-28 | Full flow: ICU/Vietnamese analyzer + synonyms, CDC sync, function_score recency, bool/should fuzzy+exact+prefix with boost 3/1/0.5, autocomplete via search_as_you_type + bool_prefix (operator='and'), highlight_query for synonym path. Production hardening: atomic alias swap (timestamp suffix + getAlias discovery + updateAliases atomic actions), optimistic concurrency via version_type=external + updatedAt.getTime(), min-char≥2 gate. Search results enriched to full PostDTOs (ES = ranking, Mongo = content, search_after cursor base64-encoded). Operational tooling: `scripts/cli/infra-reindex-posts.command.ts` for offline reindex via nest-commander. Pipeline B (completion suggester) and Technique #4 (hybrid vector) explicitly out of scope. |
 
 > Note: Real-time feed delivery (WebSocket push + Fan-out on new post) moved to Epic 8 — shares WebSocket gateway + push infra with notifications.
 
@@ -87,7 +87,7 @@ Track your learning progress through all stories.
 
 | Story | Status | Date | Notes |
 |-------|--------|------|-------|
-| 6.1: Start Conversation | ⬜ TODO | | |
+| 6.1: Start Conversation | ✅ Done | 2026-05-09 | New `apps/messaging` app. ConversationEntity aggregate (DM + Group, type discriminator), Membership VO, ConversationCreatedEvent. DM uniqueness via partial unique index `uniq_dm` on `(lower_user_id, higher_user_id) WHERE type='direct'` — race-and-recover pattern catches `23505` and returns existing DM (200 vs 201). Group creator = OWNER, others = MEMBER, member cap 1024 enforced in entity. `POST /messaging/conversations` single endpoint branches on type. Specs written but Jest config still broken project-wide (pre-existing). |
 | 6.2: Send Text Message | ⬜ TODO | | |
 | 6.3: View Message History | ⬜ TODO | | |
 | 6.4: Real-time Delivery | ⬜ TODO | | |
@@ -101,6 +101,8 @@ Track your learning progress through all stories.
 | 6.12: Leave Group | ⬜ TODO | | |
 
 **Tech planned:** WebSocket (real-time delivery, typing, presence), MongoDB (message history), Kafka (message events), Redis (presence, delivery state), DDD (Conversation + Message aggregates), OpenTelemetry (correlation via integration events), TypeScript
+
+**Architecture ADR:** `_bmad-output/architecture-epic-6-messaging.md` — 4 cross-cutting decisions (aggregate boundary, store, transport, ordering) with rationale, alternatives rejected, production references, and story mapping. Read before starting any 6.x story.
 
 ---
 
@@ -160,11 +162,11 @@ Track your learning progress through all stories.
 | Epic 3: Social Network | 7 | 7 | 100% |
 | Epic 4: Content | 11 | 10 | 91% |
 | Epic 5: Feed | 3 | 3 | 100% |
-| Epic 6: Messaging | 12 | 0 | 0% |
+| Epic 6: Messaging | 12 | 1 | 8% |
 | Epic 7: Presence | 4 | 0 | 0% |
 | Epic 8: Notifications | 9 | 0 | 0% |
 | Epic 9: AI | 7 | 0 | 0% |
-| **TOTAL** | **65** | **32** | **49%** |
+| **TOTAL** | **65** | **33** | **51%** |
 
 ---
 
@@ -192,17 +194,14 @@ Splits in-process **domain events** (EventEmitter2) from cross-service **integra
 
 **Applied retroactively:**
 - ✅ Story 4.6 (Delete Post) — post-delete → asset cleanup cascade now uses `PostDeletedIntegrationEvent { postSnapshot, cascadedCommentSnapshots }` published directly from `PostApplicationService`.
-- ⏳ Story 4.8 (Comment on Post) — same `CommentDeletedEvent` pattern; migration is the remaining follow-up.
+- ✅ Story 4.8 (Comment on Post) — done 2026-05-06. `CommentDeletedIntegrationEvent { commentSnapshot }` published via `CommentDeletedListener` (1:1 translation, no cascade); `CommentDeletedCleanupConsumer` migrated to `KafkaIntegrationConsumer`.
 
 **Foundation for future stories:**
 - Epic 6 (Messaging 6.1–6.12) — pattern rule (listener vs direct-publish) generalizes to message flows
 - Epic 8 (Notifications 8.1–8.9) — integration events + correlation critical for cross-service fan-out
 - Story 9.3 (Stream AI Response) — distributed tracing across AI pipeline
 
-**Next concrete step:** Migrate `CommentDeletedEvent` flow:
-1. Add `CommentDeletedIntegrationEvent` in `packages/common/integration-events/feed/` with `commentSnapshot` payload.
-2. Decide: direct publish (consistency) vs listener (1:1 — comment delete has no cascade).
-3. Switch `CommentDeletedCleanupConsumer` to `KafkaIntegrationConsumer` + new topic; retire legacy `comment.comment.deleted` subscription.
+**Status:** Refactor complete. Both post (direct-publish, cascade) and comment (listener, 1:1) flows now on snapshot-based integration events. Pattern is established for Epic 6+.
 
 ---
 

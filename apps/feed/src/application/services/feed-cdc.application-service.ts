@@ -91,8 +91,22 @@ export class FeedCdcApplicationService implements IFeedCdcApplicationService {
             case 'r':
             case 'u': {
                 const row = after;
+
+                const user = await this._userReadRepo.findById(row.author_id);
+                if (!user) {
+                    this._logger.warn(
+                        `User ${row.author_id} not found in local read model for post ${row.id}, skipping`,
+                    );
+                    return;
+                }
+
                 await this._postReadRepo.upsertPost(row.id, {
                     authorId: row.author_id,
+                    author: {
+                        id: user._id,
+                        name: user.displayName,
+                        avatar: user.avatarUrl,
+                    },
                     content: row.content,
                     visibility: row.visibility,
                     isEdited: row.is_edited,

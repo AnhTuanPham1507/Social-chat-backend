@@ -3,6 +3,18 @@ import { HydratedDocument } from 'mongoose';
 
 export type PostReadDocument = HydratedDocument<PostRead>;
 
+@Schema({ _id: false })
+export class PostAuthor {
+    @Prop({ type: String, required: true })
+    id: string;
+
+    @Prop({ type: String, required: true })
+    name: string;
+
+    @Prop({ type: String, default: null })
+    avatar?: string;
+}
+
 @Schema({ collection: 'feed_posts', timestamps: true })
 export class PostRead {
     @Prop({ type: String, required: true })
@@ -10,6 +22,9 @@ export class PostRead {
 
     @Prop({ type: String, required: true })
     authorId: string;
+
+    @Prop({ type: PostAuthor, default: null })
+    author?: PostAuthor;
 
     @Prop({ type: String, default: null })
     content?: string;

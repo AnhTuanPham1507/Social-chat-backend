@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { FRIENDSHIP_TYPE, FriendshipEntity } from '@social-chat/domain';
 import { BaseFriendshipRepository } from '@social-chat/infrastructure';
-import { IFriendshipRepository, MutualFriendCandidate } from '@application/contracts/friendship-repository.contract';
+import { IFriendshipRepository, MutualFriendCandidate, RandomUserCandidate } from '@application/contracts/friendship-repository.contract';
 import { FriendItem } from '@application/dtos/friendship.dto';
 
 @Injectable()
@@ -68,6 +68,14 @@ export class FriendshipRepo implements IFriendshipRepository {
             type: model.type,
             createdAt: model.createdAt,
         });
+    }
+
+    async createFriendshipPair(rowA: FriendshipEntity, rowB: FriendshipEntity): Promise<void> {
+        const repo = this._friendshipRepo.getRepository();
+        await repo.insert([
+            { id: rowA.id, userId: rowA.userId, friendId: rowA.friendId, type: rowA.type },
+            { id: rowB.id, userId: rowB.userId, friendId: rowB.friendId, type: rowB.type },
+        ]);
     }
 
     async deleteBetween(userId: string, friendId: string): Promise<void> {
@@ -192,6 +200,87 @@ export class FriendshipRepo implements IFriendshipRepository {
             ...r,
             adamicAdarScore: parseFloat(r.adamicAdarScore) || 0,
             interests: r.interests ?? [],
+        }));
+    }
+
+    async getMutualFriendsCountsFor(
+        currentUserId: string,
+        candidateIds: string[],
+    ): Promise<Map<string, number>> {
+        if (candidateIds.length === 0) return new Map();
+
+        const repo = this._friendshipRepo.getRepository();
+
+        // For each candidate, count friends shared with current user.
+        // Two-hop join: my friends → their friends ∩ {candidates}.
+        const results = await repo.query(
+            `
+            SELECT
+                fof."friend_id"  AS "userId",
+                COUNT(*)::int    AS "count"
+            FROM friendships my_friends
+            INNER JOIN friendships fof
+                ON fof."user_id" = my_friends."friend_id"
+                AND fof.type = 'friend'
+            WHERE my_friends."user_id" = $1
+              AND my_friends.type = 'friend'
+              AND fof."friend_id" = ANY($2::text[])
+            GROUP BY fof."friend_id"
+            `,
+            [currentUserId, candidateIds],
+        );
+
+        return new Map(results.map((r: { userId: string; count: number }) => [r.userId, r.count]));
+    }
+
+    async findRandomUsersExcluding(
+        userId: string,
+        limit: number,
+        excludeIds: string[],
+    ): Promise<RandomUserCandidate[]> {
+        const repo = this._friendshipRepo.getRepository();
+
+        // Random users excluding: self, already-suggested ids, current friends,
+        // any blocked relationship in either direction, and any pending friend request.
+        const results = await repo.query(
+            `
+            SELECT
+                u.id          AS "userId",
+                u.full_name   AS "displayName",
+                u.avatar_url  AS "avatarUrl"
+            FROM users u
+            WHERE u.id <> $1
+              AND u.deleted_at IS NULL
+              AND NOT (u.id = ANY($2::text[]))
+              AND NOT EXISTS (
+                  SELECT 1 FROM friendships f
+                  WHERE f."user_id" = $1
+                    AND f."friend_id" = u.id
+                    AND f.type = 'friend'
+              )
+              AND NOT EXISTS (
+                  SELECT 1 FROM friendships blk
+                  WHERE (blk."user_id" = $1 AND blk."friend_id" = u.id AND blk.type = 'blocked')
+                     OR (blk."user_id" = u.id AND blk."friend_id" = $1 AND blk.type = 'blocked')
+              )
+              AND NOT EXISTS (
+                  SELECT 1 FROM friend_requests fr
+                  WHERE fr.status = 'pending'
+                    AND (
+                          (fr.sender_id = $1 AND fr.receiver_id = u.id)
+                       OR (fr.sender_id = u.id AND fr.receiver_id = $1)
+                    )
+              )
+            ORDER BY RANDOM()
+            LIMIT $3
+            `,
+            [userId, excludeIds, limit],
+        );
+
+        return results.map((r: { userId: string; displayName: string; avatarUrl: string | null }) => ({
+            userId: r.userId,
+            displayName: r.displayName,
+            avatarUrl: r.avatarUrl ?? null,
         }));
     }
 

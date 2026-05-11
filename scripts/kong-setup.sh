@@ -9,6 +9,7 @@
 # Services:
 #   - auth-service: Authentication service (port 3001)
 #   - user-service: User management service (port 3002)
+#   - messaging-service: Messaging service (port 3005)
 #
 # Note: JWT validation is handled by downstream services, not Kong.
 # Kong provides routing, CORS, rate limiting, and logging.
@@ -24,6 +25,7 @@ set -e
 KONG_ADMIN_URL="${1:-http://localhost:8001}"
 AUTH_SERVICE_URL="${AUTH_SERVICE_URL:-http://host.docker.internal:3001}"
 USER_SERVICE_URL="${USER_SERVICE_URL:-http://host.docker.internal:3002}"
+MESSAGING_SERVICE_URL="${MESSAGING_SERVICE_URL:-http://host.docker.internal:3005}"
 
 echo "=================================================="
 echo "Kong Gateway Configuration"
@@ -31,6 +33,7 @@ echo "=================================================="
 echo "Kong Admin URL: $KONG_ADMIN_URL"
 echo "Auth Service URL: $AUTH_SERVICE_URL"
 echo "User Service URL: $USER_SERVICE_URL"
+echo "Messaging Service URL: $MESSAGING_SERVICE_URL"
 echo "=================================================="
 
 # Wait for Kong to be ready
@@ -120,6 +123,9 @@ create_service "auth-service" "$AUTH_SERVICE_URL"
 # User Service
 create_service "user-service" "$USER_SERVICE_URL"
 
+# Messaging Service
+create_service "messaging-service" "$MESSAGING_SERVICE_URL"
+
 # =============================================================================
 # Configure Routes
 # =============================================================================
@@ -133,8 +139,14 @@ echo "-------------------------------------------"
 create_route "auth-service" "auth-routes" '[\"/auth\"]' false
 
 # User routes - /users/* -> user-service
-# strip_path=false preserves the /users prefix
-create_route "user-service" "user-routes" '[\"/users\"]' false
+# strip_path=true removes the /users gateway prefix; frontend calls /users/<api-path>
+# (e.g. /users/users for list, /users/profile for profile) and the service receives <api-path>
+create_route "user-service" "user-routes" '[\"/users\"]' true
+
+# Messaging routes - /messaging/* -> messaging-service
+# strip_path=true removes the /messaging gateway prefix; frontend calls
+# /messaging/<api-path> (e.g. /messaging/messaging/conversations) and the service receives <api-path>
+create_route "messaging-service" "messaging-routes" '[\"/messaging\"]' true
 
 # =============================================================================
 # Configure Global Plugins
@@ -185,12 +197,14 @@ echo "Kong Gateway Configuration Complete!"
 echo "=================================================="
 echo ""
 echo "Services configured:"
-echo "  - auth-service -> $AUTH_SERVICE_URL"
-echo "  - user-service -> $USER_SERVICE_URL"
+echo "  - auth-service      -> $AUTH_SERVICE_URL"
+echo "  - user-service      -> $USER_SERVICE_URL"
+echo "  - messaging-service -> $MESSAGING_SERVICE_URL"
 echo ""
 echo "Routes configured:"
-echo "  - /auth/*  -> auth-service"
-echo "  - /users/* -> user-service"
+echo "  - /auth/*      -> auth-service"
+echo "  - /users/*     -> user-service"
+echo "  - /messaging/* -> messaging-service"
 echo ""
 echo "Global Plugins enabled:"
 echo "  - CORS"

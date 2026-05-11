@@ -75,6 +75,11 @@ export class UserCdcApplicationService implements IUserCdcApplicationService {
                     name: row.full_name,
                     avatar: row.avatar_url ?? undefined,
                 });
+
+                await this._postReadRepo.updateAuthorInfo(row.id, {
+                    name: row.full_name,
+                    avatar: row.avatar_url ?? undefined,
+                });
                 break;
             }
             case 'd': {

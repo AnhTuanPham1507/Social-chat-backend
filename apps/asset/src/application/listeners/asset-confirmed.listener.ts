@@ -24,7 +24,7 @@ export class AssetConfirmedListener {
         private readonly _videoProcessingService: VideoProcessingApplicationService,
     ) {}
 
-    @OnEvent('asset.confirmed')
+    @OnEvent('asset.confirmed', { async: true })
     async handle(event: AssetConfirmedEvent): Promise<void> {
         const input = {
             assetId: event.assetId,
@@ -45,7 +45,6 @@ export class AssetConfirmedListener {
             this._logger.error(
                 `Failed to process asset ${event.assetId}: ${error instanceof Error ? error.message : error}`,
             );
-            throw error;
         }
     }
 }

@@ -15,6 +15,9 @@ export interface IPostReadRepository {
     // Share operations
     incrementSharesCount(postId: string, delta: number): Promise<void>;
 
+    // Author denormalization sync (called from user CDC fan-out)
+    updateAuthorInfo(userId: string, author: { name: string; avatar?: string }): Promise<void>;
+
     // Query operations
     findById(id: string): Promise<PostReadModel | null>;
     /**
@@ -34,9 +37,22 @@ export interface IPostReadRepository {
     findManyByIds(ids: string[]): Promise<PostReadModel[]>;
 }
 
+export interface PostAuthor {
+    id: string;
+    name: string;
+    avatar?: string;
+}
+
 export interface PostReadModel {
     _id: string;
     authorId: string;
+    /**
+     * Snapshot of the author's profile, denormalized at write time via the
+     * post CDC handler and kept fresh by the user CDC fan-out. Optional
+     * because legacy rows written before this field existed may be missing
+     * it until their author's next profile update.
+     */
+    author?: PostAuthor;
     content?: string;
     visibility: string;
     isEdited: boolean;
@@ -75,6 +91,7 @@ export interface PostReadModel {
 
 export interface UpsertPostData {
     authorId: string;
+    author?: PostAuthor;
     content?: string;
     visibility: string;
     isEdited: boolean;

@@ -78,12 +78,29 @@ export class SharedOriginalDTO {
     createdAt?: Date;
 }
 
+export class PostAuthorDTO {
+    @ApiProperty({ description: 'Author user ID' })
+    id: string;
+
+    @ApiProperty({ description: 'Author display name' })
+    name: string;
+
+    @ApiPropertyOptional({ description: 'Author avatar URL', nullable: true })
+    avatar?: string;
+}
+
 export class PostDTO {
     @ApiProperty({ description: 'Post ID' })
     id: string;
 
     @ApiProperty({ description: 'Author user ID' })
     authorId: string;
+
+    @ApiPropertyOptional({
+        type: PostAuthorDTO,
+        description: 'Snapshot of author profile at read time. Optional for legacy rows that pre-date this field.',
+    })
+    author?: PostAuthorDTO;
 
     @ApiPropertyOptional({ description: 'Post content' })
     content?: string;

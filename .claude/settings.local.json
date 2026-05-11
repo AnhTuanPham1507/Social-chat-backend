@@ -76,7 +76,11 @@
       "Bash(yarn seed:posts *)",
       "Bash(yarn workspace *)",
       "Bash(yarn workspaces *)",
-      "Bash(yarn typecheck *)"
+      "Bash(yarn typecheck *)",
+      "Bash(git -C \"C:/Users/EVT-LTP-ThanhTuan/OneDrive/Desktop/source-code/Social-chat-backend\" ls-files \"*friend_request*\" \"*friend-request*\" \"apps/user/src/driven-adapters\")",
+      "Bash(echo \"exit=$?\")",
+      "Bash(yarn jest *)",
+      "Bash(yarn nest *)"
     ]
   }
 }

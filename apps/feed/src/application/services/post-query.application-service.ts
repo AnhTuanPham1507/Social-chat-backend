@@ -101,6 +101,13 @@ export class PostQueryApplicationService implements IPostQueryApplicationService
         return {
             id: doc._id,
             authorId: doc.authorId,
+            author: doc.author
+                ? {
+                      id: doc.author.id,
+                      name: doc.author.name,
+                      avatar: doc.author.avatar,
+                  }
+                : undefined,
             content: doc.content,
             visibility: doc.visibility as POST_VISIBILITY,
             isEdited: doc.isEdited,

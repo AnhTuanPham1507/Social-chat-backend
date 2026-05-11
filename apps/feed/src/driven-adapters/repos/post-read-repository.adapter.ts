@@ -37,6 +37,10 @@ export class PostReadRepo implements IPostReadRepository {
         await this._postReadMongoRepo.incrementField(postId, 'totalSharesCount', delta);
     }
 
+    async updateAuthorInfo(userId: string, author: { name: string; avatar?: string }): Promise<void> {
+        await this._postReadMongoRepo.updateAuthorByUserId(userId, author);
+    }
+
     /**
      * Cursor-based feed query.
      *

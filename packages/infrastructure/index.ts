@@ -29,5 +29,8 @@ export * from './elasticsearch';
 // Log
 export * from './log/log.module';
 
+// Clock
+export * from './clock';
+
 
 

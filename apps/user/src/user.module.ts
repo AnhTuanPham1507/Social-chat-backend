@@ -2,6 +2,10 @@ import { Module } from '@nestjs/common';
 
 import { USER_APPLICATION_SERVICE_TOKEN, UserApplicationService } from './application/services/user.application-service';
 import { FRIENDSHIP_APPLICATION_SERVICE_TOKEN, FriendshipApplicationService } from './application/services/friendship.application-service';
+import {
+    USER_SEARCH_QUERY_APPLICATION_SERVICE_TOKEN,
+    UserSearchQueryApplicationService,
+} from './application/services/user-search-query.application-service';
 import { UserController } from './driving-adapters/controllers/user.controller';
 import { InternalUserController } from './driving-adapters/controllers/internal-user.controller';
 import { FriendshipController } from './driving-adapters/controllers/friendship.controller';
@@ -24,6 +28,10 @@ import { EventEmitterBusAdapter } from '@social-chat/infrastructure';
         {
             provide: FRIENDSHIP_APPLICATION_SERVICE_TOKEN,
             useClass: FriendshipApplicationService,
+        },
+        {
+            provide: USER_SEARCH_QUERY_APPLICATION_SERVICE_TOKEN,
+            useClass: UserSearchQueryApplicationService,
         },
         {
             provide: USER_REPO_TOKEN,

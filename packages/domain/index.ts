@@ -28,10 +28,16 @@ export * from './common/url.value-object';
 // Conversation domain
 export * from './conversation/conversation-type.enum';
 export * from './conversation/participant-role.enum';
+export * from './conversation/membership.value-object';
+export * from './conversation/conversation.entity';
+export * from './conversation/events/conversation-created.event';
 
 // Message domain
 export * from './message/message-type.enum';
 export * from './message/message-status.enum';
+export * from './message/message.constants';
+export * from './message/message.entity';
+export * from './message/events';
 
 // Friendship domain
 export * from './friendship/friendship-status.enum';

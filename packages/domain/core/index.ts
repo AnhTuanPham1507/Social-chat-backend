@@ -4,3 +4,4 @@ export * from './aggregate-root.base';
 
 // Ports
 export * from './domain-event-bus.port';
+export * from './clock.port';

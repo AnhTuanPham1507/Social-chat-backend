@@ -128,6 +128,21 @@ export class FriendshipApplicationService implements IFriendshipApplicationServi
 
         if (input.action === FriendRequestAction.ACCEPT) {
             friendRequest.accept(input.currentUserId);
+
+            // Materialize the bidirectional friendship as two FRIEND rows.
+            // Insert before updating the request so that, on a unique-violation
+            // (rows somehow already exist), the request stays PENDING and the
+            // caller can retry rather than ending up with status=ACCEPTED but
+            // no friendship — which is exactly the bug we're fixing.
+            const rowA = FriendshipEntity.create({
+                userId: friendRequest.senderId,
+                friendId: friendRequest.receiverId,
+            });
+            const rowB = FriendshipEntity.create({
+                userId: friendRequest.receiverId,
+                friendId: friendRequest.senderId,
+            });
+            await this._friendshipRepo.createFriendshipPair(rowA, rowB);
         } else {
             friendRequest.decline(input.currentUserId);
         }
@@ -317,6 +332,26 @@ export class FriendshipApplicationService implements IFriendshipApplicationServi
             .sort((a, b) => b.score - a.score)
             .slice(0, SUGGESTIONS_LIMIT)
             .map(({ score, ...rest }) => rest);
+
+        // Top up with random users when mutual-friend signal can't fill the slate
+        // (e.g. brand-new user with 0 friends, or a user whose candidates were thin).
+        if (suggestions.length < SUGGESTIONS_LIMIT) {
+            const remaining = SUGGESTIONS_LIMIT - suggestions.length;
+            const excludeIds = suggestions.map((s) => s.userId);
+            const fillers = await this._friendshipRepo.findRandomUsersExcluding(
+                userId,
+                remaining,
+                excludeIds,
+            );
+            for (const f of fillers) {
+                suggestions.push({
+                    userId: f.userId,
+                    displayName: f.displayName,
+                    avatarUrl: f.avatarUrl,
+                    mutualFriendsCount: 0,
+                });
+            }
+        }
 
         const cacheKey = `${SUGGESTIONS_CACHE_KEY_PREFIX}:${userId}`;
         await this._cacheService.setWithExpireTime(cacheKey, suggestions, SUGGESTIONS_TTL);

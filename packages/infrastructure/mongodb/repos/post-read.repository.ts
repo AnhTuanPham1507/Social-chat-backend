@@ -125,4 +125,20 @@ export class PostReadMongoRepository extends BaseMongoRepository<PostReadDocumen
             { $set: { [field]: value } },
         ).exec();
     }
+
+    async updateAuthorByUserId(
+        userId: string,
+        author: { name: string; avatar?: string },
+    ): Promise<void> {
+        await this.model.updateMany(
+            { authorId: userId },
+            {
+                $set: {
+                    'author.id': userId,
+                    'author.name': author.name,
+                    'author.avatar': author.avatar ?? null,
+                },
+            },
+        ).exec();
+    }
 }

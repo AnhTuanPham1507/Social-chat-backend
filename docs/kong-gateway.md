@@ -67,10 +67,11 @@ curl -H "Authorization: Bearer <your-token>" http://localhost:3000/users/profile
 
 ## Routing Configuration
 
-| Gateway Path | Target Service | Port |
-|--------------|----------------|------|
-| `/auth/*`    | auth-service   | 3001 |
-| `/users/*`   | user-service   | 3002 |
+| Gateway Path  | Target Service    | Port |
+|---------------|-------------------|------|
+| `/auth/*`     | auth-service      | 3001 |
+| `/users/*`    | user-service      | 3002 |
+| `/messaging/*` | messaging-service | 3005 |
 
 ## Kong Ports
 
@@ -96,6 +97,7 @@ KONG_PROXY_URL=http://localhost:3000
 # Service URLs (used by Kong to route requests)
 AUTH_SERVICE_URL=http://host.docker.internal:3001
 USER_SERVICE_URL=http://host.docker.internal:3002
+MESSAGING_SERVICE_URL=http://host.docker.internal:3005
 ```
 
 ## Plugins Configured

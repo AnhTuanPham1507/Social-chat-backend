@@ -14,6 +14,12 @@ export interface PostReactions {
     mine: REACTION_TYPE | null;
 }
 
+export interface PostAuthorDTO {
+    id: string;
+    name: string;
+    avatar?: string;
+}
+
 export interface SharedOriginalAuthorDTO {
     id: string;
     displayName: string;
@@ -39,6 +45,11 @@ export interface SharedOriginalDTO {
 export class PostDTO {
     id?: string;
     authorId: string;
+    /**
+     * Snapshot of the author profile, denormalized into the read model
+     * via CDC. Optional because legacy rows may not have it yet.
+     */
+    author?: PostAuthorDTO;
     content?: string;
     visibility: POST_VISIBILITY;
     isEdited: boolean;
