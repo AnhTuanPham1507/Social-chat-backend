@@ -3,10 +3,13 @@ export class MessageDTO {
     conversationId: string;
     senderId: string;
     content: string;
+    attachmentKeys: string[];
     serverTs: Date;
 }
 
-export interface SendTextMessageInput {
+export interface SendMessageInput {
+    messageId: string;
     conversationId: string;
     content: string;
+    attachmentKeys?: string[];
 }

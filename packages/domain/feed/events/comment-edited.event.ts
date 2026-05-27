@@ -1,6 +1,8 @@
 import { DomainEvent } from '../../core/domain-event.base';
 
 export class CommentEditedEvent extends DomainEvent {
+  static readonly EVENT_NAME = 'comment.edited';
+
   constructor(
     readonly commentId: string,
     readonly postId: string,
@@ -10,6 +12,6 @@ export class CommentEditedEvent extends DomainEvent {
   }
 
   get eventName(): string {
-    return 'comment.edited';
+    return CommentEditedEvent.EVENT_NAME;
   }
 }

@@ -1,7 +1,8 @@
 import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Inject, Param, ParseUUIDPipe, Post, Put, Query, UseGuards } from '@nestjs/common';
-import { ApiBadRequestResponse, ApiBearerAuth, ApiConflictResponse, ApiCreatedResponse, ApiForbiddenResponse, ApiNoContentResponse, ApiNotFoundResponse, ApiOkResponse, ApiTags, ApiUnauthorizedResponse } from '@nestjs/swagger';
+import { ApiBadRequestResponse, ApiBearerAuth, ApiConflictResponse, ApiCreatedResponse, ApiForbiddenResponse, ApiNoContentResponse, ApiNotFoundResponse, ApiOkResponse, ApiQuery, ApiTags, ApiUnauthorizedResponse } from '@nestjs/swagger';
 import FRIENDSHIP_ENDPOINT from '../../constants/friendship-endpoint.constant';
 import { FRIENDSHIP_APPLICATION_SERVICE_TOKEN, IFriendshipApplicationService } from '@application/services/friendship.application-service';
+import { IPresenceApplicationService, PRESENCE_APP_SERVICE_TOKEN } from '@application/services/presence.application-service';
 import { SendFriendRequestDto } from '../dtos/send-friend-request.dto';
 import { RespondFriendRequestDto } from '../dtos/respond-friend-request.dto';
 import { FriendRequestResponseDto } from '../dtos/friend-request-response.dto';
@@ -10,6 +11,7 @@ import { PendingRequestItemResponseDto } from '../dtos/pending-request-item-resp
 import { GetFriendsQueryDto } from '../dtos/get-friends-query.dto';
 import { PaginatedFriendsResponseDto } from '../dtos/friend-item-response.dto';
 import { FriendSuggestionItemResponseDto } from '../dtos/friend-suggestion-response.dto';
+import { UserPresenceResponseDto } from '../dtos/presence-response.dto';
 import { FriendRequestMapper } from '../mappers/friend-request.mapper';
 import { CurrentUser, JwtGuard } from '@social-chat/shared-libs';
 
@@ -21,6 +23,8 @@ export class FriendshipController {
     constructor(
         @Inject(FRIENDSHIP_APPLICATION_SERVICE_TOKEN)
         private readonly _friendshipService: IFriendshipApplicationService,
+        @Inject(PRESENCE_APP_SERVICE_TOKEN)
+        private readonly _presenceService: IPresenceApplicationService,
     ) {}
 
     // ── Friend Request ──────────────────────────────────────
@@ -84,6 +88,29 @@ export class FriendshipController {
             requestId,
             currentUserId,
         });
+    }
+
+    // ── Presence ────────────────────────────────────────────
+
+    @Get(FRIENDSHIP_ENDPOINT.PRESENCE)
+    @ApiOkResponse({ type: [UserPresenceResponseDto], description: 'Presence status for friends' })
+    @ApiUnauthorizedResponse({ description: 'Unauthorized - Invalid or missing token' })
+    @ApiQuery({ name: 'ids', required: false, isArray: true, type: String, description: 'Friend user IDs to query; omit for all friends' })
+    async getFriendsPresence(
+        @CurrentUser('id') currentUserId: string,
+        @Query('ids') ids?: string | string[],
+    ): Promise<UserPresenceResponseDto[]> {
+        const idList = ids
+            ? (Array.isArray(ids) ? ids : ids.split(',').map((s) => s.trim())).filter(Boolean)
+            : undefined;
+
+        const results = await this._presenceService.getFriendsPresence(currentUserId, idList);
+
+        return results.map((r) => ({
+            userId:     r.userId,
+            status:     r.status,
+            lastSeenAt: r.lastSeenAt?.getTime() ?? null,
+        }));
     }
 
     // ── Suggestions ─────────────────────────────────────────

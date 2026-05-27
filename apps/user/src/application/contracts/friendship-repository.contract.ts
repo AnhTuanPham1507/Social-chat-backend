@@ -45,4 +45,5 @@ export interface IFriendshipRepository {
         excludeIds: string[],
     ): Promise<RandomUserCandidate[]>;
     getAllUserIds(): Promise<string[]>;
+    findAllFriendIds(userId: string): Promise<string[]>;
 }

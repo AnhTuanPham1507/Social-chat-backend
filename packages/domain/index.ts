@@ -34,7 +34,6 @@ export * from './conversation/events/conversation-created.event';
 
 // Message domain
 export * from './message/message-type.enum';
-export * from './message/message-status.enum';
 export * from './message/message.constants';
 export * from './message/message.entity';
 export * from './message/events';
@@ -48,8 +47,8 @@ export * from './friendship/events/friend-request-sent.event';
 export * from './friendship/events/friend-request-accepted.event';
 export * from './friendship/events/friend-request-declined.event';
 export * from './friendship/events/friend-removed.event';
-export * from './friendship/events/user-blocked.event';
-export * from './friendship/events/user-unblocked.event';
+export * from './friendship/events/friendship-blocked.event';
+export * from './friendship/events/friendship-unblocked.event';
 
 // Presence domain
 export * from './presence/presence-status.enum';

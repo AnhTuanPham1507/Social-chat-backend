@@ -2,7 +2,9 @@ import { DomainEvent } from '../../core/domain-event.base';
 import { CONTENT_TYPE } from '../../reaction/content-type.enum';
 import { REACTION_TYPE } from '../../reaction/reaction-type.enum';
 
-export class PostReactedEvent extends DomainEvent {
+export class ReactionRemovedEvent extends DomainEvent {
+  static readonly EVENT_NAME = 'reaction.removed';
+
   constructor(
     readonly reactionId: string,
     readonly contentId: string,
@@ -14,6 +16,6 @@ export class PostReactedEvent extends DomainEvent {
   }
 
   get eventName(): string {
-    return 'reaction.created';
+    return ReactionRemovedEvent.EVENT_NAME;
   }
 }

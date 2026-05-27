@@ -3,6 +3,8 @@ import { ASSET_PURPOSE } from '../asset-purpose.enum';
 import { ASSET_TYPE } from '../asset-type.value-object';
 
 export class AssetConfirmedEvent extends DomainEvent {
+  static readonly EVENT_NAME = 'asset.confirmed';
+
   constructor(
     readonly assetId: string,
     readonly bucket: string,
@@ -17,6 +19,6 @@ export class AssetConfirmedEvent extends DomainEvent {
   }
 
   get eventName(): string {
-    return 'asset.confirmed';
+    return AssetConfirmedEvent.EVENT_NAME;
   }
 }

@@ -1,16 +1,36 @@
-import { ApiProperty } from '@nestjs/swagger';
-import { IsString, MaxLength, MinLength } from 'class-validator';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import {
+    ArrayMaxSize,
+    IsArray,
+    IsOptional,
+    IsString,
+    MaxLength,
+} from 'class-validator';
 
 import { MESSAGE_CONTENT_MAX_LENGTH } from '@social-chat/domain';
 
+const MAX_ATTACHMENTS_PER_MESSAGE = 10;
+
 export class SendMessageDto {
-    @ApiProperty({
-        description: 'Message body text',
-        minLength: 1,
+    @ApiPropertyOptional({
+        description: 'Message body text. Required if no attachments.',
         maxLength: MESSAGE_CONTENT_MAX_LENGTH,
     })
+    @IsOptional()
     @IsString()
-    @MinLength(1)
     @MaxLength(MESSAGE_CONTENT_MAX_LENGTH)
-    content: string;
+    content?: string;
+
+    @ApiPropertyOptional({
+        description:
+            'Object-storage keys for attached assets (image, video, file). ' +
+            'Required if no content.',
+        type: [String],
+        maxItems: MAX_ATTACHMENTS_PER_MESSAGE,
+    })
+    @IsOptional()
+    @IsArray()
+    @ArrayMaxSize(MAX_ATTACHMENTS_PER_MESSAGE)
+    @IsString({ each: true })
+    attachmentKeys?: string[];
 }

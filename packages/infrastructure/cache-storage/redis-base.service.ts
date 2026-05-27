@@ -261,4 +261,8 @@ export class RedisBaseService {
   ): Promise<number> {
     return this._store.zadd(key, score, member);
   }
+
+  public async publish(channel: string, message: string): Promise<number> {
+    return this._store.publish(channel, message);
+  }
 }

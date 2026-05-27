@@ -12,6 +12,7 @@ export * from './cache-storage/redis.module';
 export * from './cache-storage/redis-base.service';
 export * from './cache-storage/const';
 export * from './cache-storage/redis-key.helper';
+export * from './cache-storage/presence-lua.script';
 
 // Messaging
 export * from './messaging';

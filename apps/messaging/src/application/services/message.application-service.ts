@@ -21,15 +21,17 @@ import {
     IMessageRepository,
     MESSAGE_REPO_TOKEN,
 } from '../contracts/message-repository.contract';
-import { MessageDTO, SendTextMessageInput } from '../dtos/message.dto';
+import { MessageDTO, SendMessageInput } from '../dtos/message.dto';
 import { MessageAppMapper } from '../mappers/message-app.mapper';
+import { MessageCreatedEvent } from '@social-chat/common';
+import { IWsPushPublisher, WS_PUSH_PUBLISHER_TOKEN } from '@application/contracts/ws-push-publisher.contract';
 
 export const MESSAGE_APPLICATION_SERVICE_TOKEN = Symbol(
     'MESSAGE_APPLICATION_SERVICE_TOKEN',
 );
 
 export interface IMessageApplicationService {
-    sendText(currentUserId: string, input: SendTextMessageInput): Promise<MessageDTO>;
+    sendMessage(currentUserId: string, input: SendMessageInput): Promise<MessageDTO>;
 }
 
 @Injectable()
@@ -43,11 +45,13 @@ export class MessageApplicationService implements IMessageApplicationService {
         private readonly _clock: IClock,
         @Inject(DOMAIN_EVENT_BUS_TOKEN)
         private readonly _domainEventBus: IDomainEventBus,
-    ) {}
+        @Inject(WS_PUSH_PUBLISHER_TOKEN)
+        private readonly _wsPushPublisher: IWsPushPublisher,
+    ) { }
 
-    public async sendText(
+    public async sendMessage(
         currentUserId: string,
-        input: SendTextMessageInput,
+        input: SendMessageInput,
     ): Promise<MessageDTO> {
         const conversation = await this._conversationRepo.findById(input.conversationId);
         if (!conversation) {
@@ -62,16 +66,33 @@ export class MessageApplicationService implements IMessageApplicationService {
         const serverTs = this._clock.now();
         const message = MessageEntity.send(
             {
+                messageId: input.messageId,
                 conversationId: input.conversationId,
                 senderId: currentUserId,
                 content: input.content,
+                attachmentKeys: input.attachmentKeys,
             },
             serverTs,
         );
 
         await this._messageRepo.insert(message);
+        await this._pushWsEvent(message);
         await this._domainEventBus.publishAll(message.publishEvents());
 
         return MessageAppMapper.fromEntityToAppModel(message);
+    }
+
+    private async _pushWsEvent(event: MessageEntity) {
+        const wsEvent: MessageCreatedEvent = {
+            event: 'message:created',
+            messageId: event.id,
+            conversationId: event.conversationId,
+            senderId: event.senderId,
+            content: event.content,
+            attachmentKeys: event.attachmentKeys,
+            serverTs: event.serverTs.toISOString(),
+        };
+
+        await this._wsPushPublisher.publishToConversation(event.conversationId, wsEvent);
     }
 }

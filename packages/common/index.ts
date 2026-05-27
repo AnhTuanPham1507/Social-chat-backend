@@ -42,5 +42,8 @@ export * from './ddd';
 // Integration Events (public contracts between bounded contexts)
 export * from './integration-events';
 
+// WS Push (back-channel envelope schema for realtime-gateway)
+export * from './ws-push';
+
 
 

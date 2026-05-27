@@ -10,6 +10,8 @@ import { DomainEvent } from '../../core/domain-event.base';
  * - Index user in search service
  */
 export class UserCreatedEvent extends DomainEvent {
+  static readonly EVENT_NAME = 'user.created';
+
   constructor(
     readonly userId: string,
     readonly email: string,
@@ -19,6 +21,6 @@ export class UserCreatedEvent extends DomainEvent {
   }
 
   get eventName(): string {
-    return 'user.created';
+    return UserCreatedEvent.EVENT_NAME;
   }
 }

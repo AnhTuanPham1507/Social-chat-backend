@@ -80,7 +80,11 @@
       "Bash(git -C \"C:/Users/EVT-LTP-ThanhTuan/OneDrive/Desktop/source-code/Social-chat-backend\" ls-files \"*friend_request*\" \"*friend-request*\" \"apps/user/src/driven-adapters\")",
       "Bash(echo \"exit=$?\")",
       "Bash(yarn jest *)",
-      "Bash(yarn nest *)"
+      "Bash(yarn nest *)",
+      "Bash(find packages/infrastructure/messaging -type f)",
+      "Bash(find packages/infrastructure -type d -name \"*messag*\")",
+      "Bash(yarn tsc *)",
+      "Bash(del *)"
     ]
   }
 }

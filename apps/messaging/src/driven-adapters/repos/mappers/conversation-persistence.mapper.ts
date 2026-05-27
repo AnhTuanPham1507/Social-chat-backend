@@ -32,6 +32,7 @@ export class ConversationPersistenceMapper {
             name: entity.name,
             lowerUserId,
             higherUserId,
+            lastActivityAt: entity.lastActivityAt,
             members: members as ConversationMemberModel[],
             createdAt: entity.createdAt,
             updatedAt: entity.updatedAt,
@@ -49,6 +50,7 @@ export class ConversationPersistenceMapper {
             type: model.type as CONVERSATION_TYPE,
             name: model.name,
             members,
+            lastActivityAt: model.lastActivityAt,
             createdAt: model.createdAt,
             updatedAt: model.updatedAt,
         });

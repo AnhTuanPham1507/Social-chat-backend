@@ -2,6 +2,8 @@ import { DomainEvent } from '../../core/domain-event.base';
 import { POST_VISIBILITY } from '../../post/post-visibility.enum';
 
 export class PostSharedEvent extends DomainEvent {
+  static readonly EVENT_NAME = 'post.shared';
+
   constructor(
     readonly sharePostId: string,
     readonly sharerId: string,
@@ -13,6 +15,6 @@ export class PostSharedEvent extends DomainEvent {
   }
 
   get eventName(): string {
-    return 'post.shared';
+    return PostSharedEvent.EVENT_NAME;
   }
 }

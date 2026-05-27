@@ -135,8 +135,9 @@ echo "Configuring Routes..."
 echo "-------------------------------------------"
 
 # Auth routes - /auth/* -> auth-service
-# strip_path=false preserves the /auth prefix
-create_route "auth-service" "auth-routes" '[\"/auth\"]' false
+# strip_path=true removes the /auth gateway prefix; frontend calls /auth/<api-path>
+# (e.g. /auth/auth/login) and the service receives <api-path> (e.g. /auth/login)
+create_route "auth-service" "auth-routes" '[\"/auth\"]' true
 
 # User routes - /users/* -> user-service
 # strip_path=true removes the /users gateway prefix; frontend calls /users/<api-path>

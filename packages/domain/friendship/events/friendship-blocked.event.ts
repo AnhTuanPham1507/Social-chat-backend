@@ -1,6 +1,8 @@
 import { DomainEvent } from '../../core/domain-event.base';
 
-export class UserBlockedEvent extends DomainEvent {
+export class FriendshipBlockedEvent extends DomainEvent {
+  static readonly EVENT_NAME = 'friendship.blocked';
+
   constructor(
     readonly friendshipId: string,
     readonly blockerId: string,
@@ -10,6 +12,6 @@ export class UserBlockedEvent extends DomainEvent {
   }
 
   get eventName(): string {
-    return 'friendship.blocked';
+    return FriendshipBlockedEvent.EVENT_NAME;
   }
 }

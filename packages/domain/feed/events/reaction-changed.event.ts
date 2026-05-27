@@ -3,6 +3,8 @@ import { CONTENT_TYPE } from '../../reaction/content-type.enum';
 import { REACTION_TYPE } from '../../reaction/reaction-type.enum';
 
 export class ReactionChangedEvent extends DomainEvent {
+  static readonly EVENT_NAME = 'reaction.changed';
+
   constructor(
     readonly reactionId: string,
     readonly contentId: string,
@@ -15,6 +17,6 @@ export class ReactionChangedEvent extends DomainEvent {
   }
 
   get eventName(): string {
-    return 'reaction.changed';
+    return ReactionChangedEvent.EVENT_NAME;
   }
 }

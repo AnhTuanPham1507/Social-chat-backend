@@ -1,8 +1,8 @@
 import { AggregateRoot, UUID } from '../core/aggregate-root.base';
 import { CONTENT_TYPE } from '../reaction/content-type.enum';
 import { REACTION_TYPE } from '../reaction/reaction-type.enum';
-import { PostReactedEvent } from './events/post-reacted.event';
-import { PostUnreactedEvent } from './events/post-unreacted.event';
+import { ReactionCreatedEvent } from './events/reaction-created.event';
+import { ReactionRemovedEvent } from './events/reaction-removed.event';
 import { ReactionChangedEvent } from './events/reaction-changed.event';
 
 interface ReactionProps {
@@ -46,7 +46,7 @@ export class ReactionEntity extends AggregateRoot<ReactionProps> {
     });
 
     reaction.addDomainEvent(
-      new PostReactedEvent(reaction.id, props.contentId, props.contentType, props.userId, props.type),
+      new ReactionCreatedEvent(reaction.id, props.contentId, props.contentType, props.userId, props.type),
     );
 
     return reaction;
@@ -107,7 +107,7 @@ export class ReactionEntity extends AggregateRoot<ReactionProps> {
 
   remove(): void {
     this.addDomainEvent(
-      new PostUnreactedEvent(this.id, this.contentId, this.contentType, this.userId, this.type),
+      new ReactionRemovedEvent(this.id, this.contentId, this.contentType, this.userId, this.type),
     );
   }
 }

@@ -10,6 +10,18 @@ interface ConversationProps {
     type: CONVERSATION_TYPE;
     name: string | null;
     members: Membership[];
+    /**
+     * Denormalised "last activity" timestamp for inbox sorting.
+     *
+     * Bumped by the application layer (out-of-band of the aggregate) on
+     * every MessageSentEvent — see ConversationActivityListener. We model
+     * it as a read-only entity prop so reads can project it, but mutation
+     * is intentionally NOT exposed via an entity method: bumping it on
+     * every message is hot-path, and loading the aggregate just to bump
+     * a single column would contend on the conversation row for every
+     * message in a busy DM. Repo does a direct UPDATE instead.
+     */
+    lastActivityAt: Date;
 }
 
 export interface CreateGroupProps {
@@ -23,6 +35,7 @@ export interface ReconstituteConversationProps {
     type: CONVERSATION_TYPE;
     name: string | null;
     members: Membership[];
+    lastActivityAt: Date;
     createdAt: Date;
     updatedAt: Date;
 }
@@ -47,6 +60,7 @@ export class ConversationEntity extends AggregateRoot<ConversationProps> {
             type: CONVERSATION_TYPE.DIRECT,
             name: null,
             members,
+            lastActivityAt: now,
         });
 
         conversation.addDomainEvent(
@@ -92,6 +106,7 @@ export class ConversationEntity extends AggregateRoot<ConversationProps> {
             type: CONVERSATION_TYPE.GROUP,
             name: trimmedName,
             members,
+            lastActivityAt: now,
         });
 
         conversation.addDomainEvent(
@@ -112,6 +127,7 @@ export class ConversationEntity extends AggregateRoot<ConversationProps> {
                 type: props.type,
                 name: props.name,
                 members: props.members,
+                lastActivityAt: props.lastActivityAt,
             },
             props.id,
         );
@@ -129,6 +145,10 @@ export class ConversationEntity extends AggregateRoot<ConversationProps> {
 
     get members(): ReadonlyArray<Membership> {
         return this._props.members;
+    }
+
+    get lastActivityAt(): Date {
+        return this._props.lastActivityAt;
     }
 
     get isDM(): boolean {

@@ -291,4 +291,15 @@ export class FriendshipRepo implements IFriendshipRepository {
         );
         return results.map((r: { user_id: string }) => r.user_id);
     }
+
+    async findAllFriendIds(userId: string): Promise<string[]> {
+        const results = await this._friendshipRepo
+            .getRepository()
+            .createQueryBuilder('f')
+            .select('f.friendId', 'friendId')
+            .where('f.userId = :userId', { userId })
+            .andWhere('f.type = :type', { type: FRIENDSHIP_TYPE.FRIEND })
+            .getRawMany<{ friendId: string }>();
+        return results.map((r) => r.friendId);
+    }
 }

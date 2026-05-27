@@ -9,6 +9,7 @@ export class MessageAppMapper {
             conversationId: entity.conversationId,
             senderId: entity.senderId,
             content: entity.content,
+            attachmentKeys: entity.attachmentKeys,
             serverTs: entity.serverTs,
         };
     }

@@ -15,7 +15,7 @@ import { KafkaProducerService } from '@social-chat/infrastructure';
 export class CommentDeletedListener {
     constructor(private readonly _kafkaProducer: KafkaProducerService) {}
 
-    @OnEvent('comment.deleted')
+    @OnEvent(CommentDeletedEvent.EVENT_NAME)
     async handle(event: CommentDeletedEvent): Promise<void> {
         const integrationEvent = new CommentDeletedIntegrationEvent(
             event.commentSnapshot,

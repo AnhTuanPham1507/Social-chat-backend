@@ -1,6 +1,8 @@
 import { DomainEvent } from '../../core/domain-event.base';
 
 export class FriendRemovedEvent extends DomainEvent {
+  static readonly EVENT_NAME = 'friendship.removed';
+
   constructor(
     readonly friendshipId: string,
     readonly userId: string,
@@ -11,6 +13,6 @@ export class FriendRemovedEvent extends DomainEvent {
   }
 
   get eventName(): string {
-    return 'friendship.removed';
+    return FriendRemovedEvent.EVENT_NAME;
   }
 }

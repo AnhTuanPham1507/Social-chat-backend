@@ -3,6 +3,7 @@ import { Kafka } from 'kafkajs';
 import {
   KafkaIntegrationConsumer,
   KAFKA_CLIENT_TOKEN,
+  KafkaProducerService,
 } from '@social-chat/infrastructure';
 import { PostDeletedIntegrationEvent } from '@social-chat/common';
 import { POST_DELETED_CLEANUP_GROUP_ID } from 'src/constants/messaging.constant';
@@ -25,11 +26,12 @@ export class PostDeletedCleanupConsumer extends KafkaIntegrationConsumer<PostDel
 
   constructor(
     @Inject(KAFKA_CLIENT_TOKEN) kafka: Kafka,
+    producer: KafkaProducerService,
     @Inject(OBJECT_STORAGE_SERVICE_TOKEN)
     private readonly _storageService: IObjectStorageService,
     private readonly _assetPathService: AssetPathService,
   ) {
-    super(kafka, POST_DELETED_CLEANUP_GROUP_ID);
+    super(kafka, POST_DELETED_CLEANUP_GROUP_ID, producer);
   }
 
   protected async handleMessage(

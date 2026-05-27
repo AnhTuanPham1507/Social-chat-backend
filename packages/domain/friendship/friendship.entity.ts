@@ -1,8 +1,8 @@
 import { AggregateRoot, UUID } from '../core/aggregate-root.base';
 import { FRIENDSHIP_TYPE } from './friendship-type.enum';
 import { FriendRemovedEvent } from './events/friend-removed.event';
-import { UserBlockedEvent } from './events/user-blocked.event';
-import { UserUnblockedEvent } from './events/user-unblocked.event';
+import { FriendshipBlockedEvent } from './events/friendship-blocked.event';
+import { FriendshipUnblockedEvent } from './events/friendship-unblocked.event';
 
 interface FriendshipProps {
   userId: string;
@@ -63,7 +63,7 @@ export class FriendshipEntity extends AggregateRoot<FriendshipProps> {
     });
 
     blockerRow.addDomainEvent(
-      new UserBlockedEvent(blockerRow.id, props.blockerId, props.blockedId),
+      new FriendshipBlockedEvent(blockerRow.id, props.blockerId, props.blockedId),
     );
 
     return [blockerRow, blockedRow];
@@ -133,7 +133,7 @@ export class FriendshipEntity extends AggregateRoot<FriendshipProps> {
     }
 
     this.addDomainEvent(
-      new UserUnblockedEvent(this.id, this._props.userId, this._props.friendId),
+      new FriendshipUnblockedEvent(this.id, this._props.userId, this._props.friendId),
     );
   }
 }

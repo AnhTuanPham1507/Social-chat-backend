@@ -13,6 +13,9 @@ export class MessageResponse {
     @ApiProperty()
     content: string;
 
+    @ApiProperty({ type: [String], description: 'Object-storage keys for attached assets' })
+    attachmentKeys: string[];
+
     @ApiProperty()
     serverTs: Date;
 }

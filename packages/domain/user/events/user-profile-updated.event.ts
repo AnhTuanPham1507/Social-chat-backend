@@ -9,6 +9,8 @@ import { DomainEvent } from '../../core/domain-event.base';
  * - Notify friends of profile changes
  */
 export class UserProfileUpdatedEvent extends DomainEvent {
+  static readonly EVENT_NAME = 'user.profile-updated';
+
   constructor(
     readonly userId: string,
     readonly updatedFields: string[],
@@ -17,6 +19,6 @@ export class UserProfileUpdatedEvent extends DomainEvent {
   }
 
   get eventName(): string {
-    return 'user.profile_updated';
+    return UserProfileUpdatedEvent.EVENT_NAME;
   }
 }

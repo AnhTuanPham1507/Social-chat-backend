@@ -2,6 +2,8 @@ import { DomainEvent } from '../../core/domain-event.base';
 import { POST_VISIBILITY } from '../../post/post-visibility.enum';
 
 export class PostCreatedEvent extends DomainEvent {
+  static readonly EVENT_NAME = 'post.created';
+
   constructor(
     readonly postId: string,
     readonly authorId: string,
@@ -11,6 +13,6 @@ export class PostCreatedEvent extends DomainEvent {
   }
 
   get eventName(): string {
-    return 'post.created';
+    return PostCreatedEvent.EVENT_NAME;
   }
 }

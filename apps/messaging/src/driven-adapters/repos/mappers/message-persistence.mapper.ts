@@ -8,6 +8,7 @@ export class MessagePersistenceMapper {
             conversationId: entity.conversationId,
             senderId: entity.senderId,
             content: entity.content,
+            attachmentKeys: entity.attachmentKeys,
             serverTs: entity.serverTs,
         };
     }
@@ -18,6 +19,7 @@ export class MessagePersistenceMapper {
             conversationId: doc.conversationId,
             senderId: doc.senderId,
             content: doc.content,
+            attachmentKeys: doc.attachmentKeys ?? [],
             serverTs: doc.serverTs,
         });
     }

@@ -8,6 +8,7 @@ const FRIENDSHIP_ENDPOINT = {
     BLOCK: '/:userId/block',
     UNBLOCK: '/:userId/block',
     SUGGESTIONS: '/suggestions',
+    PRESENCE: '/presence',
 };
 
 export default FRIENDSHIP_ENDPOINT;

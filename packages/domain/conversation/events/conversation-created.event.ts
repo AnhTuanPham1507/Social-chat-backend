@@ -2,6 +2,8 @@ import { DomainEvent } from '../../core/domain-event.base';
 import { CONVERSATION_TYPE } from '../conversation-type.enum';
 
 export class ConversationCreatedEvent extends DomainEvent {
+    static readonly EVENT_NAME = 'conversation.created';
+
     constructor(
         readonly conversationId: string,
         readonly type: CONVERSATION_TYPE,
@@ -12,6 +14,6 @@ export class ConversationCreatedEvent extends DomainEvent {
     }
 
     get eventName(): string {
-        return 'conversation.created';
+        return ConversationCreatedEvent.EVENT_NAME;
     }
 }

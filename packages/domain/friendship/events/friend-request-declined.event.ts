@@ -1,6 +1,8 @@
 import { DomainEvent } from '../../core/domain-event.base';
 
 export class FriendRequestDeclinedEvent extends DomainEvent {
+  static readonly EVENT_NAME = 'friend-request.declined';
+
   constructor(
     readonly friendRequestId: string,
     readonly senderId: string,
@@ -10,6 +12,6 @@ export class FriendRequestDeclinedEvent extends DomainEvent {
   }
 
   get eventName(): string {
-    return 'friend-request.declined';
+    return FriendRequestDeclinedEvent.EVENT_NAME;
   }
 }

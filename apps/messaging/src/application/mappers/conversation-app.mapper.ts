@@ -13,6 +13,7 @@ export class ConversationAppMapper {
                 role: m.role,
                 joinedAt: m.joinedAt,
             })),
+            lastActivityAt: entity.lastActivityAt,
             createdAt: entity.createdAt,
             updatedAt: entity.updatedAt,
         };

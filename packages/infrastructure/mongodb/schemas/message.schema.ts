@@ -33,8 +33,24 @@ export class Message {
     @Prop({ type: String, required: true })
     senderId: string;
 
-    @Prop({ type: String, required: true })
+    /**
+     * Empty string is valid at the storage layer — the composition invariant
+     * "content OR ≥1 attachment" is enforced by `MessageEntity` in the
+     * domain layer. Mongoose `required: true` rejects empty strings, which
+     * would force the schema to duplicate (and partially mis-enforce) the
+     * domain invariant. Default `''` keeps the column non-null.
+     */
+    @Prop({ type: String, required: false, default: '' })
     content: string;
+
+    /**
+     * Opaque R2 object keys for attached assets, owned by the asset
+     * bounded context. Stored as a flat string array so the messaging
+     * service stays decoupled from variant generation and type detection.
+     * Empty array when the message is text-only.
+     */
+    @Prop({ type: [String], required: true, default: [] })
+    attachmentKeys: string[];
 
     @Prop({ type: Date, required: true })
     serverTs: Date;

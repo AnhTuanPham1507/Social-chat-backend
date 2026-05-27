@@ -27,8 +27,42 @@ export class ConversationResponse {
     members: ConversationMemberResponse[];
 
     @ApiProperty()
+    lastActivityAt: Date;
+
+    @ApiProperty()
     createdAt: Date;
 
     @ApiProperty()
     updatedAt: Date;
+}
+
+export class ParticipantSnapshotResponse {
+    @ApiProperty()
+    userId: string;
+
+    @ApiProperty()
+    displayName: string;
+
+    @ApiProperty({ required: false })
+    avatarUrl?: string;
+}
+
+/**
+ * Inbox listing variant: includes resolved `participants` for direct
+ * client rendering (avatar + name without a follow-up user fetch).
+ */
+export class ConversationListItemResponse extends ConversationResponse {
+    @ApiProperty({ type: [ParticipantSnapshotResponse] })
+    participants: ParticipantSnapshotResponse[];
+}
+
+export class ConversationPageResponse {
+    @ApiProperty({ type: [ConversationListItemResponse] })
+    items: ConversationListItemResponse[];
+
+    @ApiProperty({ nullable: true, description: 'Opaque cursor. Pass to fetch older page; null when no more.' })
+    nextCursor: string | null;
+
+    @ApiProperty()
+    hasMore: boolean;
 }

@@ -24,7 +24,7 @@ export class AssetConfirmedListener {
         private readonly _videoProcessingService: VideoProcessingApplicationService,
     ) {}
 
-    @OnEvent('asset.confirmed', { async: true })
+    @OnEvent(AssetConfirmedEvent.EVENT_NAME, { async: true })
     async handle(event: AssetConfirmedEvent): Promise<void> {
         const input = {
             assetId: event.assetId,

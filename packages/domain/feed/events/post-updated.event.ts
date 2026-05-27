@@ -1,6 +1,8 @@
 import { DomainEvent } from '../../core/domain-event.base';
 
 export class PostUpdatedEvent extends DomainEvent {
+  static readonly EVENT_NAME = 'post.updated';
+
   constructor(
     readonly postId: string,
     readonly updatedFields: string[],
@@ -9,6 +11,6 @@ export class PostUpdatedEvent extends DomainEvent {
   }
 
   get eventName(): string {
-    return 'post.updated';
+    return PostUpdatedEvent.EVENT_NAME;
   }
 }
