@@ -1,12 +1,13 @@
 import { randomUUID } from 'crypto';
 import { resolve } from 'path';
 
-import { DATABASE_CONFIG, IDatabaseConfig, IKafkaAppConfig, KAFKA_CONFIG, SOCIAL_CHAT_KEYCLOAK_CONFIG } from '@social-chat/common';
+import { DATABASE_CONFIG, IDatabaseConfig, IKafkaAppConfig, KAFKA_CONFIG, IMongoConfig, MONGO_CONFIG, SOCIAL_CHAT_KEYCLOAK_CONFIG } from '@social-chat/common';
 import { REDIS_CONFIG, SHARED_STORE_CONFIG } from '@social-chat/common';
 import { REQ_ID_HEADER } from '@social-chat/common';
 import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { EventEmitterModule } from '@nestjs/event-emitter';
+import { MongooseModule } from '@nestjs/mongoose';
 import { ClsModule } from 'nestjs-cls';
 
 import { ScheduleModule } from '@nestjs/schedule';
@@ -54,6 +55,13 @@ import { LibAuthModule, RefreshTokenMiddleware } from '@social-chat/shared-libs'
             inject: [ConfigService],
             useFactory: (configService: ConfigService) => {
                 return configService.get<IDatabaseConfig>(DATABASE_CONFIG);
+            },
+        }),
+        MongooseModule.forRootAsync({
+            inject: [ConfigService],
+            useFactory: (configService: ConfigService) => {
+                const mongoConfig = configService.get<IMongoConfig>(MONGO_CONFIG);
+                return { uri: mongoConfig.uri };
             },
         }),
         MessagingModule.forRootAsync({

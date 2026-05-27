@@ -7,13 +7,13 @@ import {
     Message,
     MessageMongoRepository,
     MessageSchema,
-    MessagingUserRead,
-    MessagingUserReadMongoRepository,
-    MessagingUserReadSchema,
     ParticipantState,
     ParticipantStateMongoRepository,
     ParticipantStateSchema,
     SystemClock,
+    UserRead,
+    UserReadMongoRepository,
+    UserReadSchema,
 } from '@social-chat/infrastructure';
 
 import { CONVERSATION_REPO_TOKEN } from './application/contracts/conversation-repository.contract';
@@ -43,15 +43,10 @@ import {
     READ_RECEIPT_QUERY_APPLICATION_SERVICE_TOKEN,
     ReadReceiptQueryApplicationService,
 } from './application/services/read-receipt-query.application-service';
-import {
-    USER_CDC_APPLICATION_SERVICE_TOKEN,
-    UserCdcApplicationService,
-} from './application/services/user-cdc.application-service';
 import { ConversationController } from './driving-adapters/controllers/conversation.controller';
 import { InternalReadReceiptController } from './driving-adapters/controllers/internal-read-receipt.controller';
 import { MessageController } from './driving-adapters/controllers/message.controller';
 import { MessagingCommandsConsumer } from './driving-adapters/consumers/messaging-commands.consumer';
-import { UserCdcConsumer } from './driving-adapters/consumers/user-cdc.consumer';
 import { ConversationRepo } from './driven-adapters/repos/conversation-repository.adapter';
 import { MessageRepo } from './driven-adapters/repos/message-repository.adapter';
 import { ParticipantStateRepo } from './driven-adapters/repos/participant-state-repository.adapter';
@@ -62,7 +57,7 @@ import { RedisWsPushPublisher } from './driven-adapters/ws-push/redis-ws-push-pu
     imports: [
         MongooseModule.forFeature([
             { name: Message.name, schema: MessageSchema },
-            { name: MessagingUserRead.name, schema: MessagingUserReadSchema },
+            { name: UserRead.name, schema: UserReadSchema },
             { name: ParticipantState.name, schema: ParticipantStateSchema },
         ]),
     ],
@@ -89,7 +84,7 @@ import { RedisWsPushPublisher } from './driven-adapters/ws-push/redis-ws-push-pu
             useClass: ConversationApplicationService,
         },
         MessageMongoRepository,
-        MessagingUserReadMongoRepository,
+        UserReadMongoRepository,
         ParticipantStateMongoRepository,
         {
             provide: MESSAGE_REPO_TOKEN,
@@ -120,17 +115,12 @@ import { RedisWsPushPublisher } from './driven-adapters/ws-push/redis-ws-push-pu
             useClass: ReadReceiptQueryApplicationService,
         },
         {
-            provide: USER_CDC_APPLICATION_SERVICE_TOKEN,
-            useClass: UserCdcApplicationService,
-        },
-        {
             provide: WS_PUSH_PUBLISHER_TOKEN,
             useClass: RedisWsPushPublisher,
         },
         ConversationActivityListener,
         ConversationMembershipListener,
         MessagingCommandsConsumer,
-        UserCdcConsumer,
     ],
     exports: [],
 })

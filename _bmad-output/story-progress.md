@@ -94,7 +94,7 @@ Track your learning progress through all stories.
 | 6.5: Send Images | ✅ Done | 2026-05-23 | Unified with 6.6 — see row below |
 | 6.6: Send Files | ✅ Done | 2026-05-23 | **Unified attachment path.** Renamed `SendTextCommand` → `SendMessageCommand` (commandType `'send-message'`) since the wire envelope now carries either content, attachments, or both. `MessageEntity` gained `attachmentKeys: string[]` plus a composition invariant (`content` OR `attachments`, never neither). WS gateway DTO accepts `attachmentKeys?: string[]` with `@ArrayMaxSize(10)` + `@IsString({each:true})`; `content` is now `@IsOptional`, with gateway coercing `undefined` → `''` so empty messages still reach the entity for a uniform error path. Threaded through Mongo schema (default `[]`), persistence mapper, `MessageWithSenderModel`, history endpoint, and the `message:created` WS push envelope. App-service method renamed `sendText` → `sendMessage`. Asset purpose `chat-attachment` was already in the enum — no asset-side change; client orchestrates presign → R2 → reference keys, mirroring posts 4.2/4.3. Max-attachment limit (10) is a wire-layer cap, not a domain invariant. |
 | 6.7: Delivery Status | ✅ Done | 2026-05-23 | **Telegram semantics, not WhatsApp.** ✓ = "server persisted," not "device received." Zero new backend code — reuses 6.2/6.4 pipeline: sender is subscribed to `conversation:{C}` as a member, receives echo of own message, client correlates UUIDv7 messageId to optimistic entry, flips SENDING → SENT (✓). **Rejected:** `lastDelivered` field, client `message:delivered` ack, batched timer, HTTP fast-path, distinct-sender range query, multi-channel fan-out. **MESSAGE_STATUS enum deleted** — purely client-side concept; server stores no status field. Read receipts (6.8) will reintroduce the watermark + `$max` + sender fan-out machinery because server has no natural signal for "read" (unlike "delivered" where Mongo persist is the signal). Lesson: negative-space design — sharpen semantics before architecting; ~6 components evaporate when "delivered = server has it" instead of "delivered = device confirmed." |
-| 6.8: Read Receipts | ⬜ TODO | | |
+| 6.8: Read Receipts | ✅ Done | 2026-05-25 | **Slack/Messenger reader-avatar UI, NOT WhatsApp per-message ✓✓.** Per-(conversation, user) watermark in `participant_state` collection — 1 row per member per conversation, optimal floor (no further compression without losing per-user resolution). **Load-bearing op**: `findOneAndUpdate({conversationId, userId}, {$max: {lastReadMessageId, lastReadAt}, $setOnInsert: {...}}, {upsert: true, returnDocument: 'before'})`. `$max` works on UUIDv7 strings because lex order == time order. `returnDocument: 'before'` gives prev in one round-trip so caller computes `advanced` flag without race. Stale/duplicate acks (multi-device race, retry) silently absorbed. **Fan-out shape**: broadcast on `conversation:{C}` (single PUBLISH, every member's UI updates its "who-read-what" map). Targeted unicast `findDistinctSendersInRange` was designed mid-session then thrown away when user clarified the UI is reader-avatar rail not per-message ✓✓. **Transport**: HTTP fast-path `POST /internal/messaging/read-ack` skips Kafka — $max is order-independent, acks are low-stakes (lose-one-is-fine). InternalAuthGuard shared-secret in `x-internal-token` header; gateway authorizes service, body asserts subject. Native Node `fetch` (no @nestjs/axios), 5s AbortController timeout. Fire-and-forget on gateway (.catch(log), no WsResponse). **Offline recovery**: `GET /messaging/conversations/:id/participant-states` returns all N watermark rows (N ≤ 1024) — used on conversation-open or WS reconnect to bootstrap, heals dropped broadcasts. Mongo is source of truth, Redis pub/sub is fast notification layer. **Env**: `INTERNAL_SERVICE_TOKEN` on both apps (must match), `MESSAGING_API_URL` on gateway. **Smoke test deferred** like 6.4. Session lesson: broadcast vs unicast is a *product* choice; sharpen UX semantics before architecting the pipeline. |
 
 **Tech planned:** WebSocket (real-time delivery, typing, presence), MongoDB (message history), Kafka (message events), Redis (presence, delivery state), DDD (Conversation + Message aggregates), OpenTelemetry (correlation via integration events), TypeScript
 
@@ -106,12 +106,18 @@ Track your learning progress through all stories.
 
 | Story | Status | Date | Notes |
 |-------|--------|------|-------|
-| 7.1: Track Presence | ⬜ TODO | | |
-| 7.2: Online/Offline Status | ⬜ TODO | | |
-| 7.3: Typing Indicators | ⬜ TODO | | |
-| 7.4: Connection Updates | ⬜ TODO | | |
+| 7.1: Track Presence | ✅ DONE | 2026-05-26 | Redis HASH per-device heartbeat; Lua atomic HB/DC/LO/READ; composite deviceId:tabId; fan-out via conversation:{C} channels |
+| 7.2: Online/Offline Status | ✅ DONE | 2026-05-26 | Free — _dispatch already generic; presence:changed rides existing conversation:{C} pub/sub pipe with zero new code |
+| 7.3: Typing Indicators | ✅ DONE | 2026-05-26 | Stateless gateway relay — no Kafka, no DB; typing:started published directly to conversation:{C}; client-side 3s timer |
+| 7.4: Connection Updates | ✅ DONE | 2026-05-26 | 5s grace period; DEL-as-claim Redis key eliminates cross-pod flicker without sticky sessions; in-memory clearTimeout on same-pod reconnect |
 
 **Tech planned:** Redis (pub/sub + sorted sets for presence, TTL for heartbeat), WebSocket, Kafka (presence events), NestJS
+
+**Key concepts covered:**
+- Redis HASH model with timestamp-as-value for per-device presence tracking (no HEXPIRE needed)
+- Lua atomic scripts — HB/DC/LO/READ operations, stale-field pruning, status recomputation
+- Stateless gateway relay pattern for ephemeral events (typing) — skip Kafka when no durability needed
+- Grace period with DEL-as-claim atomic cancellation across pods — eliminates cross-pod flicker
 
 ---
 

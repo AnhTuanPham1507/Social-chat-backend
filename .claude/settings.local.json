@@ -84,7 +84,11 @@
       "Bash(find packages/infrastructure/messaging -type f)",
       "Bash(find packages/infrastructure -type d -name \"*messag*\")",
       "Bash(yarn tsc *)",
-      "Bash(del *)"
+      "Bash(del *)",
+      "Bash(Get-ChildItem *)",
+      "Bash(Select-Object -First 50)",
+      "Bash(rm \"/mnt/c/Users/EVT-LTP-ThanhTuan/OneDrive/Desktop/source-code/Social-chat-backend/apps/messaging/src/application/services/user-cdc.application-service.ts\")",
+      "Bash(rm \"/mnt/c/Users/EVT-LTP-ThanhTuan/OneDrive/Desktop/source-code/Social-chat-backend/apps/messaging/src/driving-adapters/consumers/user-cdc.consumer.ts\")"
     ]
   }
 }

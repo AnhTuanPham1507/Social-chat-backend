@@ -128,13 +128,25 @@ export interface PresenceChangedEvent {
 }
 
 /**
- * Broadcast on `conversation:{convId}` when a participant starts typing.
- * There is no `typing:stopped` event — clients start a 3-second client-side
- * timer on receipt and reset it on each new `typing:started`. This keeps the
- * gateway stateless for ephemeral, high-frequency events.
+ * Broadcast on `conversation:{convId}` when a participant's typing state
+ * transitions. Two values:
+ *   typing:started — sender is composing. Throttled client-side (~2 s) so we
+ *                    don't flood Redis on every keystroke.
+ *   typing:stopped — sender cleared the input or sent the message; clears the
+ *                    indicator immediately on receivers.
+ *
+ * Receivers still arm a 3-second client-side fallback timer on `typing:started`
+ * as a safety net for missed `typing:stopped` events (sender crash, network
+ * drop, tab close). The gateway remains stateless: it relays whichever
+ * transition the sender emits without tracking per-user typing state.
+ *
+ * Mood note: `typing:started` lives in the Progress family (see header), and
+ * `typing:stopped` is past-tense and would normally be Fact mood. The pair is
+ * kept intentionally because started/stopped is the industry-standard idiom
+ * for chat typing protocols (XMPP chat-states, Matrix m.typing).
  */
 export interface TypingEvent {
-    event: 'typing:started';
+    event: 'typing:started' | 'typing:stopped';
     conversationId: string;
     userId: string;
 }

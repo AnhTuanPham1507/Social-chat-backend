@@ -4,7 +4,7 @@ import { UserReadMongoRepository } from '@social-chat/infrastructure';
 
 import {
     IUserReadRepository,
-    UserReadModel,
+    UpsertUserData,
 } from '../../application/contracts/user-read-repository.contract';
 
 @Injectable()
@@ -13,12 +13,11 @@ export class UserReadRepo implements IUserReadRepository {
         private readonly _userReadMongoRepo: UserReadMongoRepository,
     ) {}
 
-    async findById(id: string): Promise<UserReadModel | null> {
-        return this._userReadMongoRepo.findById(id) as Promise<UserReadModel | null>;
+    async upsertUser(id: string, data: UpsertUserData): Promise<void> {
+        await this._userReadMongoRepo.upsert(id, data as any);
     }
 
-    async findManyByIds(ids: string[]): Promise<UserReadModel[]> {
-        if (ids.length === 0) return [];
-        return this._userReadMongoRepo.findMany({ _id: { $in: ids } }) as Promise<UserReadModel[]>;
+    async deleteUser(id: string): Promise<void> {
+        await this._userReadMongoRepo.deleteById(id);
     }
 }

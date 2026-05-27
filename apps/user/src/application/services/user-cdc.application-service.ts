@@ -47,7 +47,7 @@ export class UserCdcApplicationService implements IUserCdcApplicationService {
             case 'd': {
                 const row = before;
                 await this._userReadRepo.deleteUser(row.id);
-                this._logger.log(`messaging_users projection removed for user ${row.id}`);
+                this._logger.log(`feed_users projection removed for user ${row.id}`);
                 break;
             }
         }

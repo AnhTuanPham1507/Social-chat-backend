@@ -36,6 +36,7 @@ import {
     RedisSubscriptionManager,
     WsPushChannel,
 } from '../../driven-adapters/redis-subscription-manager';
+import { AuthTokenWsDto } from '../dtos/auth-token.ws-dto';
 import { ConversationTypingWsDto } from '../dtos/conversation-typing.ws-dto';
 import { MessageReadWsDto } from '../dtos/message-read.ws-dto';
 import { SendMessageWsDto } from '../dtos/send-message.ws-dto';
@@ -52,6 +53,11 @@ type MessageFailedAck = {
     reason: string;
 };
 
+type AuthErrorPayload = {
+    code: 'TOKEN_EXPIRED' | 'INVALID_TOKEN' | 'TOKEN_USER_MISMATCH';
+    reason: string;
+};
+
 @WebSocketGateway({
     cors: {
         // Cookies + CORS rule: when credentials are enabled, the browser
@@ -63,8 +69,7 @@ type MessageFailedAck = {
     },
 })
 export class RealtimeGateway
-    implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect, OnModuleDestroy
-{
+    implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect, OnModuleDestroy {
     private readonly _logger = new Logger(RealtimeGateway.name);
 
     @WebSocketServer()
@@ -84,7 +89,7 @@ export class RealtimeGateway
         private readonly _presenceRepo: IPresenceRepository,
         @Inject(REDIS_SERVICE_TOKEN.SHARED_STORE_SERVICE)
         private readonly _redis: RedisBaseService,
-    ) {}
+    ) { }
 
     public afterInit(server: Server): void {
         server.use(async (socket, next) => {
@@ -103,6 +108,7 @@ export class RealtimeGateway
                     name: payload.preferred_username,
                     roles: payload.realm_access?.roles ?? [],
                 });
+                socket.data.tokenExp = payload.exp;
 
                 next();
             } catch {
@@ -156,7 +162,7 @@ export class RealtimeGateway
         } catch (err) {
             this._logger.error(
                 `Failed to load conversations for user=${user.id}: ` +
-                    `${err instanceof Error ? err.message : err}`,
+                `${err instanceof Error ? err.message : err}`,
             );
         }
 
@@ -173,7 +179,7 @@ export class RealtimeGateway
         } catch (err) {
             this._logger.error(
                 `Presence heartbeat failed on connect userId=${user.id}: ` +
-                    `${err instanceof Error ? err.message : err}`,
+                `${err instanceof Error ? err.message : err}`,
             );
         }
 
@@ -195,9 +201,10 @@ export class RealtimeGateway
 
         // Start grace period instead of immediately marking offline (Story 7.4).
         // After 5 s of silence the user is considered gone; a reconnect or
-        // heartbeat on any pod will cancel this window.
+        // heartbeat on any pod will cancel this window. Awaited so the SET is
+        // ordered before any same-device _cancelGrace DEL that might follow.
         if (user && deviceField) {
-            this._startGrace(user.id, deviceField);
+            await this._startGrace(user.id, deviceField);
         }
 
         this._logger.log(
@@ -212,9 +219,53 @@ export class RealtimeGateway
         this._pendingDisconnects.clear();
     }
 
-    @SubscribeMessage('ping')
-    public handlePing(): WsResponse<{ ts: number }> {
-        return { event: 'pong', data: { ts: Date.now() } };
+    /**
+     * Client sends its refreshed access token after calling the REST /auth/refresh
+     * endpoint. We re-verify with Keycloak (not just a local exp check) so a
+     * revoked token is rejected even if its exp hasn't elapsed yet.
+     *
+     * Subject must match the connected user — prevents a logged-out tab from
+     * swapping in a different user's token over an established socket.
+     */
+    @SubscribeMessage('auth:token')
+    @UsePipes(
+        new ValidationPipe({
+            whitelist: true,
+            forbidNonWhitelisted: true,
+            transform: true,
+        }),
+    )
+    public async handleAuthToken(
+        @ConnectedSocket() socket: Socket,
+        @MessageBody() dto: AuthTokenWsDto,
+    ): Promise<WsResponse<{ ok: true } | AuthErrorPayload>> {
+        try {
+            const payload =
+                await this._keycloakService.verifyToken<IAccessTokenPayload>(dto.token);
+
+            const user = socket.data.user as AuthUserDto;
+            if (payload.sub !== user.id) {
+                return {
+                    event: 'auth:error',
+                    data: { code: 'TOKEN_USER_MISMATCH', reason: 'Token subject does not match connected user' },
+                };
+            }
+
+            socket.data.user = new AuthUserDto({
+                id: payload.sub,
+                email: payload.email,
+                name: payload.preferred_username,
+                roles: payload.realm_access?.roles ?? [],
+            });
+            socket.data.tokenExp = payload.exp;
+
+            return { event: 'auth:refreshed', data: { ok: true } };
+        } catch {
+            return {
+                event: 'auth:error',
+                data: { code: 'INVALID_TOKEN', reason: 'Token verification failed' },
+            };
+        }
     }
 
     @SubscribeMessage('presence:heartbeat')
@@ -225,6 +276,11 @@ export class RealtimeGateway
         const deviceField = socket.data.deviceField as string | undefined;
         if (!deviceField) return;
 
+        if (this._isTokenExpired(socket)) {
+            socket.emit('auth:error', { code: 'TOKEN_EXPIRED', reason: 'Access token expired; send auth:token to refresh' });
+            return;
+        }
+
         try {
             await this._cancelGrace(user.id, deviceField);
             const convIds = await this._convCache.findConversationIds(user.id);
@@ -233,16 +289,21 @@ export class RealtimeGateway
         } catch (err) {
             this._logger.warn(
                 `Presence heartbeat failed userId=${user.id}: ` +
-                    `${err instanceof Error ? err.message : err}`,
+                `${err instanceof Error ? err.message : err}`,
             );
         }
     }
 
     /**
-     * Client is actively typing in a conversation. We do NOT track this state
-     * server-side — the gateway is a stateless relay for ephemeral events.
-     * Downstream clients start a 3-second timer on receipt; each new event
-     * resets it. Skipping Kafka/DB avoids durable storage of throwaway state.
+     * Relays a typing-state transition (started|stopped) for one conversation.
+     * The gateway is a stateless relay — no server-side timers, no Kafka, no
+     * DB — so the wire event mirrors whatever the sender emitted.
+     *
+     * Receivers treat `typing:started` as a live signal and arm a 3 s client
+     * fallback to auto-clear if a `typing:stopped` is lost (sender crash, tab
+     * close, network drop). Senders should emit `stopped` on input-empty and
+     * post-send so receivers clear immediately instead of waiting for the
+     * fallback timeout.
      *
      * Membership is validated via the socket's attachedChannels: a socket can
      * only be in a conversation room if it joined during handleConnection or a
@@ -264,10 +325,15 @@ export class RealtimeGateway
         const attached = socket.data.attachedChannels as Set<string> | undefined;
         const channel = `conversation:${dto.conversationId}`;
 
+        if (this._isTokenExpired(socket)) {
+            socket.emit('auth:error', { code: 'TOKEN_EXPIRED', reason: 'Access token expired; send auth:token to refresh' });
+            return;
+        }
+
         if (!attached?.has(channel)) return;
 
         const event: TypingEvent = {
-            event: 'typing:started',
+            event: dto.state === 'stopped' ? 'typing:stopped' : 'typing:started',
             conversationId: dto.conversationId,
             userId: user.id,
         };
@@ -295,6 +361,11 @@ export class RealtimeGateway
         @ConnectedSocket() socket: Socket,
         @MessageBody() dto: MessageReadWsDto,
     ): void {
+        if (this._isTokenExpired(socket)) {
+            socket.emit('auth:error', { code: 'TOKEN_EXPIRED', reason: 'Access token expired; send auth:token to refresh' });
+            return;
+        }
+
         const user = socket.data.user as AuthUserDto;
 
         this._messagingApi
@@ -302,7 +373,7 @@ export class RealtimeGateway
             .catch((err) => {
                 this._logger.warn(
                     `Read ack failed userId=${user.id} convId=${dto.conversationId}: ` +
-                        `${err instanceof Error ? err.message : err}`,
+                    `${err instanceof Error ? err.message : err}`,
                 );
             });
     }
@@ -318,7 +389,14 @@ export class RealtimeGateway
     public async handleSendMessage(
         @ConnectedSocket() socket: Socket,
         @MessageBody() dto: SendMessageWsDto,
-    ): Promise<WsResponse<MessageSendingAck | MessageFailedAck>> {
+    ): Promise<WsResponse<MessageSendingAck | MessageFailedAck | AuthErrorPayload>> {
+        if (this._isTokenExpired(socket)) {
+            return {
+                event: 'auth:error',
+                data: { code: 'TOKEN_EXPIRED', reason: 'Access token expired; send auth:token to refresh' },
+            };
+        }
+
         const user = socket.data.user as AuthUserDto;
         const gatewayReceivedAt = Date.now();
 
@@ -359,12 +437,23 @@ export class RealtimeGateway
         }
     }
 
+    private _isTokenExpired(socket: Socket): boolean {
+        const exp = socket.data.tokenExp as number | undefined;
+        if (!exp) return true;
+        return Date.now() >= exp * 1000;
+    }
+
     private async _publishPresence(
         userId: string,
         convIds: string[],
         result: PresenceMutationResult,
     ): Promise<void> {
-        if (!result.transitioned) return;
+        if (!result.transitioned) {
+            this._logger.debug(
+                `Presence transition not needed userId=${userId}`,
+            );
+            return;
+        };
 
         const event: PresenceChangedEvent = {
             event: 'presence:changed',
@@ -385,19 +474,40 @@ export class RealtimeGateway
      * Two-layer cancellation (Story 7.4):
      *   1. In-memory clearTimeout — cancels immediately on same-pod reconnect,
      *      avoiding a wasted Redis round-trip.
-     *   2. Redis key `presence:grace:{userId}:{deviceField}` EX 5 — the timer
+     *   2. Redis key `presence:grace:{userId}:{deviceField}` — the timer
      *      callback uses DEL-as-claim: if DEL returns 0, a reconnect on another
      *      pod already cancelled us, so we skip the offline publish. This
      *      eliminates cross-pod flicker without requiring sticky sessions.
+     *
+     * TTL is intentionally much larger than the 5 s timer: it is a safety
+     * backstop for pod crash, NOT the grace duration. If the TTL were ~5 s,
+     * Redis would race the JS timer — the key could expire microseconds before
+     * the callback runs, DEL would return 0, and we would silently skip the
+     * offline publish (user stuck "online" forever).
+     *
+     * The SET must be awaited so it lands at Redis BEFORE any _cancelGrace DEL
+     * a fast same-device reconnect might fire — otherwise SET-after-DEL leaves
+     * an orphan key that the timer claims and wrongly publishes offline.
+     *
+     * If a timer already exists for this deviceField (duplicate _startGrace
+     * without an intervening _cancelGrace), we replace it cleanly instead of
+     * leaking the previous setTimeout handle.
      */
-    private _startGrace(userId: string, deviceField: string): void {
+    private async _startGrace(userId: string, deviceField: string): Promise<void> {
+        const existing = this._pendingDisconnects.get(deviceField);
+        if (existing) {
+            clearTimeout(existing);
+        }
+
         const graceKey = `presence:grace:${userId}:${deviceField}`;
 
-        this._redis.getClient().set(graceKey, '1', 'EX', 5).catch((err) => {
+        try {
+            await this._redis.getClient().set(graceKey, '1', 'EX', 30);
+        } catch (err) {
             this._logger.warn(
                 `Failed to set grace key userId=${userId}: ${err instanceof Error ? err.message : err}`,
             );
-        });
+        }
 
         const handle = setTimeout(() => {
             this._pendingDisconnects.delete(deviceField);
@@ -429,7 +539,12 @@ export class RealtimeGateway
         // DEL-as-claim: whoever deletes the key owns the offline publish.
         // Returns 0 if a reconnect on any pod already cancelled this window.
         const deleted = await this._redis.getClient().del(graceKey);
-        if (deleted === 0) return;
+        if (deleted === 0) {
+            this._logger.debug(
+                `Grace period cancelled for userId=${userId} deviceField=${deviceField}`,
+            );
+            return;
+        }
 
         let convIds: string[] = [];
         try {
@@ -439,6 +554,10 @@ export class RealtimeGateway
         }
         const result = await this._presenceRepo.disconnect(userId, deviceField);
         await this._publishPresence(userId, convIds, result);
+
+        this._logger.debug(
+            `Grace period disconnect completed userId=${userId} deviceField=${deviceField}`,
+        );
     }
 
     /**
@@ -460,7 +579,7 @@ export class RealtimeGateway
         } catch (err) {
             this._logger.warn(
                 `Failed to parse WS push payload on ${JSON.stringify(channel)}: ` +
-                    `${err instanceof Error ? err.message : err}`,
+                `${err instanceof Error ? err.message : err}`,
             );
             return;
         }

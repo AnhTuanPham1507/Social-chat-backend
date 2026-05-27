@@ -7,10 +7,7 @@ import {
     KAFKA_CLIENT_TOKEN,
 } from '@social-chat/infrastructure';
 
-import {
-    CDC_GROUP_ID,
-    MESSAGING_CDC_TOPIC,
-} from '../../constants/messaging.constant';
+import { CDC_GROUP_ID, USER_CDC_TOPIC } from '../../constants/user-cdc.constant';
 import {
     IUserCdcApplicationService,
     USER_CDC_APPLICATION_SERVICE_TOKEN,
@@ -18,7 +15,7 @@ import {
 
 @Injectable()
 export class UserCdcConsumer extends CdcBaseConsumer {
-    protected readonly topics = [MESSAGING_CDC_TOPIC.USER];
+    protected readonly topics = [USER_CDC_TOPIC.USER];
 
     constructor(
         @Inject(KAFKA_CLIENT_TOKEN) kafka: Kafka,

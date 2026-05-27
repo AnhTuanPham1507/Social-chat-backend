@@ -21,9 +21,13 @@ import {
     IMessageRepository,
     MESSAGE_REPO_TOKEN,
 } from '../contracts/message-repository.contract';
+import {
+    IParticipantStateRepository,
+    PARTICIPANT_STATE_REPO_TOKEN,
+} from '../contracts/participant-state-repository.contract';
 import { MessageDTO, SendMessageInput } from '../dtos/message.dto';
 import { MessageAppMapper } from '../mappers/message-app.mapper';
-import { MessageCreatedEvent } from '@social-chat/common';
+import { MessageCreatedEvent, MessageReadEvent } from '@social-chat/common';
 import { IWsPushPublisher, WS_PUSH_PUBLISHER_TOKEN } from '@application/contracts/ws-push-publisher.contract';
 
 export const MESSAGE_APPLICATION_SERVICE_TOKEN = Symbol(
@@ -41,6 +45,8 @@ export class MessageApplicationService implements IMessageApplicationService {
         private readonly _messageRepo: IMessageRepository,
         @Inject(CONVERSATION_REPO_TOKEN)
         private readonly _conversationRepo: IConversationRepository,
+        @Inject(PARTICIPANT_STATE_REPO_TOKEN)
+        private readonly _participantStateRepo: IParticipantStateRepository,
         @Inject(CLOCK_TOKEN)
         private readonly _clock: IClock,
         @Inject(DOMAIN_EVENT_BUS_TOKEN)
@@ -76,10 +82,30 @@ export class MessageApplicationService implements IMessageApplicationService {
         );
 
         await this._messageRepo.insert(message);
+        await this._autoAckSender(message, serverTs);
         await this._pushWsEvent(message);
         await this._domainEventBus.publishAll(message.publishEvents());
 
         return MessageAppMapper.fromEntityToAppModel(message);
+    }
+
+    private async _autoAckSender(message: MessageEntity, readAt: Date): Promise<void> {
+        const { advanced } = await this._participantStateRepo.advanceReadWatermark(
+            message.conversationId,
+            message.senderId,
+            message.id,
+            readAt,
+        );
+        if (!advanced) return;
+
+        const wsEvent: MessageReadEvent = {
+            event: 'message:read',
+            conversationId: message.conversationId,
+            userId: message.senderId,
+            lastReadMessageId: message.id,
+            lastReadAt: readAt.toISOString(),
+        };
+        await this._wsPushPublisher.publishToConversation(message.conversationId, wsEvent);
     }
 
     private async _pushWsEvent(event: MessageEntity) {
